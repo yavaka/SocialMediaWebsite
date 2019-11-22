@@ -15,7 +15,6 @@ namespace SocialMedia.Models
         public string FullName => $"{this.FirstName} {this.LastName}";
         public Gender Gender { get; set; }
         public string Bio { get; set; }
-
     }
 
     public enum Gender
