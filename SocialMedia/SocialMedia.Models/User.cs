@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SocialMedia.Models
 {
     public class User
     {
+        public User()
+        {
+            this.Posts = new List<Post>();
+            this.Friends = new List<User>();
+        }
+
         public int UserId { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
@@ -15,6 +22,9 @@ namespace SocialMedia.Models
         public string FullName => $"{this.FirstName} {this.LastName}";
         public Gender Gender { get; set; }
         public string Bio { get; set; }
+
+        public List<Post> Posts { get; set; }
+        public List<User> Friends { get; set; }
     }
 
     public enum Gender
