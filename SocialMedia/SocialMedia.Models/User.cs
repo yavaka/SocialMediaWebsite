@@ -9,6 +9,7 @@ namespace SocialMedia.Models
         {
             this.Posts = new List<Post>();
             this.Friends = new List<User>();
+            this.Groups = new List<Group>();
         }
 
         public int UserId { get; set; }
