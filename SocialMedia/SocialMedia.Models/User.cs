@@ -25,6 +25,8 @@ namespace SocialMedia.Models
 
         public List<Post> Posts { get; set; }
         public List<User> Friends { get; set; }
+        public List<Group> Groups { get; set; }
+
     }
 
     public enum Gender
