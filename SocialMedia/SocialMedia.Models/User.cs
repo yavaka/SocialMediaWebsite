@@ -24,9 +24,9 @@ namespace SocialMedia.Models
         public Gender Gender { get; set; }
         public string Bio { get; set; }
 
-        public List<Post> Posts { get; set; }
-        public List<User> Friends { get; set; }
-        public List<Group> Groups { get; set; }
+        public ICollection<Post> Posts { get; set; }
+        public ICollection<User> Friends { get; set; }
+        public ICollection<Group> Groups { get; set; }
 
     }
 

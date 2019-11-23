@@ -16,6 +16,6 @@ namespace SocialMedia.Models
         public int AuthorId => this.Author.UserId;
         public string Content { get; set; }
         public DateTime DatePosted { get; set; }
-        public List<User> TaggedFriends { get; set; }
+        public ICollection<User> TaggedFriends { get; set; }
     }
 }

@@ -18,8 +18,8 @@ namespace SocialMedia.Models
         public int AuthorId => this.Author.UserId;
         public DateTime DatePosted { get; set; }
         public string Content { get; set; }
-        public List<User> TaggedFriend { get; set; }
-        public List<Comment> Comments { get; set; }
+        public ICollection<User> TaggedFriend { get; set; }
+        public ICollection<Comment> Comments { get; set; }
 
     }
 }

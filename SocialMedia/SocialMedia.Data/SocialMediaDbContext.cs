@@ -8,17 +8,11 @@ namespace SocialMedia.Data
 {
     public class SocialMediaDbContext : DbContext
     {
-        public SocialMediaDbContext()
-        {
-
-        }
+        private const string CONNECTION_STRING = @"Server=.\SQLEXPRESS;Database=SocialMediaDB;Trusted_Connection=True;";
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+            optionsBuilder.UseSqlServer(CONNECTION_STRING);
         }
 
         public DbSet<User> Users { get; set; }
