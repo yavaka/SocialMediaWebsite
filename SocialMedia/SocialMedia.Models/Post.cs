@@ -8,8 +8,8 @@ namespace SocialMedia.Models
     {
         public Post()
         {
-            this.TaggedFriend = new List<User>();
-            this.Comments = new List<Comment>();
+            //this.TaggedFriend = new List<User>();
+            //this.Comments = new List<Comment>();
         }
 
 
@@ -18,8 +18,8 @@ namespace SocialMedia.Models
         public int AuthorId => this.Author.UserId;
         public DateTime DatePosted { get; set; }
         public string Content { get; set; }
-        public ICollection<User> TaggedFriend { get; set; }
-        public ICollection<Comment> Comments { get; set; }
+       //public virtual ICollection<User> TaggedFriend { get; set; }
+       //public virtual ICollection<Comment> Comments { get; set; }
 
     }
 }

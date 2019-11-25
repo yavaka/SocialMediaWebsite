@@ -8,7 +8,7 @@ namespace SocialMedia.Data
 {
     public class SocialMediaDbContext : DbContext
     {
-        private const string CONNECTION_STRING = @"Server=.\SQLEXPRESS;Database=SocialMediaDB;Trusted_Connection=True;";
+        private const string CONNECTION_STRING = @"Server=(localdb)\mssqllocaldb; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True";
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -19,6 +19,11 @@ namespace SocialMedia.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Comment> Comments { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            
+        }
 
     }
 }

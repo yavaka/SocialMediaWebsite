@@ -8,7 +8,7 @@ namespace SocialMedia.Models
     {
         public Comment()
         {
-            this.TaggedFriends = new List<User>();
+            //this.TaggedFriends = new List<User>();
         }
 
         public int CommentId{ get; set; }
@@ -16,6 +16,7 @@ namespace SocialMedia.Models
         public int AuthorId => this.Author.UserId;
         public string Content { get; set; }
         public DateTime DatePosted { get; set; }
-        public ICollection<User> TaggedFriends { get; set; }
+
+        //public virtual ICollection<User> TaggedFriends { get; set; }
     }
 }
