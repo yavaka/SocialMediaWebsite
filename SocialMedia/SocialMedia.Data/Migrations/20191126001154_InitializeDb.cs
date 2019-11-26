@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SocialMedia.Data.Migrations
 {
-    public partial class CreateDatabase : Migration
+    public partial class InitializeDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -26,8 +26,7 @@ namespace SocialMedia.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<int>(nullable: false),
                     Username = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
@@ -49,19 +48,19 @@ namespace SocialMedia.Data.Migrations
                 {
                     CommentId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AuthorUserId = table.Column<int>(nullable: true),
                     Content = table.Column<string>(nullable: true),
-                    DatePosted = table.Column<DateTime>(nullable: false)
+                    DatePosted = table.Column<DateTime>(nullable: false),
+                    AuthorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Comments", x => x.CommentId);
                     table.ForeignKey(
-                        name: "FK_Comments_Users_AuthorUserId",
-                        column: x => x.AuthorUserId,
+                        name: "FK_Comments_Users_AuthorId",
+                        column: x => x.AuthorId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,30 +69,59 @@ namespace SocialMedia.Data.Migrations
                 {
                     PostId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AuthorUserId = table.Column<int>(nullable: true),
                     DatePosted = table.Column<DateTime>(nullable: false),
-                    Content = table.Column<string>(nullable: true)
+                    Content = table.Column<string>(nullable: true),
+                    AuthorId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.PostId);
                     table.ForeignKey(
-                        name: "FK_Posts_Users_AuthorUserId",
-                        column: x => x.AuthorUserId,
+                        name: "FK_Posts_Users_AuthorId",
+                        column: x => x.AuthorId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsersInGroups",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(nullable: false),
+                    GroupId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsersInGroups", x => new { x.UserId, x.GroupId });
+                    table.ForeignKey(
+                        name: "FK_UsersInGroups_Groups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Groups",
+                        principalColumn: "GroupId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UsersInGroups_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comments_AuthorUserId",
+                name: "IX_Comments_AuthorId",
                 table: "Comments",
-                column: "AuthorUserId");
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_AuthorUserId",
+                name: "IX_Posts_AuthorId",
                 table: "Posts",
-                column: "AuthorUserId");
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UsersInGroups_GroupId",
+                table: "UsersInGroups",
+                column: "GroupId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -102,10 +130,13 @@ namespace SocialMedia.Data.Migrations
                 name: "Comments");
 
             migrationBuilder.DropTable(
-                name: "Groups");
+                name: "Posts");
 
             migrationBuilder.DropTable(
-                name: "Posts");
+                name: "UsersInGroups");
+
+            migrationBuilder.DropTable(
+                name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "Users");

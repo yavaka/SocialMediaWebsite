@@ -10,8 +10,8 @@ using SocialMedia.Data;
 namespace SocialMedia.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    [Migration("20191125155420_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20191126001154_InitializeDb")]
+    partial class InitializeDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -27,7 +27,7 @@ namespace SocialMedia.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AuthorUserId");
+                    b.Property<int>("AuthorId");
 
                     b.Property<string>("Content");
 
@@ -35,7 +35,7 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("CommentId");
 
-                    b.HasIndex("AuthorUserId");
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("Comments");
                 });
@@ -61,7 +61,7 @@ namespace SocialMedia.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("AuthorUserId");
+                    b.Property<int>("AuthorId");
 
                     b.Property<string>("Content");
 
@@ -69,16 +69,14 @@ namespace SocialMedia.Data.Migrations
 
                     b.HasKey("PostId");
 
-                    b.HasIndex("AuthorUserId");
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("SocialMedia.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("UserId");
 
                     b.Property<string>("Bio");
 
@@ -103,18 +101,54 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SocialMedia.Models.UserInGroup", b =>
+                {
+                    b.Property<int>("UserId");
+
+                    b.Property<int>("GroupId");
+
+                    b.HasKey("UserId", "GroupId");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("UsersInGroups");
+                });
+
             modelBuilder.Entity("SocialMedia.Models.Comment", b =>
                 {
                     b.HasOne("SocialMedia.Models.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorUserId");
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("SocialMedia.Models.Post", b =>
                 {
                     b.HasOne("SocialMedia.Models.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorUserId");
+                        .WithMany("Posts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SocialMedia.Models.User", b =>
+                {
+                    b.HasOne("SocialMedia.Models.User")
+                        .WithMany("Friends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SocialMedia.Models.UserInGroup", b =>
+                {
+                    b.HasOne("SocialMedia.Models.Group", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SocialMedia.Models.User", "User")
+                        .WithMany("Groups")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

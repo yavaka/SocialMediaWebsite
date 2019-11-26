@@ -7,9 +7,10 @@ namespace SocialMedia.Models
     {
         public User()
         {
-            //this.Posts = new List<Post>();
-            //this.Friends = new List<User>();
-            //this.Groups = new List<Group>();
+            this.Posts = new HashSet<Post>();
+            this.Friends = new HashSet<User>();
+            this.Groups = new HashSet<UserInGroup>();
+            this.Comments = new HashSet<Comment>();
         }
 
         public int UserId { get; set; }
@@ -24,9 +25,10 @@ namespace SocialMedia.Models
         public Gender Gender { get; set; }
         public string Bio { get; set; }
 
-        //public virtual ICollection<Post> Posts { get; set; }
-        //public virtual ICollection<User> Friends { get; set; }
-        //public virtual ICollection<Group> Groups { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<User> Friends { get; set; }
+        public virtual ICollection<UserInGroup> Groups { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
 
     }
 

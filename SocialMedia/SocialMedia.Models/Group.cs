@@ -9,15 +9,16 @@ namespace SocialMedia.Models
     {
         public Group()
         {
-           //this.Members = new List<User>();
-           //this.Posts = new List<Post>();
+            this.Members = new HashSet<UserInGroup>();
+            this.Posts = new HashSet<Post>();
         }
 
-        public int GroupId{ get; set; }
-        public string Title{ get; set; }
+        public int GroupId { get; set; }
+        public string Title { get; set; }
         public string Description { get; set; }
-       //public virtual ICollection<User> Members { get; set; }
-       //public virtual ICollection<Post> Posts{ get; set; }
+
+        public virtual ICollection<UserInGroup> Members { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
 
     }
 }
