@@ -10,15 +10,6 @@ namespace SocialMedia.Data
     {
         private const string CONNECTION_STRING = @"Server=(localdb)\mssqllocaldb; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True";
 
-        public SocialMediaDbContext()
-        {
-
-        }
-
-        public SocialMediaDbContext(DbContextOptions<SocialMediaDbContext> options) :
-            base(options)
-        {
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
