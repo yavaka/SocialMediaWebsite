@@ -1,7 +1,12 @@
-﻿@page
-@model IndexModel
-@{
-    ViewData["Title"] = "Home page";
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        <span>@ViewBag.Message</span>
+    </div>
 }
 
 <div class="text-center">
