@@ -1,34 +1,34 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SocialMedia.Models
 {
-    public class User
+    [Table("Users")]
+    public class User : IdentityUser
     {
-        public User()
-        {
-            this.Posts = new HashSet<Post>();
-            this.Friends = new HashSet<User>();
-            this.Groups = new HashSet<UserInGroup>();
-            this.Comments = new HashSet<Comment>();
-        }
-
-        public int UserId { get; set; }
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Country { get; set; }
-        public DateTime DOB { get; set; }
+        //public User()
+        //{
+        //    this.Posts = new HashSet<Post>();
+        //    this.Friends = new HashSet<User>();
+        //    this.Groups = new HashSet<UserInGroup>();
+        //    this.Comments = new HashSet<Comment>();
+        //}
+     
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
+        public string Country { get; set; }
+        public DateTime? DOB { get; set; }
         public Gender Gender { get; set; }
         public string Bio { get; set; }
+        public string Locale { get; set; } = "en-GB";
 
-        public virtual ICollection<Post> Posts { get; set; }
-        public virtual ICollection<User> Friends { get; set; }
-        public virtual ICollection<UserInGroup> Groups { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
+        //public virtual ICollection<Post> Posts { get; set; }
+        //public virtual ICollection<User> Friends { get; set; }
+        //public virtual ICollection<UserInGroup> Groups { get; set; }
+        //public virtual ICollection<Comment> Comments { get; set; }
 
     }
 

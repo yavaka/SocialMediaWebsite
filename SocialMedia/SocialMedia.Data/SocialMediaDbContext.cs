@@ -1,79 +1,83 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SocialMedia.Models;
+using SocialMedia.Models.IdentityModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SocialMedia.Data
 {
-    public class SocialMediaDbContext : DbContext
+    public class SocialMediaDbContext : IdentityDbContext<User>
     {
-        private const string CONNECTION_STRING = @"Server=(localdb)\mssqllocaldb; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True";
-
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public SocialMediaDbContext(DbContextOptions<SocialMediaDbContext> options) 
+            : base(options)
         {
-            optionsBuilder.UseSqlServer(CONNECTION_STRING);
         }
 
-        public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
-        public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
+
+        //public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //User has many posts
-            modelBuilder.Entity<Post>()
-                .HasOne<User>(a => a.Author)
-                .WithMany(u => u.Posts)
-                .HasForeignKey(id => id.AuthorId);
+            base.OnModelCreating(modelBuilder);
 
-            //User has many friends
-            modelBuilder.Entity<User>()
-                .HasMany<User>(f => f.Friends)
-                .WithOne()
-                .HasForeignKey(u => u.UserId);
+            modelBuilder.Entity<User>(user => user.HasIndex(x => x.Locale)
+                                             .IsUnique(false));
 
-            //Mapping table PKs
-            modelBuilder.Entity<UserInGroup>()
-                .HasKey(ug => new { ug.UserId, ug.GroupId });
+            //    //User has many posts
+            //    modelBuilder.Entity<Post>()
+            //        .HasOne<User>(a => a.Author)
+            //        .WithMany(u => u.Posts)
+            //        .HasForeignKey(id => id.AuthorId);
 
-            //User has many groups (Mapping table)
-            modelBuilder.Entity<UserInGroup>()
-                .HasOne(u => u.User)
-                .WithMany(g => g.Groups)
-                .HasForeignKey(uId => uId.UserId);
+            //    //User has many friends
+            //    modelBuilder.Entity<User>()
+            //        .HasMany<User>(f => f.Friends)
+            //        .WithOne()
+            //        .HasForeignKey(u => u.UserId);
 
-            //User has many groups (Mapping table)
-            modelBuilder.Entity<UserInGroup>()
-                .HasOne(g => g.Group)
-                .WithMany(u => u.Members)
-                .HasForeignKey(gId => gId.GroupId);
+            //    //Mapping table PKs
+            //    modelBuilder.Entity<UserInGroup>()
+            //        .HasKey(ug => new { ug.UserId, ug.GroupId });
 
-            //Post has tagged users
-            modelBuilder.Entity<Post>()
-                .HasMany(t => t.TaggedFriend);
+            //    //User has many groups (Mapping table)
+            //    modelBuilder.Entity<UserInGroup>()
+            //        .HasOne(u => u.User)
+            //        .WithMany(g => g.Groups)
+            //        .HasForeignKey(uId => uId.UserId);
 
-            //Group has many posts
-            modelBuilder.Entity<Group>()
-                .HasMany(p => p.Posts);
+            //    //User has many groups (Mapping table)
+            //    modelBuilder.Entity<UserInGroup>()
+            //        .HasOne(g => g.Group)
+            //        .WithMany(u => u.Members)
+            //        .HasForeignKey(gId => gId.GroupId);
 
-            //Post has many comments
-            modelBuilder.Entity<Post>()
-                .HasMany(c => c.Comments);
+            //    //Post has tagged users
+            //    modelBuilder.Entity<Post>()
+            //        .HasMany(t => t.TaggedFriend);
 
-            //Comment has a author
-            modelBuilder.Entity<Comment>()
-                .HasOne(a => a.Author)
-                .WithMany(c => c.Comments)
-                .HasForeignKey(aId => aId.AuthorId);
+            //    //Group has many posts
+            //    modelBuilder.Entity<Group>()
+            //        .HasMany(p => p.Posts);
 
-            //Comment has tagged friends
-            modelBuilder.Entity<Comment>()
-                .HasMany(t =>t.TaggedFriends);
+            //    //Post has many comments
+            //    modelBuilder.Entity<Post>()
+            //        .HasMany(c => c.Comments);
+
+            //    //Comment has a author
+            //    modelBuilder.Entity<Comment>()
+            //        .HasOne(a => a.Author)
+            //        .WithMany(c => c.Comments)
+            //        .HasForeignKey(aId => aId.AuthorId);
+
+            //    //Comment has tagged friends
+            //    modelBuilder.Entity<Comment>()
+            //        .HasMany(t =>t.TaggedFriends);
         }
 
-    }
+        }
 }
