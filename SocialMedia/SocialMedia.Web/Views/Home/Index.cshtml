@@ -2,10 +2,10 @@
     ViewData["Title"] = "Home Page";
 }
 
-@if (ViewBag.Message != null)
+@if (TempData["Message"] != null)
 {
     <div class="alert alert-success">
-        <span>@ViewBag.Message</span>
+        <span>@TempData["Message"]</span>
     </div>
 }
 

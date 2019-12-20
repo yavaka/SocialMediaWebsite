@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SocialMedia.Models;
@@ -20,11 +21,15 @@ namespace SocialMedia.Web.Controllers
 
         public IActionResult Index()
         {
+            LoggerInformation(Request.GetDisplayUrl());
             return View();
         }
 
+        
+
         public IActionResult Privacy()
         {
+            LoggerInformation(Request.GetDisplayUrl());
             return View();
         }
 
@@ -32,6 +37,11 @@ namespace SocialMedia.Web.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private void LoggerInformation(string url)
+        {
+            this._logger.LogInformation(url);
         }
     }
 }

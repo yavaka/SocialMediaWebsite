@@ -37,10 +37,20 @@ namespace SocialMedia.Web
             var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             services.AddDbContext<SocialMediaDbContext>(opt => opt.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True"));
 
-            services.AddIdentity<User, IdentityRole>(options => { })
+            services.AddIdentity<User, IdentityRole>(options => {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredUniqueChars = 6;
+            })
                 .AddEntityFrameworkStores<SocialMediaDbContext>();
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
+
+            //Cookies for Login
+            services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Login");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

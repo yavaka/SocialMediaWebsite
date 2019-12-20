@@ -24,7 +24,9 @@ namespace SocialMedia.Models
         public Gender Gender { get; set; }
         public string Bio { get; set; }
         public string Locale { get; set; } = "en-GB";
-
+        
+        [NotMapped]
+        public string Message{ get; set; }
         //public virtual ICollection<Post> Posts { get; set; }
         //public virtual ICollection<User> Friends { get; set; }
         //public virtual ICollection<UserInGroup> Groups { get; set; }
