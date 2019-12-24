@@ -16,14 +16,17 @@ namespace SocialMedia.Web.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly UserManager<User> _userManager;
         private readonly IUserClaimsPrincipalFactory<User> _claimsPrincipalFactory;
+        private readonly SignInManager<User> _signInManager;
 
         public AccountController(ILogger<AccountController> logger,
             UserManager<User> userManager,
-            IUserClaimsPrincipalFactory<User> claimsPrincipalFactory)
+            IUserClaimsPrincipalFactory<User> claimsPrincipalFactory,
+            SignInManager<User> signInManager)
         {
             this._logger = logger;
             this._userManager = userManager;
             this._claimsPrincipalFactory = claimsPrincipalFactory;
+            this._signInManager = signInManager;
         }
 
         //
@@ -101,5 +104,15 @@ namespace SocialMedia.Web.Controllers
             return View();
         }
         #endregion
+
+        //Logout
+        public async Task<IActionResult> LogoutAsync() 
+        {
+            await this._signInManager.SignOutAsync();
+            _logger.LogInformation($"User logged out.");
+
+            TempData["Message"] = $"{User.Identity.Name} successfully logged out.";
+            return RedirectToAction("Index","Home");
+        }
     }
 }
