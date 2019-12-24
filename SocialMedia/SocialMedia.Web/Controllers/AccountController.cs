@@ -53,7 +53,7 @@ namespace SocialMedia.Web.Controllers
                     };
 
 
-                    var result = await this._userManager.CreateAsync(user, model.Password);
+                    await this._userManager.CreateAsync(user, model.Password);
 
                     this._logger.LogInformation($"{user.UserName} added successfully with Id {user.Id}", user);
 
@@ -61,7 +61,6 @@ namespace SocialMedia.Web.Controllers
 
                     return RedirectToAction("Index", "Home");
                 }
-               
             }
             return View();
         }
@@ -70,7 +69,7 @@ namespace SocialMedia.Web.Controllers
         //
         #region Login
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult LoginAsync()
         {
             this._logger.LogInformation(Request.Path);
             
