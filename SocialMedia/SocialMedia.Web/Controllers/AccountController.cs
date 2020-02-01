@@ -45,7 +45,7 @@ namespace SocialMedia.Web.Controllers
             if (ModelState.IsValid)
             {
                 var user = await this._userManager.FindByNameAsync(model.UserName);
-                
+
                 if (user == null)
                 {
                     user = new User
@@ -75,7 +75,7 @@ namespace SocialMedia.Web.Controllers
         public IActionResult LoginAsync()
         {
             this._logger.LogInformation(Request.Path);
-            
+
             return View();
         }
 
@@ -106,13 +106,59 @@ namespace SocialMedia.Web.Controllers
         #endregion
 
         //Logout
-        public async Task<IActionResult> LogoutAsync() 
+        public async Task<IActionResult> LogoutAsync()
         {
             await this._signInManager.SignOutAsync();
             _logger.LogInformation($"User logged out.");
 
             TempData["Message"] = $"{User.Identity.Name} successfully logged out.";
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
+        }
+
+        //Edit user details
+        [HttpGet]
+        public IActionResult ManageUser()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageUser(User newUserDetails)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            //If there is no user throw exception
+            if (user == null)
+            {
+                return NotFound(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            user = UpdateUserDetails(user, newUserDetails);
+
+            await this._userManager.UpdateAsync(user);
+
+            await _signInManager.RefreshSignInAsync(user);
+            TempData["Message"] = "Your profile has been updated";
+
+            return View();
+        }
+
+        private User UpdateUserDetails(User user, User newUserDetails)
+        {
+            //TODO: Check all props DOB, Gender, etc...
+            //TODO: Separate user details to acc details and personal details
+            //TODO: Show current details of the user
+            if (user.Email != newUserDetails.Email)
+                user.Email = newUserDetails.Email;
+            if (user.FirstName != newUserDetails.FirstName)
+                user.FirstName = newUserDetails.FirstName;
+            if (user.LastName != newUserDetails.LastName)
+                user.LastName = newUserDetails.LastName;
+            if (user.Country != newUserDetails.Country)
+                user.Country = newUserDetails.Country;
+            
+            return user;
         }
     }
 }

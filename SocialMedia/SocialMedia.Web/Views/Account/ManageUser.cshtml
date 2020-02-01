@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SocialMedia.Models
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@model SocialMedia.Models.User
+
+@{
+    ViewData["Title"] = User.Identity.Name;
+}
+
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        <span>@TempData["Message"]</span>
+    </div>
+}
+
+<div class="col-md-12">
+    <h1 class="text-center">@User.Identity.Name personal details</h1>
+    <form asp-action="ManageUser" method="post" class="form-horizontal">
+        <div class="form-group">
+            <label asp-for="@Model.Email" class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <input asp-for="@Model.Email" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="@Model.FirstName" class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <input asp-for="@Model.FirstName" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="@Model.LastName" class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <input asp-for="@Model.LastName" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="@Model.Country" class="col-sm-2"></label>
+            <div class="col-sm-10">
+                <input asp-for="@Model.Country" class="form-control" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+        <div asp-validation-summary="All"></div>
+    </form>
+</div>
