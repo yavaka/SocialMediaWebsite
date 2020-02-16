@@ -8,14 +8,14 @@ namespace SocialMedia.Models
     [Table("Users")]
     public class User : IdentityUser
     {
-        //public User()
-        //{
-        //    this.Posts = new HashSet<Post>();
-        //    this.Friends = new HashSet<User>();
-        //    this.Groups = new HashSet<UserInGroup>();
-        //    this.Comments = new HashSet<Comment>();
-        //}
-     
+        public User()
+        {
+            this.Posts = new HashSet<Post>();
+            //    this.Friends = new HashSet<User>();
+            //    this.Groups = new HashSet<UserInGroup>();
+            //    this.Comments = new HashSet<Comment>();
+        }
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
@@ -24,10 +24,10 @@ namespace SocialMedia.Models
         public Gender Gender { get; set; }
         public string Bio { get; set; }
         public string Locale { get; set; } = "en-GB";
+        public virtual ICollection<Post> Posts { get; set; }
         
         [NotMapped]
         public string Message{ get; set; }
-        //public virtual ICollection<Post> Posts { get; set; }
         //public virtual ICollection<User> Friends { get; set; }
         //public virtual ICollection<UserInGroup> Groups { get; set; }
         //public virtual ICollection<Comment> Comments { get; set; }
