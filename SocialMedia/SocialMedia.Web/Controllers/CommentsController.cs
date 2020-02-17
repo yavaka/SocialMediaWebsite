@@ -28,12 +28,15 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int postId)
         {
             //TODO: DONE! if there is no signed user do not list comments
             var user = await this._userManager.GetUserAsync(User);
+            var post = await this._context.Posts
+                .FirstOrDefaultAsync(p => p.PostId == postId);
+
             var comments = await _context.Comments
-                .Where(a => a.Author == user)
+                .Where(a => a.Author == user && a.CommentedPost == post)
                 .ToListAsync();
             
             return View(comments);
@@ -69,7 +72,7 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CommentId,Content,DatePosted")] Comment comment)
+        public async Task<IActionResult> Create([Bind("CommentId,Content,DatePosted")] Comment comment, int postId)
         {
             //TODO: DONE! assign to user and post
             if (ModelState.IsValid)
@@ -81,8 +84,13 @@ namespace SocialMedia.Web.Controllers
                 user.Comments.Add(comment);
                 
                 comment.Author = user;
-                _context.Add(comment);
 
+                //Get the post
+                var post = await this._context.Posts.FirstOrDefaultAsync(i =>i.PostId == postId);
+                comment.CommentedPost = post;
+
+                _context.Add(comment);
+                               
                 //Update current user
                 await this._userManager.UpdateAsync(user);
                 await _signInManager.RefreshSignInAsync(user);
