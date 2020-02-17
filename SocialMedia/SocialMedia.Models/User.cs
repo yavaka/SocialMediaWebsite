@@ -13,7 +13,7 @@ namespace SocialMedia.Models
             this.Posts = new HashSet<Post>();
             //    this.Friends = new HashSet<User>();
             //    this.Groups = new HashSet<UserInGroup>();
-            //    this.Comments = new HashSet<Comment>();
+            this.Comments = new HashSet<Comment>();
         }
 
         public string FirstName { get; set; }
@@ -25,12 +25,12 @@ namespace SocialMedia.Models
         public string Bio { get; set; }
         public string Locale { get; set; } = "en-GB";
         public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
         
         [NotMapped]
         public string Message{ get; set; }
         //public virtual ICollection<User> Friends { get; set; }
         //public virtual ICollection<UserInGroup> Groups { get; set; }
-        //public virtual ICollection<Comment> Comments { get; set; }
 
     }
 

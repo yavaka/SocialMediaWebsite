@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace SocialMedia.Models
@@ -11,12 +12,13 @@ namespace SocialMedia.Models
         //    this.TaggedFriends = new HashSet<User>();
         //}
 
+        [Key]
         public int CommentId{ get; set; }
         public string Content { get; set; }
         public DateTime DatePosted { get; set; }
-
-        //public int AuthorId { get; set; }
-        //public virtual User Author { get; set; }
+        public virtual User Author { get; set; }
+        public virtual Post CommentedPost { get; set; }
+        
         //public virtual ICollection<User> TaggedFriends { get; set; }
     }
 }

@@ -148,7 +148,7 @@ namespace SocialMedia.Web.Controllers
         {
             //TODO: Check all props DOB, Gender, etc...
             //TODO: Separate user details to acc details and personal details
-            //TODO: Show current details of the user
+            //TODO: DONE! Show current details of the user
             if (user.Email != newUserDetails.Email)
                 user.Email = newUserDetails.Email;
             if (user.FirstName != newUserDetails.FirstName)
