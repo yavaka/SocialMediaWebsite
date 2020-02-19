@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SocialMedia.Data;
 using SocialMedia.Models;
 using SocialMedia.Models.IdentityModels;
 
@@ -17,16 +19,19 @@ namespace SocialMedia.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IUserClaimsPrincipalFactory<User> _claimsPrincipalFactory;
         private readonly SignInManager<User> _signInManager;
+        private readonly SocialMediaDbContext _context;
 
         public AccountController(ILogger<AccountController> logger,
             UserManager<User> userManager,
             IUserClaimsPrincipalFactory<User> claimsPrincipalFactory,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            SocialMediaDbContext context)
         {
             this._logger = logger;
             this._userManager = userManager;
             this._claimsPrincipalFactory = claimsPrincipalFactory;
             this._signInManager = signInManager;
+            this._context = context;
         }
 
         //
@@ -157,8 +162,46 @@ namespace SocialMedia.Web.Controllers
                 user.LastName = newUserDetails.LastName;
             if (user.Country != newUserDetails.Country)
                 user.Country = newUserDetails.Country;
-            
+
             return user;
         }
+
+        //Get Account/Users
+        [HttpGet]
+        public async Task<IActionResult> Users()
+        {
+            //Get the current user
+            var user = await this._userManager.GetUserAsync(User);
+
+            //Get all other users except the current one
+            var users = this._userManager.Users
+                .Where(i => i.Id != user.Id)
+                .ToList();
+
+            return View(users);
+        }
+
+
+        //Get Account/UserProfile
+        [HttpGet]
+        public async Task<IActionResult> UserProfile()
+        {
+            //Gets the url Account/UserProfile/UserId
+            var reqUrl = Request.HttpContext.Request;
+            //Convert the url into array
+            var urlPath = reqUrl.Path
+                .ToString()
+                .Split('/')
+                .ToArray();
+            
+            //Gets the user
+            var user = await this._userManager.FindByIdAsync(urlPath[3]);
+
+            if (user == null)
+                return NotFound();
+
+            return View(user);
+        }
+
     }
 }

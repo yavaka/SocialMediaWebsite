@@ -11,7 +11,8 @@ namespace SocialMedia.Models
         public User()
         {
             this.Posts = new HashSet<Post>();
-            //    this.Friends = new HashSet<User>();
+            this.Friends = new HashSet<User>();
+            this.FriendRequests = new HashSet<User>();
             //    this.Groups = new HashSet<UserInGroup>();
             this.Comments = new HashSet<Comment>();
         }
@@ -26,10 +27,13 @@ namespace SocialMedia.Models
         public string Locale { get; set; } = "en-GB";
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
-        
+        //TODO: Add migrations Friends
+        //Update database
+        public virtual ICollection<User> Friends { get; set; }
+        public virtual ICollection<User> FriendRequests{ get; set; }
+
         [NotMapped]
         public string Message{ get; set; }
-        //public virtual ICollection<User> Friends { get; set; }
         //public virtual ICollection<UserInGroup> Groups { get; set; }
 
     }

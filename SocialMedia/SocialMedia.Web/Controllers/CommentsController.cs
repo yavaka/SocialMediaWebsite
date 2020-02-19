@@ -110,10 +110,12 @@ namespace SocialMedia.Web.Controllers
             }
 
             var comment = await _context.Comments.FindAsync(id);
+
             if (comment == null)
             {
                 return NotFound();
             }
+            
             return View(comment);
         }
 

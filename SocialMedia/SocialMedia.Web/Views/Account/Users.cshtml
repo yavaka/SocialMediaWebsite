@@ -1,0 +1,43 @@
+﻿@model IEnumerable<SocialMedia.Models.User>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Friends recommendations</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Username
+            </th>
+            <th>
+                Full name
+            </th>
+            <th>
+                Nationality
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Country)
+                </td>
+                <td>
+                    <a asp-action="UserProfile" asp-route-id="@item.Id">View Profile</a> |
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

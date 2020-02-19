@@ -1,0 +1,32 @@
+﻿@model SocialMedia.Models.User
+
+@{
+    ViewData["Title"] = "UserProfile";
+}
+
+<h1>UserProfile</h1>
+
+<div>
+    <h4>Comment</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Username:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            Full name:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FullName)
+        </dd>
+        <dt class="col-sm-2">
+            Nationality:
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Country)
+        </dd>
+    </dl>
+</div>

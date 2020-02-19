@@ -28,17 +28,24 @@ namespace SocialMedia.Data
             modelBuilder.Entity<User>(user => user.HasIndex(x => x.Locale)
                                              .IsUnique(false));
 
+            //User has many friends
+            modelBuilder.Entity<User>()
+                .HasMany<User>(f => f.Friends)
+                .WithOne()
+                .HasForeignKey(u => u.Id);
+
+            //User has many friend requests
+            modelBuilder.Entity<User>()
+                .HasMany<User>(fr => fr.FriendRequests)
+                .WithOne()
+                .HasForeignKey(u => u.Id);
+
+
             //    //User has many posts
             //    modelBuilder.Entity<Post>()
             //        .HasOne<User>(a => a.Author)
             //        .WithMany(u => u.Posts)
             //        .HasForeignKey(id => id.AuthorId);
-
-            //    //User has many friends
-            //    modelBuilder.Entity<User>()
-            //        .HasMany<User>(f => f.Friends)
-            //        .WithOne()
-            //        .HasForeignKey(u => u.UserId);
 
             //    //Mapping table PKs
             //    modelBuilder.Entity<UserInGroup>()
