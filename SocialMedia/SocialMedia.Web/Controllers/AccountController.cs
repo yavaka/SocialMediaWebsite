@@ -60,6 +60,15 @@ namespace SocialMedia.Web.Controllers
                         Email = model.Email
                     };
 
+                    //Create friends table
+                    var friends = new Friends() 
+                    {
+                        Account = user,
+                        AccountId = user.Id
+                    };
+
+                    //Attach friends table to current user
+                    user.Friends = friends;
 
                     await this._userManager.CreateAsync(user, model.Password);
 

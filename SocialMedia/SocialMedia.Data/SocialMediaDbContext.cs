@@ -18,27 +18,21 @@ namespace SocialMedia.Data
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
-
+        public virtual DbSet<Friends> Friends{ get; set; }
         //public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            
 
             modelBuilder.Entity<User>(user => user.HasIndex(x => x.Locale)
                                              .IsUnique(false));
 
-            //User has many friends
-            modelBuilder.Entity<User>()
-                .HasMany<User>(f => f.Friends)
-                .WithOne()
-                .HasForeignKey(u => u.Id);
-
-            //User has many friend requests
-            modelBuilder.Entity<User>()
-                .HasMany<User>(fr => fr.FriendRequests)
-                .WithOne()
-                .HasForeignKey(u => u.Id);
+            //One to one relation between User and Friends
+            modelBuilder.Entity<Friends>()
+                .HasOne<User>(a => a.Account)
+                .WithOne(u => u.Friends)
+                .HasForeignKey<Friends>(i => i.AccountId);
 
 
             //    //User has many posts
@@ -84,7 +78,9 @@ namespace SocialMedia.Data
             //    //Comment has tagged friends
             //    modelBuilder.Entity<Comment>()
             //        .HasMany(t =>t.TaggedFriends);
+
+            base.OnModelCreating(modelBuilder);
         }
 
-        }
+    }
 }

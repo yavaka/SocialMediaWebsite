@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SocialMedia.Models
@@ -11,12 +12,11 @@ namespace SocialMedia.Models
         public User()
         {
             this.Posts = new HashSet<Post>();
-            this.Friends = new HashSet<User>();
-            this.FriendRequests = new HashSet<User>();
-            //    this.Groups = new HashSet<UserInGroup>();
             this.Comments = new HashSet<Comment>();
+            //this.Groups = new HashSet<UserInGroup>();
         }
 
+        //TODO: First and Last names are required
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
@@ -27,10 +27,7 @@ namespace SocialMedia.Models
         public string Locale { get; set; } = "en-GB";
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
-        //TODO: Add migrations Friends
-        //Update database
-        public virtual ICollection<User> Friends { get; set; }
-        public virtual ICollection<User> FriendRequests{ get; set; }
+        public Friends Friends { get; set; }
 
         [NotMapped]
         public string Message{ get; set; }
