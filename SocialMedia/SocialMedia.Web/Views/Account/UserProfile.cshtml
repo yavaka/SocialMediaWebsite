@@ -28,5 +28,20 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Country)
         </dd>
+        <dt>
+            @*TODO: If requester already sent request show pending/friend*@
+            @*TODO: If addressee accept fr req show addressee posts *@
+            @*@{ if (ViewData.Values.Contains("non friend"))
+           {
+               <a asp-action="SendRequest" asp-route-id="@Model.Id">Send Request</a>
+           }
+           else if (ViewData.Values.Contains("pending"))
+           {
+               <a asp-action="Accept" asp-route-id="@Model.Id">Accept</a>
+               <a asp-action="Reject" asp-route-id="@Model.Id">Reject</a>
+           }
+        }*@
+            <a asp-action="SendRequest" asp-route-id="@Model.Id">Send Request</a>
+        </dt>
     </dl>
 </div>

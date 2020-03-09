@@ -10,8 +10,8 @@ using SocialMedia.Data;
 namespace SocialMedia.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    [Migration("20200218153741_UserFriends")]
-    partial class UserFriends
+    [Migration("20200309174955_CommentsAndUserFriends")]
+    partial class CommentsAndUserFriends
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -154,7 +154,7 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Models.Comment", b =>
                 {
-                    b.Property<int>("CommentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -171,13 +171,32 @@ namespace SocialMedia.Data.Migrations
                     b.Property<DateTime>("DatePosted")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("CommentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
 
                     b.HasIndex("CommentedPostPostId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("SocialMedia.Models.Friendship", b =>
+                {
+                    b.Property<string>("RequesterId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AddresseeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("RequesterId", "AddresseeId")
+                        .HasName("Friendship_PK");
+
+                    b.HasIndex("AddresseeId");
+
+                    b.ToTable("Friendships");
                 });
 
             modelBuilder.Entity("SocialMedia.Models.Group", b =>
@@ -250,13 +269,19 @@ namespace SocialMedia.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("char(30)")
+                        .IsFixedLength(true)
+                        .HasMaxLength(30)
+                        .IsUnicode(false);
 
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("char(30)")
+                        .IsFixedLength(true)
+                        .HasMaxLength(30)
+                        .IsUnicode(false);
 
                     b.Property<string>("Locale")
                         .HasColumnType("nvarchar(450)");
@@ -290,12 +315,12 @@ namespace SocialMedia.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
+                        .IsRequired()
+                        .HasColumnType("char(256)")
+                        .IsFixedLength(true)
+                        .HasMaxLength(256)
+                        .IsUnicode(false);
 
                     b.HasKey("Id");
 
@@ -309,7 +334,14 @@ namespace SocialMedia.Data.Migrations
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserName")
+                        .IsUnique()
+                        .HasName("User_AK2");
+
+                    b.HasIndex("FirstName", "LastName")
+                        .IsUnique()
+                        .HasName("User_AK1")
+                        .HasFilter("[FirstName] IS NOT NULL AND [LastName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -376,24 +408,26 @@ namespace SocialMedia.Data.Migrations
                         .HasForeignKey("CommentedPostPostId");
                 });
 
+            modelBuilder.Entity("SocialMedia.Models.Friendship", b =>
+                {
+                    b.HasOne("SocialMedia.Models.User", "Addressee")
+                        .WithMany("FriendshipAddressee")
+                        .HasForeignKey("AddresseeId")
+                        .HasConstraintName("FriendshipToAddressee_FK")
+                        .IsRequired();
+
+                    b.HasOne("SocialMedia.Models.User", "Requester")
+                        .WithMany("FriendshipRequester")
+                        .HasForeignKey("RequesterId")
+                        .HasConstraintName("FriendshipToRequester_FK")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SocialMedia.Models.Post", b =>
                 {
                     b.HasOne("SocialMedia.Models.User", "Author")
                         .WithMany("Posts")
                         .HasForeignKey("AuthorId");
-                });
-
-            modelBuilder.Entity("SocialMedia.Models.User", b =>
-                {
-                    b.HasOne("SocialMedia.Models.User", null)
-                        .WithMany("FriendRequests")
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMedia.Models.User", null)
-                        .WithMany("Friends")
-                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

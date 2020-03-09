@@ -52,7 +52,7 @@ namespace SocialMedia.Web.Controllers
             }
 
             var comment = await _context.Comments
-                .FirstOrDefaultAsync(m => m.CommentId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -126,7 +126,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("CommentId,Content,DatePosted")] Comment comment)
         {
-            if (id != comment.CommentId)
+            if (id != comment.Id)
             {
                 return NotFound();
             }
@@ -140,7 +140,7 @@ namespace SocialMedia.Web.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.CommentId))
+                    if (!CommentExists(comment.Id))
                     {
                         return NotFound();
                     }
@@ -163,7 +163,7 @@ namespace SocialMedia.Web.Controllers
             }
 
             var comment = await _context.Comments
-                .FirstOrDefaultAsync(m => m.CommentId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -185,7 +185,7 @@ namespace SocialMedia.Web.Controllers
 
         private bool CommentExists(int id)
         {
-            return _context.Comments.Any(e => e.CommentId == id);
+            return _context.Comments.Any(e => e.Id == id);
         }
     }
 }

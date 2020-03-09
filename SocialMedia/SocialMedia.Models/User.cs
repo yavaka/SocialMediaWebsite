@@ -13,8 +13,11 @@ namespace SocialMedia.Models
         {
             this.Posts = new HashSet<Post>();
             this.Comments = new HashSet<Comment>();
+            this.FriendshipAddressee = new HashSet<Friendship>();
+            this.FriendshipRequester = new HashSet<Friendship>();
             //this.Groups = new HashSet<UserInGroup>();
         }
+
 
         //TODO: First and Last names are required
         public string FirstName { get; set; }
@@ -27,7 +30,8 @@ namespace SocialMedia.Models
         public string Locale { get; set; } = "en-GB";
         public virtual ICollection<Post> Posts { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
-        public Friends Friends { get; set; }
+        public virtual ICollection<Friendship> FriendshipAddressee { get; set; }
+        public virtual ICollection<Friendship> FriendshipRequester { get; set; }
 
         [NotMapped]
         public string Message{ get; set; }

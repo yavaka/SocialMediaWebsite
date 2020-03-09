@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200218153741_UserFriends.cs" />
+    <Compile Remove="Migrations\20200218153741_UserFriends.Designer.cs" />
+    <Compile Remove="Migrations\20200304134727_UserFriends_FriendsTable.cs" />
+    <Compile Remove="Migrations\20200304134727_UserFriends_FriendsTable.Designer.cs" />
+    <Compile Remove="Migrations\20200308113724_CommentsAndUserFriends.cs" />
+    <Compile Remove="Migrations\20200308113724_CommentsAndUserFriends.Designer.cs" />
+    <Compile Remove="Migrations\20200309174103_CommentsAndUserFriends.cs" />
+    <Compile Remove="Migrations\20200309174103_CommentsAndUserFriends.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1">
