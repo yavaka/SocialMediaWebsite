@@ -115,7 +115,6 @@ namespace SocialMedia.Web.Controllers
                     }
                 }
             }
-            //TODO: pass data to view ! issue - friend req.
 
             return View(nonFriends);
         }
@@ -188,8 +187,6 @@ namespace SocialMedia.Web.Controllers
                     this._context.Users
                     .FirstOrDefault(i => i.Id == requesterId.RequesterId));
             }
-
-            //TODO: pass data to view ! issue - pending
 
             return View(requests);
         }

@@ -22,6 +22,9 @@ namespace SocialMedia.Web.Controllers
             this._userManager = userManager;
         }
 
+        //TODO: Group page
+        //TODO: Add posts to every group
+
         // GET: Groups
         public async Task<IActionResult> Index()
         {
@@ -80,6 +83,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("GroupId,Title,Description")] Group group)
         {
+            //TODO: groups validations
             if (ModelState.IsValid)
             {
                 //Gets the current user 

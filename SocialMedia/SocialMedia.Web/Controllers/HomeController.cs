@@ -13,7 +13,8 @@ namespace SocialMedia.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        
+        //TODO: Current user`s profile
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;

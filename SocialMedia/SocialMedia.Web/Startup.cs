@@ -33,12 +33,13 @@ namespace SocialMedia.Web
         {
             //TODO: routing 
             services.AddLogging();
+            services.AddRazorPages();
             services.AddMvc();
-
             var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             services.AddDbContext<SocialMediaDbContext>(opt => opt.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True"));
 
-            services.AddIdentity<User, IdentityRole>(options => {
+            services.AddIdentity<User, IdentityRole>(options =>
+            {
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
@@ -46,7 +47,8 @@ namespace SocialMedia.Web
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 6;
             })
-                .AddEntityFrameworkStores<SocialMediaDbContext>();
+                .AddEntityFrameworkStores<SocialMediaDbContext>()
+                .AddDefaultTokenProviders(); 
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
 
@@ -80,6 +82,7 @@ namespace SocialMedia.Web
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }

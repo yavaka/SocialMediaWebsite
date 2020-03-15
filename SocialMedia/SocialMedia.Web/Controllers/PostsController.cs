@@ -68,6 +68,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PostId,DatePosted,Content")] Post post)
         {
+            //TODO: posts/create validations
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(User);
@@ -105,6 +106,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PostId,DatePosted,Content")] Post post)
         {
+            //TODO: posts/edit validations
             if (id != post.PostId)
             {
                 return NotFound();

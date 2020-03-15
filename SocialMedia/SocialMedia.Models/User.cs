@@ -17,8 +17,7 @@ namespace SocialMedia.Models
             this.FriendshipRequester = new HashSet<Friendship>();
             this.Groups = new HashSet<UserInGroup>();
         }
-
-
+        //TODO: validations
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
