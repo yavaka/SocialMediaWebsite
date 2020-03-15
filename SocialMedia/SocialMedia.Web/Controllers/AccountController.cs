@@ -107,9 +107,6 @@ namespace SocialMedia.Web.Controllers
                 ModelState.AddModelError("", "Invalid UserName or Password");
             }
             
-            //TODO: pass data to view ! issue - Login
-            //Add new key to ViewData dictionary
-            ViewData.Keys.Add("friendship");
             return View();
         }
         #endregion
@@ -157,7 +154,7 @@ namespace SocialMedia.Web.Controllers
         {
             //TODO: Check all props DOB, Gender, etc...
             //TODO: Separate user details to acc details and personal details
-            //TODO: DONE! Show current details of the user
+            //TODO: Show current details of the user
             if (user.Email != newUserDetails.Email)
                 user.Email = newUserDetails.Email;
             if (user.FirstName != newUserDetails.FirstName)
@@ -213,6 +210,7 @@ namespace SocialMedia.Web.Controllers
                 }
             }
             //TODO: pass data to view ! issue - friend req.
+            
             return View(nonFriends);
         }
 
@@ -285,8 +283,7 @@ namespace SocialMedia.Web.Controllers
             }
 
             //TODO: pass data to view ! issue - pending
-
-            ViewData["friendship"] = "pending";
+            
             return View(requests);
         }
 

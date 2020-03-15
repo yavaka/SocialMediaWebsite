@@ -16,7 +16,6 @@ namespace SocialMedia.Web.Controllers
         private readonly SocialMediaDbContext _context;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
-        //TODO: DONE! Dependency Injection for SignInManager and UserManager 
 
         public CommentsController(SocialMediaDbContext context,
             SignInManager<User> signInManager,
@@ -30,7 +29,6 @@ namespace SocialMedia.Web.Controllers
         // GET: Comments
         public async Task<IActionResult> Index(int postId)
         {
-            //TODO: DONE! if there is no signed user do not list comments
             var user = await this._userManager.GetUserAsync(User);
             var post = await this._context.Posts
                 .FirstOrDefaultAsync(p => p.PostId == postId);
@@ -42,7 +40,6 @@ namespace SocialMedia.Web.Controllers
             return View(comments);
         }
 
-        //TODO:
         // GET: Comments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -74,11 +71,8 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CommentId,Content,DatePosted")] Comment comment, int postId)
         {
-            //TODO: DONE! assign to user and post
             if (ModelState.IsValid)
             {
-                //TODO: assign to specific post //Later
-
                 //Get current user
                 var user = await this._userManager.GetUserAsync(User);
                 user.Comments.Add(comment);
