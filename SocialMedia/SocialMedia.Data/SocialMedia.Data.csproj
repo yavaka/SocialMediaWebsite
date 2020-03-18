@@ -13,6 +13,12 @@
     <Compile Remove="Migrations\20200308113724_CommentsAndUserFriends.Designer.cs" />
     <Compile Remove="Migrations\20200309174103_CommentsAndUserFriends.cs" />
     <Compile Remove="Migrations\20200309174103_CommentsAndUserFriends.Designer.cs" />
+    <Compile Remove="Migrations\20200318024152_DateFormat.cs" />
+    <Compile Remove="Migrations\20200318024152_DateFormat.Designer.cs" />
+    <Compile Remove="Migrations\20200318024646_DateFormat.cs" />
+    <Compile Remove="Migrations\20200318024646_DateFormat.Designer.cs" />
+    <Compile Remove="Migrations\20200318040025_MultilineBio.cs" />
+    <Compile Remove="Migrations\20200318040025_MultilineBio.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

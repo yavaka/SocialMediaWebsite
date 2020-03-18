@@ -17,13 +17,19 @@ namespace SocialMedia.Models
             this.FriendshipRequester = new HashSet<Friendship>();
             this.Groups = new HashSet<UserInGroup>();
         }
-        //TODO: validations
+      
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
         public string Country { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Date)]
         public DateTime? DOB { get; set; }
+
+        [EnumDataType(typeof(Gender))]
         public Gender Gender { get; set; }
+        [DataType(DataType.MultilineText)]
         public string Bio { get; set; }
         public string Locale { get; set; } = "en-GB";
 
