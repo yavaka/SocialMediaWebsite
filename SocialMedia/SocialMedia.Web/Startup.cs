@@ -46,6 +46,7 @@ namespace SocialMedia.Web
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredUniqueChars = 6;
+                options.User.RequireUniqueEmail = true;
             })
                 .AddEntityFrameworkStores<SocialMediaDbContext>()
                 .AddDefaultTokenProviders(); 

@@ -47,6 +47,9 @@ namespace SocialMedia.Data
             //Users
             modelBuilder.Entity<User>(entity =>
             {
+                entity.HasIndex(e => e.Email)
+                    .IsUnique(true);
+
                 entity.HasIndex(x => x.Locale)
                     .IsUnique(false);
                 

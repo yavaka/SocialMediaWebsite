@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using SocialMedia.Models;
+using SocialMedia.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 {
@@ -18,18 +20,21 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly SocialMediaDbContext _context;
 
         public EmailModel(
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            SocialMediaDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            this._context = context;
         }
 
-        public string Username { get; set; }
-
         public string Email { get; set; }
+
+        public bool IsEmailConfirmed { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -54,11 +59,14 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
             {
                 NewEmail = email,
             };
+
+            IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+            
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -85,20 +93,19 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
             var email = await _userManager.GetEmailAsync(user);
             if (Input.NewEmail != email)
             {
-                user.Email = Input.NewEmail;
-                await _userManager.UpdateAsync(user);
-
-                // In our UI email and user name are one and the same, so when we update the email
-                // we need to update the user name.
-                var setUserNameResult = await _userManager.SetUserNameAsync(user, email);
-                if (!setUserNameResult.Succeeded)
+                if (this._userManager.Users.Any(e => e.Email == Input.NewEmail))
                 {
-                    StatusMessage = "Error changing user name.";
+                    ModelState.AddModelError("Email", $"Email '{this.Input.NewEmail}' is already taken.");
+                    await LoadAsync(user);
                     return Page();
                 }
 
+                var updateUser = await this._context.Users.FirstOrDefaultAsync(i =>i.Id == user.Id);
+                updateUser.Email = this.Input.NewEmail;
+                await this._context.SaveChangesAsync();
+
                 await _signInManager.RefreshSignInAsync(user);
-                StatusMessage = "Thank you for confirming your email change.";
+                StatusMessage = "Your email is changed.";
                 return RedirectToPage();
             }
 

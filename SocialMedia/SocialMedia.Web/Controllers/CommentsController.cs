@@ -71,7 +71,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CommentId,Content,DatePosted")] Comment comment, int postId)
         {
-            //TODO: comments validations
+            //TODO: comments validations with model state error
             if (ModelState.IsValid)
             {
                 //Get current user
