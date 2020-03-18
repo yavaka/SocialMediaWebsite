@@ -30,11 +30,11 @@ namespace SocialMedia.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            var posts = _context.Posts
-                .Where(a=>a.Author == user)
+            var posts = await _context.Posts
+                .Where(a=>a.AuthorId == user.Id)
                 .ToListAsync();
                 
-            return View(await posts);
+            return View(posts);
         }
 
         // GET: Posts/Details/5
@@ -66,17 +66,18 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PostId,DatePosted,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("PostId,Content")] Post post)
         {
             //TODO: posts/create validations
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(User);
+                
                 post.Author = user;
-                user.Posts.Add(post);
-                _context.Add(post);
-                await this._userManager.UpdateAsync(user);
-                await _signInManager.RefreshSignInAsync(user);
+                post.AuthorId = user.Id;
+                post.DatePosted = DateTime.Now;
+                _context.Posts.Add(post);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -104,10 +105,9 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PostId,DatePosted,Content")] Post post)
+        public async Task<IActionResult> Edit(int id, Post updatedPost)
         {
-            //TODO: posts/edit validations
-            if (id != post.PostId)
+            if (id != updatedPost.PostId)
             {
                 return NotFound();
             }
@@ -116,12 +116,19 @@ namespace SocialMedia.Web.Controllers
             {
                 try
                 {
-                    _context.Update(post);
+                    var user = await this._userManager.GetUserAsync(User);
+                    var post = await this._context.Posts
+                        .FirstOrDefaultAsync(i => i.PostId == updatedPost.PostId);
+
+                    post.Author = user;
+                    post.AuthorId = user.Id;
+                    post.Content = updatedPost.Content;
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(post.PostId))
+                    if (!PostExists(updatedPost.PostId))
                     {
                         return NotFound();
                     }
@@ -132,7 +139,7 @@ namespace SocialMedia.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            return View(updatedPost);
         }
 
         // GET: Posts/Delete/5

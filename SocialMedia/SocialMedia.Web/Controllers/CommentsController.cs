@@ -69,7 +69,7 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CommentId,Content,DatePosted")] Comment comment, int postId)
+        public async Task<IActionResult> Create([Bind("CommentId,Content")] Comment comment, int postId)
         {
             //TODO: comments validations with model state error
             if (ModelState.IsValid)
@@ -83,7 +83,7 @@ namespace SocialMedia.Web.Controllers
                 //Get the post
                 var post = await this._context.Posts.FirstOrDefaultAsync(i =>i.PostId == postId);
                 comment.CommentedPost = post;
-
+                comment.DatePosted = DateTime.Now;
                 _context.Add(comment);
                                
                 //Update current user

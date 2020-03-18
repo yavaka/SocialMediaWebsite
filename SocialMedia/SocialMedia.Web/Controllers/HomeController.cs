@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,8 +14,9 @@ namespace SocialMedia.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        
-        //TODO: Current user`s profile
+
+        //TODO: User`s profile in Identity as Page
+
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -25,9 +27,7 @@ namespace SocialMedia.Web.Controllers
             LoggerInformation(Request.GetDisplayUrl());
             return View();
         }
-
         
-
         public IActionResult Privacy()
         {
             LoggerInformation(Request.GetDisplayUrl());
