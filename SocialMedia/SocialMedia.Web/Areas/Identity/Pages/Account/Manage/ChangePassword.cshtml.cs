@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SocialMedia.Data;
 using SocialMedia.Models;
 namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 {
@@ -15,15 +17,18 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<ChangePasswordModel> _logger;
+        private readonly SocialMediaDbContext _context;
 
         public ChangePasswordModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            ILogger<ChangePasswordModel> logger)
+            ILogger<ChangePasswordModel> logger,
+            SocialMediaDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            this._context = context;
         }
 
         [BindProperty]
@@ -75,16 +80,21 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
+            UserStore<User> store = new UserStore<User>(this._context);
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, Input.OldPassword, Input.NewPassword);
-            if (!changePasswordResult.Succeeded)
+            var hashedNewPassword = this._userManager.PasswordHasher.HashPassword(user, Input.NewPassword);
+            await store.SetPasswordHashAsync(user, hashedNewPassword);
+            var result = await store.UpdateAsync(user);
+            
+            if (!result.Succeeded)
             {
-                foreach (var error in changePasswordResult.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }

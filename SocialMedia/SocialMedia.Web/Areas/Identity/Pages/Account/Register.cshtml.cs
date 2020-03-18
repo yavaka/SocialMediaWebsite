@@ -44,9 +44,15 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            private string username;
+
             [Required]
             [Display(Name = "Username")]
-            public string Username{ get; set; }
+            public string Username
+            { 
+                get { return username.Trim(' '); } 
+                set { username = value.Trim(' '); } 
+            }
 
             [Required]
             [EmailAddress]
