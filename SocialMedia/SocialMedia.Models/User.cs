@@ -21,6 +21,9 @@ namespace SocialMedia.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
+        
+        //TODO: Add City
+        //public string City { get; set; }
         public string Country { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
@@ -38,6 +41,8 @@ namespace SocialMedia.Models
         public virtual ICollection<Friendship> FriendshipAddressee { get; set; }
         public virtual ICollection<Friendship> FriendshipRequester { get; set; }
         public virtual ICollection<UserInGroup> Groups { get; set; }
+        
+        //TODO: Gallery
 
         [NotMapped]
         public string Message{ get; set; }

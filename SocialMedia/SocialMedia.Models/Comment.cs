@@ -22,6 +22,7 @@ namespace SocialMedia.Models
         public int CommentedPostId { get; set; }
         public virtual Post CommentedPost { get; set; }
         
+        //TODO: Comment/TagFriends
         //public virtual ICollection<User> TaggedFriends { get; set; }
     }
 }

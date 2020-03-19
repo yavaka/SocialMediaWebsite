@@ -16,7 +16,7 @@ namespace SocialMedia.Web.Controllers
         private readonly ILogger<HomeController> _logger;
 
         //TODO: User`s profile in Identity as Page
-
+        //TODO: Notifications
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;

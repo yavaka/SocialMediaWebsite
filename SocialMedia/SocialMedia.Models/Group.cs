@@ -10,7 +10,7 @@ namespace SocialMedia.Models
         public Group()
         {
             this.Members = new HashSet<UserInGroup>();
-           // this.Posts = new HashSet<Post>();
+            this.Posts = new HashSet<Post>();
         }
 
         public int GroupId { get; set; }

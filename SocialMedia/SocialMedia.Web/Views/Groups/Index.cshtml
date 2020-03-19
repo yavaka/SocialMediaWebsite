@@ -31,7 +31,7 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.GroupId">Details</a>
+                <a asp-action="NonGroupMemberDetails" asp-route-id="@item.GroupId">Details</a>
             </td>
         </tr>
 }

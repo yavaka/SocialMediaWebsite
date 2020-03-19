@@ -28,6 +28,7 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
             this._context = context;
         }
 
+        //TODO: User/Profile picture
         public string Username { get; set; }
 
         [TempData]

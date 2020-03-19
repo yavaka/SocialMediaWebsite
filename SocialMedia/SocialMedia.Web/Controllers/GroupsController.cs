@@ -54,6 +54,24 @@ namespace SocialMedia.Web.Controllers
             return View(nonMemberGroups);
         }
 
+        public async Task<IActionResult> NonGroupMemberDetails(int? id) 
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var group = await _context.Groups
+                .FirstOrDefaultAsync(m => m.GroupId == id);
+            
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            return View(group);
+        }
+
         // GET: Groups/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -74,6 +92,8 @@ namespace SocialMedia.Web.Controllers
             //Pass groupId to PostsController
             TempData["groupId"] = id;
 
+            //TODO: List posts and comments
+            
             return View(group);
         }
 
