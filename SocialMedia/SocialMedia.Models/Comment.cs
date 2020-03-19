@@ -19,6 +19,7 @@ namespace SocialMedia.Models
         public DateTime DatePosted { get; set; }
         public string AuthorId { get; set; }
         public virtual User Author { get; set; }
+        public int CommentedPostId { get; set; }
         public virtual Post CommentedPost { get; set; }
         
         //public virtual ICollection<User> TaggedFriends { get; set; }

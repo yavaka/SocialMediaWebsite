@@ -52,7 +52,7 @@ namespace SocialMedia.Data
 
                 entity.HasIndex(x => x.Locale)
                     .IsUnique(false);
-                
+
                 entity.HasIndex(e => e.UserName)
                     .HasName("User_AK2")
                     .IsUnique();
@@ -78,11 +78,19 @@ namespace SocialMedia.Data
                     .IsFixedLength();
             });
 
-            //Comment has a author
-            modelBuilder.Entity<Comment>()
-                .HasOne(a => a.Author)
+            //Comments
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.HasOne(a => a.Author)
                 .WithMany(c => c.Comments)
                 .HasForeignKey(aId => aId.AuthorId);
+
+                entity.HasOne(p => p.CommentedPost)
+                .WithMany(c => c.Comments)
+                .HasForeignKey(pId => pId.CommentedPostId);
+            });
+
+            //Comment has a post
 
 
             //User has many posts

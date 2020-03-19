@@ -17,6 +17,8 @@ namespace SocialMedia.Web.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
 
+        private static int _postId = 0;
+
         public CommentsController(SocialMediaDbContext context,
             SignInManager<User> signInManager,
             UserManager<User> userManager)
@@ -27,14 +29,20 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index(int postId)
+        public async Task<IActionResult> Index()
         {
+            //Current postId
+            if (TempData["postId"] != null)
+            {
+                _postId = int.Parse(TempData["postId"].ToString());
+            }
+
             var user = await this._userManager.GetUserAsync(User);
             var post = await this._context.Posts
-                .FirstOrDefaultAsync(p => p.PostId == postId);
+                .FirstOrDefaultAsync(p => p.PostId == _postId);
 
             var comments = await _context.Comments
-                .Where(a => a.Author == user && a.CommentedPost == post)
+                .Where(a => a.AuthorId == user.Id && a.CommentedPostId == _postId)
                 .ToListAsync();
             
             return View(comments);
@@ -69,28 +77,34 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CommentId,Content")] Comment comment, int postId)
+        public async Task<IActionResult> Create(Comment comment)
         {
             //TODO: comments validations with model state error
             if (ModelState.IsValid)
             {
                 //Get current user
                 var user = await this._userManager.GetUserAsync(User);
-                user.Comments.Add(comment);
                 
+                //Sets current user as a author
                 comment.Author = user;
-
+                comment.AuthorId = user.Id;
+                
                 //Get the post
-                var post = await this._context.Posts.FirstOrDefaultAsync(i =>i.PostId == postId);
-                comment.CommentedPost = post;
-                comment.DatePosted = DateTime.Now;
-                _context.Add(comment);
-                               
-                //Update current user
-                await this._userManager.UpdateAsync(user);
-                await _signInManager.RefreshSignInAsync(user);
-                await _context.SaveChangesAsync();
+                var post = await this._context.Posts.FirstOrDefaultAsync(i =>i.PostId == _postId);
+                
+                if (post == null)
+                {
+                    return NotFound();
+                }
 
+                comment.CommentedPost = post;
+                comment.CommentedPostId = post.PostId;
+                comment.DatePosted = DateTime.Now;
+
+                this._context.Comments.Add(comment);
+                               
+                await _context.SaveChangesAsync();
+                
                 return RedirectToAction(nameof(Index));
             }
             return View(comment);
@@ -119,9 +133,9 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CommentId,Content,DatePosted")] Comment comment)
+        public async Task<IActionResult> Edit(int id, Comment updatedComment)
         {
-            if (id != comment.Id)
+            if (id != updatedComment.Id)
             {
                 return NotFound();
             }
@@ -130,12 +144,24 @@ namespace SocialMedia.Web.Controllers
             {
                 try
                 {
-                    _context.Update(comment);
+                    var user = await this._userManager
+                        .GetUserAsync(User);
+                    var comment = await this._context.Comments
+                        .FirstOrDefaultAsync(i => i.Id == id);
+                    var post = await this._context.Posts
+                        .FirstOrDefaultAsync(i => i.PostId == _postId);
+
+                    comment.AuthorId = user.Id;
+                    comment.Author = user;
+                    comment.CommentedPostId = post.PostId;
+                    comment.CommentedPost = post;
+                    comment.Content = updatedComment.Content;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.Id))
+                    if (!CommentExists(updatedComment.Id))
                     {
                         return NotFound();
                     }
@@ -146,7 +172,7 @@ namespace SocialMedia.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(comment);
+            return View(updatedComment);
         }
 
         // GET: Comments/Delete/5

@@ -47,6 +47,9 @@ namespace SocialMedia.Web.Controllers
 
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.PostId == id);
+
+            //Pass current postId to CommentsController
+            TempData["postId"] = id;
             if (post == null)
             {
                 return NotFound();
