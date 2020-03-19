@@ -85,19 +85,26 @@ namespace SocialMedia.Data
                 .WithMany(c => c.Comments)
                 .HasForeignKey(aId => aId.AuthorId);
 
+
                 entity.HasOne(p => p.CommentedPost)
                 .WithMany(c => c.Comments)
                 .HasForeignKey(pId => pId.CommentedPostId);
             });
 
-            //Comment has a post
-
-
-            //User has many posts
-            modelBuilder.Entity<Post>()
-                .HasOne<User>(a => a.Author)
+            modelBuilder.Entity<Post>(entity =>
+            {
+                //Post has a author
+                entity.HasOne<User>(a => a.Author)
                 .WithMany(u => u.Posts)
                 .HasForeignKey(id => id.AuthorId);
+
+                //Post has many comments
+                entity.HasMany<Comment>(c => c.Comments)
+                .WithOne(p => p.CommentedPost)
+                .HasForeignKey(i => i.CommentedPostId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
 
             //UsersInGroups (Mapping table)
             modelBuilder.Entity<UserInGroup>(entity =>
@@ -116,20 +123,19 @@ namespace SocialMedia.Data
                 entity.HasOne(g => g.Group)
                     .WithMany(u => u.Members)
                     .HasForeignKey(gId => gId.GroupId);
+
             });
+
+            //Group has many posts
+            modelBuilder.Entity<Group>()
+                .HasMany(p => p.Posts)
+                .WithOne(g => g.Group)
+                .HasForeignKey(gId => gId.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //    //Post has tagged users
             //    modelBuilder.Entity<Post>()
             //        .HasMany(t => t.TaggedFriend);
-
-            //    //Group has many posts
-            //    modelBuilder.Entity<Group>()
-            //        .HasMany(p => p.Posts);
-
-            //    //Post has many comments
-            //    modelBuilder.Entity<Post>()
-            //        .HasMany(c => c.Comments);
-
 
             //    //Comment has tagged friends
             //    modelBuilder.Entity<Comment>()

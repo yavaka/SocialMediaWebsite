@@ -17,6 +17,8 @@ namespace SocialMedia.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
+        private static int _groupId = 0;
+
         public PostsController(SocialMediaDbContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
@@ -26,14 +28,32 @@ namespace SocialMedia.Web.Controllers
             _signInManager = signInManager;
         }
 
-        // GET: Posts
-        public async Task<IActionResult> Index()
+        //TODO: Service for posts example: GetAll(), FindById(), etc.
+        // GET: GroupPosts
+        public async Task<IActionResult> GroupPosts()
         {
+            if (TempData["groupId"] != null)
+            {
+                _groupId = int.Parse(TempData["groupId"].ToString());
+            }
+
             var user = await _userManager.GetUserAsync(User);
             var posts = await _context.Posts
-                .Where(a=>a.AuthorId == user.Id)
+                .Where(a => a.AuthorId == user.Id && a.GroupId == _groupId)
                 .ToListAsync();
-                
+
+            return View(posts);
+        }
+
+        // GET: UserPosts
+        public async Task<IActionResult> UserPosts()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var posts = await _context.Posts
+                .Where(a => a.AuthorId == user.Id && a.GroupId == null)
+                .ToListAsync();
+
             return View(posts);
         }
 
@@ -48,12 +68,13 @@ namespace SocialMedia.Web.Controllers
             var post = await _context.Posts
                 .FirstOrDefaultAsync(m => m.PostId == id);
 
-            //Pass current postId to CommentsController
-            TempData["postId"] = id;
             if (post == null)
             {
                 return NotFound();
             }
+
+            //Pass current postId to CommentsController
+            TempData["postId"] = id;
 
             return View(post);
         }
@@ -71,18 +92,40 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PostId,Content")] Post post)
         {
-            //TODO: posts/create validations
-            if (ModelState.IsValid)
+            //Creates group in the current user`s profile
+            if (ModelState.IsValid && _groupId == 0)
             {
                 var user = await _userManager.GetUserAsync(User);
-                
+
                 post.Author = user;
                 post.AuthorId = user.Id;
                 post.DatePosted = DateTime.Now;
                 _context.Posts.Add(post);
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(UserPosts));
+            }
+            //Creates post in a group
+            else if (ModelState.IsValid && _groupId != 0)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var group = await this._context.Groups
+                    .FirstOrDefaultAsync(i => i.GroupId == _groupId);
+
+                if (group == null)
+                {
+                    return NotFound();
+                }
+
+                post.Author = user;
+                post.AuthorId = user.Id;
+                post.Group = group;
+                post.GroupId = group.GroupId;
+                post.DatePosted = DateTime.Now;
+                _context.Posts.Add(post);
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(GroupPosts));
             }
             return View(post);
         }
@@ -115,7 +158,7 @@ namespace SocialMedia.Web.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && _groupId == 0)
             {
                 try
                 {
@@ -126,7 +169,7 @@ namespace SocialMedia.Web.Controllers
                     post.Author = user;
                     post.AuthorId = user.Id;
                     post.Content = updatedPost.Content;
-                    
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -140,8 +183,45 @@ namespace SocialMedia.Web.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(UserPosts));
             }
+            else if (ModelState.IsValid && _groupId != 0)
+            {
+                try
+                {
+                    var user = await this._userManager.GetUserAsync(User);
+                    var post = await this._context.Posts
+                        .FirstOrDefaultAsync(i => i.PostId == updatedPost.PostId);
+                    var group = await this._context.Groups
+                    .FirstOrDefaultAsync(i => i.GroupId == _groupId);
+
+                    if (group == null)
+                    {
+                        return NotFound();
+                    }
+
+                    post.Author = user;
+                    post.AuthorId = user.Id;
+                    post.Group = group;
+                    post.GroupId = group.GroupId;
+                    post.Content = updatedPost.Content;
+
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PostExists(updatedPost.PostId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(GroupPosts));
+            }
+            
             return View(updatedPost);
         }
 
@@ -171,7 +251,7 @@ namespace SocialMedia.Web.Controllers
             var post = await _context.Posts.FindAsync(id);
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(UserPosts));
         }
 
         private bool PostExists(int id)

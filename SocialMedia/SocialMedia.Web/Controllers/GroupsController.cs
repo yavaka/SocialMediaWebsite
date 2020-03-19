@@ -22,8 +22,8 @@ namespace SocialMedia.Web.Controllers
             this._userManager = userManager;
         }
 
-        //TODO: Group page
-        //TODO: Add posts to every group
+        //TODO: Members Group view
+        //TODO: Join Group view
 
         // GET: Groups
         public async Task<IActionResult> Index()
@@ -57,6 +57,7 @@ namespace SocialMedia.Web.Controllers
         // GET: Groups/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            //TODO: List all of the members
             if (id == null)
             {
                 return NotFound();
@@ -64,10 +65,14 @@ namespace SocialMedia.Web.Controllers
 
             var group = await _context.Groups
                 .FirstOrDefaultAsync(m => m.GroupId == id);
+
             if (group == null)
             {
                 return NotFound();
             }
+
+            //Pass groupId to PostsController
+            TempData["groupId"] = id;
 
             return View(group);
         }

@@ -6,23 +6,23 @@
     <ul class="navbar-nav">
         @if (SignInManager.IsSignedIn(User))
         {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="MyGroups">MyGroups</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false">Groups</a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="MyGroups">My Groups</a></li>
+                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">All Groups</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false">Friendships</a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="Friends">Friends</a></li>
+                    <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="FriendRequests">Requests</a></li>
+                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="NonFriends">Non friends</a></li>
+                </ul>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">Groups</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="Friends">Friends</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="FriendRequests">Requests</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="NonFriends">Non friends</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="Index">Posts</a>
+                <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="UserPosts">Posts</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Account</a>

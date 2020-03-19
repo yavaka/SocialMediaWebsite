@@ -17,11 +17,11 @@ namespace SocialMedia.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public virtual ICollection<UserInGroup> Members { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
 
 
         [NotMapped]
         public string Message{ get; set; }
-        //public virtual ICollection<Post> Posts { get; set; }
 
     }
 }

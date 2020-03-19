@@ -18,6 +18,8 @@ namespace SocialMedia.Models
         public string Content { get; set; }
         public string AuthorId { get; set; }
         public virtual User Author { get; set; }
+        public int? GroupId { get; set; }
+        public virtual Group Group { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
 
         //public virtual ICollection<User> TaggedFriend { get; set; }
