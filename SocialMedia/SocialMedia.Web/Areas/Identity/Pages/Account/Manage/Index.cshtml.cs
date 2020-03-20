@@ -53,6 +53,12 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Date of birth")]
             [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
             public DateTime? DOB { get; set; }
+            
+            [Display(Name = "City")]
+            public string City { get; set; }
+
+            [Display(Name = "Country")]
+            public string Country { get; set; }
 
             [Display(Name = "Gender")]
             public Gender Gender { get; set; }
@@ -74,7 +80,9 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
                 LastName = user.LastName,
                 Gender = user.Gender,
                 DOB = user.DOB,
-                Bio = user.Bio
+                Bio = user.Bio,
+                City = user.City,
+                Country = user.Country
             };
         }
 
@@ -180,6 +188,37 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
                 }
 
             }
+            if (Input.Country != user.Country)
+            {
+                try
+                {
+                    var updateUser = await this._context.Users.FirstOrDefaultAsync(i => i.Id == user.Id);
+                    updateUser.Country = Input.Country;
+                    await this._context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    StatusMessage = "Your country has not been updated";
+                    return RedirectToPage();
+                }
+
+            }
+            if (Input.City != user.City)
+            {
+                try
+                {
+                    var updateUser = await this._context.Users.FirstOrDefaultAsync(i => i.Id == user.Id);
+                    updateUser.City= Input.City;
+                    await this._context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    StatusMessage = "Your city has not been updated";
+                    return RedirectToPage();
+                }
+
+            }
+
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();

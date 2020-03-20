@@ -123,11 +123,17 @@ namespace SocialMedia.Data
             });
 
             //Group has many posts
-            modelBuilder.Entity<Group>()
-                .HasMany(p => p.Posts)
+            modelBuilder.Entity<Group>(entity =>
+            {
+                entity.HasMany(p => p.Posts)
                 .WithOne(g => g.Group)
                 .HasForeignKey(gId => gId.GroupId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(t => t.Title)
+                .IsUnique();
+
+            });
 
             //    //Post has tagged users
             //    modelBuilder.Entity<Post>()

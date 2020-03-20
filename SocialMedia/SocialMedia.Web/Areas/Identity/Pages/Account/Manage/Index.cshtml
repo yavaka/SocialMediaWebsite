@@ -31,6 +31,16 @@
                 <span asp-validation-for="Input.Bio" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Input.City"></label>
+                <input asp-for="Input.City" class="form-control" />
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Country"></label>
+                <input asp-for="Input.Country" class="form-control" />
+                <span asp-validation-for="Input.Country" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Input.DOB"></label>
                 <input placeholder="dd/mm/yyyy" asp-for="Input.DOB" type="text" class="form-control datepicker">
             </div>

@@ -21,9 +21,7 @@ namespace SocialMedia.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
-        
-        //TODO: Add City
-        //public string City { get; set; }
+        public string City { get; set; }
         public string Country { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
