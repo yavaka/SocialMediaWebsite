@@ -24,22 +24,24 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            @if (item.Message == "admin")
-            {
+            <tr>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.GroupId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.GroupId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.GroupId">Delete</a>
+                    @Html.DisplayFor(modelItem => item.Title)
                 </td>
-            }
-        </tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.GroupId">Details</a>
+                </td>
+                @if (item.Message == "admin")
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.GroupId">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.GroupId">Delete</a>
+                    </td>
+                }
+            </tr>
         }
     </tbody>
 </table>

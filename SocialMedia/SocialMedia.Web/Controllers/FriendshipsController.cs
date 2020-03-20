@@ -52,28 +52,6 @@ namespace SocialMedia.Web.Controllers
             return View(friends);
         }
 
-        //Friend profile
-        //Get Account/FriendProfile
-        [HttpGet]
-        public async Task<IActionResult> FriendProfile()
-        {
-            //Gets the url Account/UserProfile/UserId
-            var reqUrl = Request.HttpContext.Request;
-            //Convert the url into array
-            var urlPath = reqUrl.Path
-                .ToString()
-                .Split('/')
-                .ToArray();
-
-            //Gets the user
-            var user = await this._userManager.FindByIdAsync(urlPath[3]);
-
-            if (user == null)
-                return NotFound();
-
-            return View(user);
-        }
-
         //Non friends
         //Get Account/Users
         [HttpGet]
@@ -132,13 +110,23 @@ namespace SocialMedia.Web.Controllers
                 .Split('/')
                 .ToArray();
 
+            //Gets the current user
+            var currentUser = await this._userManager.GetUserAsync(User);
+
             //Gets the user
             var user = await this._userManager.FindByIdAsync(urlPath[3]);
 
-            if (user == null)
-                return NotFound();
-
-            return View(user);
+            //Check are the current user and other one are friends
+            if (await this._context.Friendships.AnyAsync(
+                i => i.AddresseeId == currentUser.Id && i.RequesterId == user.Id && i.Status == 1 ||
+                i.AddresseeId == user.Id && i.RequesterId == currentUser.Id && i.Status == 1))
+            {
+                return View("UserProfile", user);
+            }
+            else
+            {
+                return View("NonFriendProfile", user);
+            }
         }
 
         //Requester
@@ -236,6 +224,6 @@ namespace SocialMedia.Web.Controllers
             return RedirectToAction("FriendRequests");
         }
 
-        
+
     }
 }

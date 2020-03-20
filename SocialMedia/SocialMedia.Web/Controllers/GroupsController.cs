@@ -23,22 +23,21 @@ namespace SocialMedia.Web.Controllers
         }
 
         //TODO: Members Group view
-        //TODO: Join Group view
 
         // GET: Groups
         public async Task<IActionResult> Index()
         {
             //Gets the current user
             var user = await this._userManager.GetUserAsync(User);
-            
+
             //Gets all data from mapping table UsersInGroups of the current user
             var userGroups = await this._context.UsersInGroups
-                .Where(i =>i.UserId == user.Id)
+                .Where(i => i.UserId == user.Id)
                 .ToListAsync();
 
             //Gets all Groups
             var groups = await this._context.Groups.ToListAsync();
-            
+
             //Assign all groups to collection where the current user is not a member
             var nonMemberGroups = groups;
 
@@ -46,7 +45,7 @@ namespace SocialMedia.Web.Controllers
             foreach (var group in userGroups)
             {
                 //Gets the group where the user is already a member
-                var memberGroup = groups.Find(i =>i.GroupId == group.GroupId);
+                var memberGroup = groups.Find(i => i.GroupId == group.GroupId);
                 //Removes the group where the current user is already a member
                 nonMemberGroups.Remove(memberGroup);
             }
@@ -54,7 +53,8 @@ namespace SocialMedia.Web.Controllers
             return View(nonMemberGroups);
         }
 
-        public async Task<IActionResult> NonGroupMemberDetails(int? id) 
+        // GET: Groups/NonGroupMemberDetails
+        public async Task<IActionResult> NonGroupMemberDetails(int? id)
         {
             if (id == null)
             {
@@ -63,7 +63,7 @@ namespace SocialMedia.Web.Controllers
 
             var group = await _context.Groups
                 .FirstOrDefaultAsync(m => m.GroupId == id);
-            
+
             if (group == null)
             {
                 return NotFound();
@@ -93,7 +93,7 @@ namespace SocialMedia.Web.Controllers
             TempData["groupId"] = id;
 
             //TODO: List posts and comments
-            
+
             return View(group);
         }
 
@@ -113,7 +113,7 @@ namespace SocialMedia.Web.Controllers
             {
                 //Gets the current user 
                 var user = await this._userManager.GetUserAsync(User);
-                
+
                 //Create new row in the UsersInGroups table where the current user is admin
                 var newGroup = new UserInGroup()
                 {
@@ -213,11 +213,11 @@ namespace SocialMedia.Web.Controllers
         }
 
         //Get: Groups/MyGroups
-        public async Task<IActionResult> MyGroups() 
+        public async Task<IActionResult> MyGroups()
         {
             //Gets the current user
             var user = await this._userManager.GetUserAsync(User);
-            
+
             //Gets all data from the mapping table UsersInGroups for the current user
             var groupsIds = await this._context.UsersInGroups
                 .Where(id => id.UserId == user.Id)
@@ -229,7 +229,7 @@ namespace SocialMedia.Web.Controllers
                 //Gets the group which match with the groupId from UsersInGroups table
                 var group = await this._context.Groups
                     .FirstOrDefaultAsync(i => i.GroupId == groupId.GroupId);
-                
+
                 //Check is the user is admin 
                 //If true set admin in the Message prop of the group
                 if (groupId.Admin == true)
@@ -237,13 +237,13 @@ namespace SocialMedia.Web.Controllers
                     group.Message = "admin";
                 }
 
-                groups.Add(group); 
+                groups.Add(group);
             }
             return View(groups);
         }
 
         //Post: Groups/JoinGroup
-        public async Task<IActionResult> JoinGroup(int id) 
+        public async Task<IActionResult> JoinGroup(int id)
         {
             //Gets the current user
             var user = await this._userManager.GetUserAsync(User);
@@ -253,7 +253,7 @@ namespace SocialMedia.Web.Controllers
                 .FirstOrDefaultAsync(i => i.GroupId == id);
 
             //Adds new row in the UsersIngroups table where the current user is not admin
-            var joinGroup = new UserInGroup() 
+            var joinGroup = new UserInGroup()
             {
                 UserId = user.Id,
                 User = user,
@@ -265,6 +265,28 @@ namespace SocialMedia.Web.Controllers
             await this._context.SaveChangesAsync();
 
             return RedirectToAction("Index");
+        }
+
+        //Get: Groups/GroupMembers/
+        public async Task<IActionResult> GroupMembers(int id)
+        {
+            var user = await this._userManager.GetUserAsync(User);
+            //Gets all of the members in the group with id from UsersInGroups table
+            var membersInTheGroup = await this._context.UsersInGroups
+                .Where(gId => gId.GroupId == id)
+                .ToListAsync();
+
+            var members = new List<User>();
+            foreach (var member in membersInTheGroup)
+            {
+                if (member.UserId != user.Id)
+                {
+                    members.Add(await this._context.Users
+                    .FirstOrDefaultAsync(i => i.Id == member.UserId));
+                }
+            }
+
+            return View(members);
         }
 
         private bool GroupExists(int id)

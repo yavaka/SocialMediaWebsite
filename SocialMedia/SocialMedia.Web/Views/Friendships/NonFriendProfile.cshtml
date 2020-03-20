@@ -1,13 +1,13 @@
 ﻿@model SocialMedia.Models.User
 
 @{
-    ViewData["Title"] = "FriendProfile";
+    ViewData["Title"] = "NonFriendProfile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>FriendProfile</h1>
+<h1>Non Friend Profile</h1>
 
 <div>
-    <h4>Comment</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -28,5 +28,8 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Country)
         </dd>
+        <dt>
+            <a asp-action="SendRequest" asp-route-id="@Model.Id">Send Request</a>
+        </dt>
     </dl>
 </div>
