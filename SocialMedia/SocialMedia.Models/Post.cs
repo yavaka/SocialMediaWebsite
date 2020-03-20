@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace SocialMedia.Models
@@ -25,5 +26,7 @@ namespace SocialMedia.Models
         //TODO: Posts/CheckIns
         //public virtual ICollection<User> TaggedFriend { get; set; }
 
+        [NotMapped]
+        public string Message { get; set; }
     }
 }

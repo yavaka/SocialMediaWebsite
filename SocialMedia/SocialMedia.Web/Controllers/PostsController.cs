@@ -37,12 +37,20 @@ namespace SocialMedia.Web.Controllers
             {
                 _groupId = int.Parse(TempData["groupId"].ToString());
             }
-
+            
             var user = await _userManager.GetUserAsync(User);
             var posts = await _context.Posts
-                .Where(a => a.AuthorId == user.Id && a.GroupId == _groupId)
+                .Where(a => a.GroupId == _groupId)
                 .ToListAsync();
 
+            //If the current user is author of some post, it can be edited and deleted
+            foreach (var post in posts)
+            {
+                if (post.AuthorId == user.Id)
+                {
+                    post.Message = "author";
+                }
+            }
             return View(posts);
         }
 
@@ -61,6 +69,8 @@ namespace SocialMedia.Web.Controllers
         // GET: Posts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            var user = await this._userManager.GetUserAsync(User);
+
             if (id == null)
             {
                 return NotFound();
@@ -72,6 +82,11 @@ namespace SocialMedia.Web.Controllers
             if (post == null)
             {
                 return NotFound();
+            }
+
+            if (post.AuthorId == user.Id)
+            {
+                post.Message = "author";
             }
 
             //Pass current postId to CommentsController

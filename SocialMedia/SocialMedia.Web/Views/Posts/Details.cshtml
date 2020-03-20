@@ -25,7 +25,13 @@
     </dl>
 </div>
 <div>
-    <a asp-controller="Comments" asp-action="Index">Comments</a> |
-    <a asp-action="Edit" asp-route-id="@Model.PostId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (Model.Message == "author")
+    {
+        <a asp-controller="Comments" asp-action="Index">Comments</a> @:|
+        <a asp-action="Edit" asp-route-id="@Model.PostId">Edit</a>
+    }
+    else
+    {
+        <a asp-controller="Comments" asp-action="Index">Comments</a>
+    }
 </div>
