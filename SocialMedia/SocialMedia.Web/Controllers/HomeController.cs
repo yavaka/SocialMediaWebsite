@@ -17,6 +17,8 @@ namespace SocialMedia.Web.Controllers
 
         //TODO: User`s profile in Identity as Page
         //TODO: Notifications
+        //TODO: Introduction views when it is first log in
+
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;

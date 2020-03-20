@@ -75,7 +75,6 @@ namespace SocialMedia.Web.Controllers
         // GET: Groups/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            //TODO: List all of the members
             if (id == null)
             {
                 return NotFound();
@@ -92,8 +91,6 @@ namespace SocialMedia.Web.Controllers
             //Pass groupId to PostsController
             TempData["groupId"] = id;
 
-            //TODO: List posts and comments
-
             return View(group);
         }
 
@@ -108,7 +105,13 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("GroupId,Title,Description")] Group group)
         {
-            //TODO: groups validations
+            //Unique title
+            if (await this._context.Groups.AnyAsync(i =>i.Title == group.Title))
+            {
+                ModelState.AddModelError("Title", $"Title {group.Title} already exists. Title must be unique!");
+                return View();
+            }
+           
             if (ModelState.IsValid)
             {
                 //Gets the current user 
@@ -158,6 +161,13 @@ namespace SocialMedia.Web.Controllers
             if (id != group.GroupId)
             {
                 return NotFound();
+            }
+
+            //Unique title
+            if (await this._context.Groups.AnyAsync(i => i.Title == group.Title))
+            {
+                ModelState.AddModelError("Title", $"Title {group.Title} already exists. Title must be unique!");
+                return View();
             }
 
             if (ModelState.IsValid)
