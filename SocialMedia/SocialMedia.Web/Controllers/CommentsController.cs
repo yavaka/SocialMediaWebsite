@@ -38,32 +38,21 @@ namespace SocialMedia.Web.Controllers
             }
 
             var user = await this._userManager.GetUserAsync(User);
-            var post = await this._context.Posts
-                .FirstOrDefaultAsync(p => p.PostId == _postId);
 
             var comments = await _context.Comments
-                .Where(a => a.AuthorId == user.Id && a.CommentedPostId == _postId)
+                .Where(a => a.CommentedPostId == _postId)
                 .ToListAsync();
-            
+
+            //If the current user is author of some comment, it can be edited and deleted
+            foreach (var comment in comments)
+            {
+                if (comment.AuthorId == user.Id)
+                {
+                    comment.Message = "author";
+                }
+            }
+
             return View(comments);
-        }
-
-        // GET: Comments/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var comment = await _context.Comments
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            return View(comment);
         }
 
         // GET: Comments/Create
@@ -83,14 +72,14 @@ namespace SocialMedia.Web.Controllers
             {
                 //Get current user
                 var user = await this._userManager.GetUserAsync(User);
-                
+
                 //Sets current user as a author
                 comment.Author = user;
                 comment.AuthorId = user.Id;
-                
+
                 //Get the post
-                var post = await this._context.Posts.FirstOrDefaultAsync(i =>i.PostId == _postId);
-                
+                var post = await this._context.Posts.FirstOrDefaultAsync(i => i.PostId == _postId);
+
                 if (post == null)
                 {
                     return NotFound();
@@ -101,9 +90,9 @@ namespace SocialMedia.Web.Controllers
                 comment.DatePosted = DateTime.Now;
 
                 this._context.Comments.Add(comment);
-                               
+
                 await _context.SaveChangesAsync();
-                
+
                 return RedirectToAction(nameof(Index));
             }
             return View(comment);
@@ -123,7 +112,7 @@ namespace SocialMedia.Web.Controllers
             {
                 return NotFound();
             }
-            
+
             return View(comment);
         }
 

@@ -51,6 +51,7 @@ namespace SocialMedia.Web.Controllers
                     post.Message = "author";
                 }
             }
+
             return View(posts);
         }
 

@@ -8,21 +8,27 @@ namespace SocialMedia.Models
 {
     public class Comment
     {
+        private string authorUsername;
+
         //public Comment()
         //{
         //    this.TaggedFriends = new HashSet<User>();
         //}
 
         [Key]
-        public int Id{ get; set; }
+        public int Id { get; set; }
         public string Content { get; set; }
         public DateTime DatePosted { get; set; }
         public string AuthorId { get; set; }
         public virtual User Author { get; set; }
         public int CommentedPostId { get; set; }
         public virtual Post CommentedPost { get; set; }
-        
+
+
         //TODO: Comment/TagFriends
         //public virtual ICollection<User> TaggedFriends { get; set; }
+
+        [NotMapped]
+        public string Message { get; set; }
     }
 }
