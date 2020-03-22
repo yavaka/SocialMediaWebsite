@@ -22,8 +22,6 @@ namespace SocialMedia.Web.Controllers
             this._userManager = userManager;
         }
 
-        //TODO: Members Group view
-
         // GET: Groups
         public async Task<IActionResult> Index()
         {

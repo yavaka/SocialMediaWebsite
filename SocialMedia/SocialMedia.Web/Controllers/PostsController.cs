@@ -19,6 +19,8 @@ namespace SocialMedia.Web.Controllers
 
         private static int _groupId = 0;
 
+
+
         public PostsController(SocialMediaDbContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
@@ -33,6 +35,7 @@ namespace SocialMedia.Web.Controllers
         // GET: GroupPosts
         public async Task<IActionResult> GroupPosts()
         {
+            TempData["groupPost"] = "true";
             if (TempData["groupId"] != null)
             {
                 _groupId = int.Parse(TempData["groupId"].ToString());
@@ -58,6 +61,7 @@ namespace SocialMedia.Web.Controllers
         // GET: UserPosts
         public async Task<IActionResult> UserPosts()
         {
+            TempData["userPost"] = "true";
             var user = await _userManager.GetUserAsync(User);
 
             var posts = await _context.Posts
@@ -109,8 +113,9 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PostId,Content")] Post post)
         {
+            //TODO: Issue - when group post is created then user create a post doesnt list the post because _groupId is not 0
             //Creates group in the current user`s profile
-            if (ModelState.IsValid && _groupId == 0)
+            if (ModelState.IsValid && TempData["userPost"].ToString() == "true")
             {
                 var user = await _userManager.GetUserAsync(User);
 
@@ -123,7 +128,7 @@ namespace SocialMedia.Web.Controllers
                 return RedirectToAction(nameof(UserPosts));
             }
             //Creates post in a group
-            else if (ModelState.IsValid && _groupId != 0)
+            else if (ModelState.IsValid && TempData["userGroup"].ToString() == "true")
             {
                 var user = await _userManager.GetUserAsync(User);
                 var group = await this._context.Groups

@@ -8,8 +8,6 @@ namespace SocialMedia.Models
 {
     public class Comment
     {
-        private string authorUsername;
-
         //public Comment()
         //{
         //    this.TaggedFriends = new HashSet<User>();
