@@ -113,7 +113,6 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PostId,Content")] Post post)
         {
-            //TODO: Issue - when group post is created then user create a post doesnt list the post because _groupId is not 0
             //Creates group in the current user`s profile
             if (ModelState.IsValid && TempData["userPost"].ToString() == "true")
             {

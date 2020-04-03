@@ -20,6 +20,7 @@ namespace SocialMedia.Web.Controllers
             this._userManager = userManager;
             this._context = context;
         }
+        //TODO: accept/reject view
 
         //Friends
         public async Task<IActionResult> Friends()
