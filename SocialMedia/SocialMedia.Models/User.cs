@@ -17,7 +17,7 @@ namespace SocialMedia.Models
             this.FriendshipRequester = new HashSet<Friendship>();
             this.Groups = new HashSet<UserInGroup>();
         }
-      
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName => $"{this.FirstName} {this.LastName}";
@@ -40,10 +40,20 @@ namespace SocialMedia.Models
         public virtual ICollection<Friendship> FriendshipRequester { get; set; }
         public virtual ICollection<UserInGroup> Groups { get; set; }
         
+        /// <summary>
+        /// User who tag a friend
+        /// </summary>
+        public virtual ICollection<TagFriends> Tagger { get; set; }
+        /// <summary>
+        /// User who is tagged by some of its friends
+        /// </summary>
+        public virtual ICollection<TagFriends> Tagged { get; set; }
+
+
         //TODO: Gallery
 
         [NotMapped]
-        public string Message{ get; set; }
+        public string Message { get; set; }
 
     }
 

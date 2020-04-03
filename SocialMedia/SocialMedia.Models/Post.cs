@@ -22,10 +22,9 @@ namespace SocialMedia.Models
         public int? GroupId { get; set; }
         public virtual Group Group { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
-        //TODO: Posts/TagFriends
-        //TODO: Posts/CheckIns
-        //public virtual ICollection<User> TaggedFriend { get; set; }
+        public virtual ICollection<TagFriends> TaggedUsers { get; set; }
 
+        //TODO: Posts/CheckIns
         [NotMapped]
         public string Message { get; set; }
     }

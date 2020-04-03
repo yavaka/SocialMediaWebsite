@@ -16,28 +16,67 @@ namespace SocialMedia.Data
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Friendship> Friendships { get; set; }
         public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
-
+        public virtual DbSet<TagFriends> TagFriends { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //TagFriends
+            modelBuilder.Entity<TagFriends>(entity =>
+            {
+                entity.ToTable("TagFriends");
+
+                entity.HasKey(pk => new { pk.TaggerId, pk.TaggedId });
+
+                //Tagger
+                entity.HasOne(t => t.Tagger)
+                    .WithMany(u => u.Tagger)
+                    .HasForeignKey(t => t.TaggerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TagFriendsToTagger_FK");
+
+                //Tagged
+                entity.HasOne(t => t.Tagged)
+                    .WithMany(u => u.Tagged)
+                    .HasForeignKey(t => t.TaggedId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TagFriendsToTagged_FK");
+
+                //Post
+                entity.HasOne(t => t.Post)
+                .WithMany(p => p.TaggedUsers)
+                .HasForeignKey(t => t.PostId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("TagFriendsToPost_FK");
+
+                //Comment
+                entity.HasOne(t => t.Comment)
+                .WithMany(c => c.TaggedUsers)
+                .HasForeignKey(t => t.CommentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("TagFreindsToComment_FK");
+            });
+
             //Friendships
             modelBuilder.Entity<Friendship>(entity =>
             {
                 entity.ToTable("Friendships");
 
-                entity.HasKey(e => new { e.RequesterId, e.AddresseeId })
+                entity.HasKey(pk => new { pk.RequesterId, pk.AddresseeId })
                     .HasName("Friendship_PK");
 
-                entity.HasOne(d => d.Addressee)
-                    .WithMany(p => p.FriendshipAddressee)
-                    .HasForeignKey(d => d.AddresseeId)
+                //Addressee
+                entity.HasOne(f => f.Addressee)
+                    .WithMany(u => u.FriendshipAddressee)
+                    .HasForeignKey(f => f.AddresseeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FriendshipToAddressee_FK");
 
-                entity.HasOne(d => d.Requester)
-                    .WithMany(p => p.FriendshipRequester)
-                    .HasForeignKey(d => d.RequesterId)
+                //Requester
+                entity.HasOne(f => f.Requester)
+                    .WithMany(u => u.FriendshipRequester)
+                    .HasForeignKey(f => f.RequesterId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FriendshipToRequester_FK");
+
             });
 
             //Users
@@ -87,6 +126,7 @@ namespace SocialMedia.Data
                 .HasForeignKey(pId => pId.CommentedPostId);
             });
 
+            //Posts
             modelBuilder.Entity<Post>(entity =>
             {
                 //Post has a author
@@ -135,13 +175,6 @@ namespace SocialMedia.Data
 
             });
 
-            //    //Post has tagged users
-            //    modelBuilder.Entity<Post>()
-            //        .HasMany(t => t.TaggedFriend);
-
-            //    //Comment has tagged friends
-            //    modelBuilder.Entity<Comment>()
-            //        .HasMany(t =>t.TaggedFriends);
 
             base.OnModelCreating(modelBuilder);
         }

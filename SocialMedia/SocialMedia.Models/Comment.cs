@@ -8,10 +8,10 @@ namespace SocialMedia.Models
 {
     public class Comment
     {
-        //public Comment()
-        //{
-        //    this.TaggedFriends = new HashSet<User>();
-        //}
+        public Comment()
+        {
+            this.TaggedUsers = new HashSet<TagFriends>();
+        }
 
         [Key]
         public int Id { get; set; }
@@ -22,9 +22,7 @@ namespace SocialMedia.Models
         public int CommentedPostId { get; set; }
         public virtual Post CommentedPost { get; set; }
 
-
-        //TODO: Comment/TagFriends
-        //public virtual ICollection<User> TaggedFriends { get; set; }
+        public virtual ICollection<TagFriends> TaggedUsers { get; set; }
 
         [NotMapped]
         public string Message { get; set; }
