@@ -11,6 +11,7 @@ using SocialMedia.Models;
 
 namespace SocialMedia.Web.Controllers
 {
+    //TODO: Integrate tag friends functionality in Create and Edit methods
     public class CommentsController : Controller
     {
         private readonly SocialMediaDbContext _context;

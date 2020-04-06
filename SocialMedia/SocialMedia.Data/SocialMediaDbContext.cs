@@ -17,6 +17,7 @@ namespace SocialMedia.Data
         public virtual DbSet<Friendship> Friendships { get; set; }
         public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
         public virtual DbSet<TagFriends> TagFriends { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //TagFriends
@@ -24,34 +25,31 @@ namespace SocialMedia.Data
             {
                 entity.ToTable("TagFriends");
 
-                entity.HasKey(pk => new { pk.TaggerId, pk.TaggedId });
+                entity.HasKey(pk =>pk.Id)
+                .HasName("TagFriends_PK");
 
                 //Tagger
                 entity.HasOne(t => t.Tagger)
                     .WithMany(u => u.Tagger)
                     .HasForeignKey(t => t.TaggerId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("TagFriendsToTagger_FK");
 
                 //Tagged
                 entity.HasOne(t => t.Tagged)
                     .WithMany(u => u.Tagged)
                     .HasForeignKey(t => t.TaggedId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("TagFriendsToTagged_FK");
 
                 //Post
                 entity.HasOne(t => t.Post)
                 .WithMany(p => p.TaggedUsers)
                 .HasForeignKey(t => t.PostId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("TagFriendsToPost_FK");
 
                 //Comment
                 entity.HasOne(t => t.Comment)
                 .WithMany(c => c.TaggedUsers)
                 .HasForeignKey(t => t.CommentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("TagFreindsToComment_FK");
             });
 
@@ -141,7 +139,6 @@ namespace SocialMedia.Data
                 .OnDelete(DeleteBehavior.Cascade);
             });
 
-
             //UsersInGroups (Mapping table)
             modelBuilder.Entity<UserInGroup>(entity =>
             {
@@ -162,9 +159,10 @@ namespace SocialMedia.Data
 
             });
 
-            //Group has many posts
+            //Group
             modelBuilder.Entity<Group>(entity =>
             {
+                //Group has many posts
                 entity.HasMany(p => p.Posts)
                 .WithOne(g => g.Group)
                 .HasForeignKey(gId => gId.GroupId)

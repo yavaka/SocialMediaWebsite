@@ -13,7 +13,6 @@ namespace SocialMedia.Models
             //this.TaggedFriend = new HashSet<User>();
         }
 
-
         public int PostId { get; set; }
         public DateTime DatePosted { get; set; }
         public string Content { get; set; }

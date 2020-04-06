@@ -10,8 +10,8 @@ using SocialMedia.Data;
 namespace SocialMedia.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    [Migration("20200403114044_TagFriends")]
-    partial class TagFriends
+    [Migration("20200406204136_TagFriend")]
+    partial class TagFriend
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -251,11 +251,10 @@ namespace SocialMedia.Data.Migrations
 
             modelBuilder.Entity("SocialMedia.Models.TagFriends", b =>
                 {
-                    b.Property<string>("TaggerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TaggedId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("CommentId")
                         .HasColumnType("int");
@@ -263,13 +262,22 @@ namespace SocialMedia.Data.Migrations
                     b.Property<int?>("PostId")
                         .HasColumnType("int");
 
-                    b.HasKey("TaggerId", "TaggedId");
+                    b.Property<string>("TaggedId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TaggerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id")
+                        .HasName("TagFriends_PK");
 
                     b.HasIndex("CommentId");
 
                     b.HasIndex("PostId");
 
                     b.HasIndex("TaggedId");
+
+                    b.HasIndex("TaggerId");
 
                     b.ToTable("TagFriends");
                 });
@@ -511,14 +519,12 @@ namespace SocialMedia.Data.Migrations
                     b.HasOne("SocialMedia.Models.User", "Tagged")
                         .WithMany("Tagged")
                         .HasForeignKey("TaggedId")
-                        .HasConstraintName("TagFriendsToTagged_FK")
-                        .IsRequired();
+                        .HasConstraintName("TagFriendsToTagged_FK");
 
                     b.HasOne("SocialMedia.Models.User", "Tagger")
                         .WithMany("Tagger")
                         .HasForeignKey("TaggerId")
-                        .HasConstraintName("TagFriendsToTagger_FK")
-                        .IsRequired();
+                        .HasConstraintName("TagFriendsToTagger_FK");
                 });
 
             modelBuilder.Entity("SocialMedia.Models.UserInGroup", b =>

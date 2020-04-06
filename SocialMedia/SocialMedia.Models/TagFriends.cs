@@ -6,6 +6,8 @@ namespace SocialMedia.Models
 {
     public class TagFriends
     {
+        public int Id { get; set; }
+        
         /// <summary>
         /// User who tag a friend
         /// </summary>
