@@ -296,6 +296,15 @@ namespace SocialMedia.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var post = await _context.Posts.FindAsync(id);
+            var taggedFriends = _context.TagFriends
+                .Where(i => i.PostId == id);
+            
+            //Removes all tagged friends in the post
+            foreach (var taggedFriend in taggedFriends)
+            {
+                _context.TagFriends.Remove(taggedFriend);
+            }
+            
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(UserPosts));

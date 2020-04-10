@@ -32,12 +32,14 @@ namespace SocialMedia.Data
                 entity.HasOne(t => t.Tagger)
                     .WithMany(u => u.Tagger)
                     .HasForeignKey(t => t.TaggerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("TagFriendsToTagger_FK");
 
                 //Tagged
                 entity.HasOne(t => t.Tagged)
                     .WithMany(u => u.Tagged)
                     .HasForeignKey(t => t.TaggedId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("TagFriendsToTagged_FK");
 
                 //Post

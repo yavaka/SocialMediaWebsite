@@ -10,7 +10,7 @@ using SocialMedia.Data;
 namespace SocialMedia.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    [Migration("20200406204136_TagFriend")]
+    [Migration("20200410130043_TagFriend")]
     partial class TagFriend
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
