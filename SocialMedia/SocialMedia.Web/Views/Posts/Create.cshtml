@@ -5,16 +5,16 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>Post</h4>
+<h1>Create Post</h1>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create" method="post">
             <!--Post model-->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                @*--Tagged users--*@
                 @if (Model.Tagged.Count > 0)
                 {
                     var sb = new StringBuilder();
@@ -33,6 +33,7 @@
                 <input asp-for="@Model.Post.Content" class="form-control" />
                 <span asp-validation-for="@Model.Post.Content" class="text-danger"></span>
             </div>
+
             <!--Tag friends-->
             <div>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Tag Friends</button>
@@ -41,14 +42,15 @@
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title">Users</h4>
+                                <h4 class="modal-title">Friends</h4>
                             </div>
                             <div class="modal-body">
                                 <ul>
                                     @foreach (var user in Model.UserFriends)
                                     {
-                                        <li>
-                                            @Html.ActionLink(user.UserName, "TagFriend", "Posts", new {viewModel = this.Model, taggedId = user.Id })
+
+                                        <li>@* Send ViewModel and taggedId to Posts/TagFriend *@
+                                            @Html.ActionLink(user.UserName, "TagFriend", "Posts", new {taggedId = user.Id, viewName = "Create" })
                                         </li>
                                     }
                                 </ul>
@@ -57,6 +59,8 @@
                     </div>
                 </div>
             </div>
+
+            <br />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary"  />
             </div>

@@ -7,14 +7,14 @@
         @if (SignInManager.IsSignedIn(User))
         {
             <li class="nav-item dropdown">
-                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false">Groups</a>
+                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Groups</a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="MyGroups">My Groups</a></li>
                     <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">All Groups</a></li>
                 </ul>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false">Friendships</a>
+                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Friendships</a>
                 <ul class="dropdown-menu">
                     <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="Friends">Friends</a></li>
                     <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="FriendRequests">Requests</a></li>

@@ -111,14 +111,13 @@ namespace SocialMedia.Web.Controllers
             var userId = this._userManager.GetUserId(User);
             var user = this._context.Users.FirstOrDefault(i => i.Id == userId);
 
-            var viewModel = new PostTagFriendsViewModel()
+            ViewModel = new PostTagFriendsViewModel()
             {
                 CurrentUser = user,
                 UserFriends = GetUserFriends(user)
             };
-            ViewModel = viewModel;
 
-            return View(viewModel);
+            return View(ViewModel);
         }
 
         // POST: Posts/Create
@@ -137,13 +136,13 @@ namespace SocialMedia.Web.Controllers
                     AuthorId = user.Id,
                     DatePosted = DateTime.Now,
                     Content = viewModel.Post.Content,
-                    TaggedUsers = TagFriendsEntities()
+                    TaggedUsers = TagFriendEntities()
                 };
 
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
 
-                ViewModel = null;
+                ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(UserPosts));
             }
             //Creates post in a group
@@ -165,13 +164,13 @@ namespace SocialMedia.Web.Controllers
                     Content = viewModel.Post.Content,
                     GroupId = group.GroupId,
                     Group = group,
-                    TaggedUsers = TagFriendsEntities()
+                    TaggedUsers = TagFriendEntities()
                 };
 
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
 
-                ViewModel = null;
+                ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(GroupPosts));
             }
 
@@ -191,36 +190,47 @@ namespace SocialMedia.Web.Controllers
             {
                 return NotFound();
             }
-            return View(post);
+
+            var user = await this._userManager.GetUserAsync(User);
+
+            ViewModel = new PostTagFriendsViewModel();
+            ViewModel.CurrentUser = user;
+            ViewModel.Post = post;
+            ViewModel.Tagged = GetTaggedFriendsByUserId(post.PostId, user.Id);
+            /*If this method is invoked before GetTaggedFriends, 
+              there will add all of the current user`s friends.
+              Let`s get that user x is already tagged from the creation of the post.
+              It does not make sense the current user to be allowed to tag user x twice.*/
+            ViewModel.UserFriends = GetUserFriends(user);
+
+            return View(ViewModel);
         }
 
         // POST: Posts/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Post updatedPost)
+        public async Task<IActionResult> Edit([FromForm]PostTagFriendsViewModel viewModel)
         {
-            if (id != updatedPost.PostId)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid && _groupId == 0)
             {
                 try
                 {
                     var user = await this._userManager.GetUserAsync(User);
+                    ViewModel.CurrentUser = user;
                     var post = await this._context.Posts
-                        .FirstOrDefaultAsync(i => i.PostId == updatedPost.PostId);
+                        .Include(i =>i.TaggedUsers)
+                        .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
 
                     post.Author = user;
                     post.AuthorId = user.Id;
-                    post.Content = updatedPost.Content;
-
+                    post.Content = viewModel.Post.Content;
+                    post.TaggedUsers = TagFriendEntities(post);
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(updatedPost.PostId))
+                    if (!PostExists(viewModel.Post.PostId))
                     {
                         return NotFound();
                     }
@@ -229,6 +239,8 @@ namespace SocialMedia.Web.Controllers
                         throw;
                     }
                 }
+
+                ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(UserPosts));
             }
             else if (ModelState.IsValid && _groupId != 0)
@@ -236,8 +248,10 @@ namespace SocialMedia.Web.Controllers
                 try
                 {
                     var user = await this._userManager.GetUserAsync(User);
+                    ViewModel.CurrentUser = user;
                     var post = await this._context.Posts
-                        .FirstOrDefaultAsync(i => i.PostId == updatedPost.PostId);
+                        .Include(i =>i.TaggedUsers)
+                        .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
                     var group = await this._context.Groups
                     .FirstOrDefaultAsync(i => i.GroupId == _groupId);
 
@@ -250,13 +264,14 @@ namespace SocialMedia.Web.Controllers
                     post.AuthorId = user.Id;
                     post.Group = group;
                     post.GroupId = group.GroupId;
-                    post.Content = updatedPost.Content;
+                    post.Content = viewModel.Post.Content;
+                    post.TaggedUsers = TagFriendEntities(post);
 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(updatedPost.PostId))
+                    if (!PostExists(viewModel.Post.PostId))
                     {
                         return NotFound();
                     }
@@ -265,10 +280,12 @@ namespace SocialMedia.Web.Controllers
                         throw;
                     }
                 }
+                
+                ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(GroupPosts));
             }
 
-            return View(updatedPost);
+            return View(viewModel);
         }
 
         //TODO: The DELETE statement conflicted with the REFERENCE constraint "TagFriendsToPost_FK". The conflict occurred in database "SocialMedia", table "dbo.TagFriends", column 'PostId'.
@@ -298,13 +315,13 @@ namespace SocialMedia.Web.Controllers
             var post = await _context.Posts.FindAsync(id);
             var taggedFriends = _context.TagFriends
                 .Where(i => i.PostId == id);
-            
+
             //Removes all tagged friends in the post
             foreach (var taggedFriend in taggedFriends)
             {
                 _context.TagFriends.Remove(taggedFriend);
             }
-            
+
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(UserPosts));
@@ -316,27 +333,53 @@ namespace SocialMedia.Web.Controllers
         }
 
         #endregion
-        //TODO: Tag friends service : Entities
-        private ICollection<TagFriends> TagFriendsEntities()
-        {
-            var userId = ViewModel.CurrentUser.Id;
 
+        //TODO: Tag friends service : Entities(Post post)
+        private ICollection<TagFriends> TagFriendEntities(Post post)
+        {
+            if (ViewModel.Tagged.Count == 0)
+            {
+                return new List<TagFriends>();
+            }
+
+            foreach (var tagged in ViewModel.Tagged)
+            {
+                if (!post.TaggedUsers.Any(i =>i.TaggedId == tagged.Id && 
+                                            i.TaggerId == ViewModel.CurrentUser.Id &&
+                                            i.PostId == post.PostId))
+                {
+                    post.TaggedUsers.Add(new TagFriends() 
+                    {
+                        TaggerId = ViewModel.CurrentUser.Id,
+                        TaggedId = tagged.Id,
+                    });
+                }
+            }
+            //change it then
+            return post.TaggedUsers;
+        }
+
+        //TODO: Tag friends service : Entities
+        private ICollection<TagFriends> TagFriendEntities()
+        {
             var tagFriendsEntities = new List<TagFriends>();
             foreach (var tagged in ViewModel.Tagged)
             {
                 var tagFriendsEntity = new TagFriends()
                 {
-                    TaggerId = userId,
-                    TaggedId = tagged.Id
+                    TaggerId = ViewModel.CurrentUser.Id,
+                    TaggedId = tagged.Id,
                 };
                 tagFriendsEntities.Add(tagFriendsEntity);
             }
             return tagFriendsEntities;
         }
 
-        //TODO: Tag friends service : TagFriend(string taggedId)
-        public IActionResult TagFriend(string taggedId)
+        //TODO: Tag friends service : TagFriend(string taggedId, string taggerId)
+        public IActionResult TagFriend(string taggedId, string viewName)
         {
+            //TODO Bug : When the view is reloaded adds a duplicate item in the ViewModel.Tagged collection 
+
             //Adds tagged user in tagged collection of the view model
             var taggedUser = this._context.Users
                 .FirstOrDefault(i => i.Id == taggedId);
@@ -349,7 +392,26 @@ namespace SocialMedia.Web.Controllers
             var item = ViewModel.UserFriends.SingleOrDefault(i => i.Id == taggedUser.Id);
             ViewModel.UserFriends.Remove(item);
 
-            return View("Create", ViewModel);
+            //viewName variable is used to determine where the form comes from
+            return View(viewName, ViewModel);
+        }
+
+        //TODO:Tag friends service : RemoveTaggedFriendById(string id)
+        public IActionResult RemoveTaggedFriend(string taggedId)
+        {
+            //Gets the tagged user
+            var taggedUser = ViewModel.Tagged
+                .FirstOrDefault(i => i.Id == taggedId);
+
+            //Removes the tagged user 
+            ViewModel.Tagged
+                .Remove(taggedUser);
+
+            //Adds already non tagged user in the UserFriends, 
+            //so the current user can decide to tag it again in the same post.
+            ViewModel.UserFriends.Add(taggedUser);
+
+            return View("Edit", ViewModel);
         }
 
         //TODO:Friendship service : GetUserFriends
@@ -359,29 +421,54 @@ namespace SocialMedia.Web.Controllers
             var friendships = this._context.Friendships
                 .Where(i => i.AddresseeId == currentUser.Id && i.Status == 1 ||
                             i.RequesterId == currentUser.Id && i.Status == 1)
+                .Include(i => i.Addressee)
+                .Include(i => i.Requester)
                 .ToList();
 
             var friends = new List<User>();
             //Add all friends
             foreach (var friendship in friendships)
             {
-                var friend = new User();
-                //If addressee is current user, add requester
-                if (friendship.AddresseeId == currentUser.Id)
+                //If addressee is the current user, add requester if it is not already tagged
+                if (friendship.AddresseeId == currentUser.Id &&
+                    !ViewModel.Tagged.Contains(friendship.Requester))
                 {
-                    friend = this._context.Users
-                        .FirstOrDefault(i => i.Id == friendship.RequesterId);
+                    /*this._context.Users
+                        .FirstOrDefault(i => i.Id == friendship.RequesterId)*/
+                    friends.Add(friendship.Requester);
                 }
-                else //If requester is current user, add addressee
+                else if (friendship.RequesterId == currentUser.Id &&
+                    !ViewModel.Tagged.Contains(friendship.Addressee)) //If requester is current user, add addressee
                 {
-                    friend = this._context.Users
-                        .FirstOrDefault(i => i.Id == friendship.AddresseeId);
+                    //this._context.Users
+                    //    .FirstOrDefault(i => i.Id == friendship.AddresseeId)
+                    friends.Add(friendship.Addressee);
                 }
-                friends.Add(friend);
             }
 
             return friends;
         }
+
+        //TODO:Tag friends service : GetTaggedFriendsByPostId(int postId)
+        private ICollection<User> GetTaggedFriendsByUserId(int postId, string userId)
+        {
+            //TagFriend entities where users are tagged by the current user
+            var tagFriendsEntities = this._context.TagFriends
+                .Where(i => i.PostId == postId && i.TaggerId == userId)
+                .Include(i =>i.Tagged)
+                .ToList();
+
+            if (tagFriendsEntities != null)
+            {
+                return tagFriendsEntities
+                    .Select(i => i.Tagged)
+                    .ToList();
+            }
+
+            return null;
+        }
+
+        
     }
 
 }
