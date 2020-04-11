@@ -86,7 +86,10 @@ namespace SocialMedia.Web.Controllers
                 return NotFound();
             }
 
+            //Gets the post and its tag friend entities
             var post = await _context.Posts
+                .Include(i =>i.TaggedUsers)
+                .Include(i =>i.Author)
                 .FirstOrDefaultAsync(m => m.PostId == id);
 
             if (post == null)
@@ -94,15 +97,18 @@ namespace SocialMedia.Web.Controllers
                 return NotFound();
             }
 
-            if (post.AuthorId == user.Id)
+            ViewModel = new PostTagFriendsViewModel() 
             {
-                post.Message = "author";
-            }
+                CurrentUser = user,
+                Post = post,
+                Tagged = GetTaggedFriends(post.PostId, user.Id)
+            };
+
 
             //Pass current postId to CommentsController
             TempData["postId"] = id;
 
-            return View(post);
+            return View(ViewModel);
         }
 
         // GET: Posts/Create
@@ -196,7 +202,7 @@ namespace SocialMedia.Web.Controllers
             ViewModel = new PostTagFriendsViewModel();
             ViewModel.CurrentUser = user;
             ViewModel.Post = post;
-            ViewModel.Tagged = GetTaggedFriendsByUserId(post.PostId, user.Id);
+            ViewModel.Tagged = GetTaggedFriends(post.PostId, user.Id);
             /*If this method is invoked before GetTaggedFriends, 
               there will add all of the current user`s friends.
               Let`s get that user x is already tagged from the creation of the post.
@@ -450,7 +456,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         //TODO:Tag friends service : GetTaggedFriendsByPostId(int postId)
-        private ICollection<User> GetTaggedFriendsByUserId(int postId, string userId)
+        private ICollection<User> GetTaggedFriends(int postId, string userId)
         {
             //TagFriend entities where users are tagged by the current user
             var tagFriendsEntities = this._context.TagFriends
