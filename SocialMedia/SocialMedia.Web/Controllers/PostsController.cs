@@ -18,6 +18,7 @@ namespace SocialMedia.Web.Controllers
         private readonly SocialMediaDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        
         private static int _groupId = 0;
         private static PostTagFriendsViewModel ViewModel = new PostTagFriendsViewModel();
 

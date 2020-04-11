@@ -1,22 +1,62 @@
-﻿@model SocialMedia.Models.Comment
+﻿@using System.Text
+@model SocialMedia.Models.ViewModels.CommentTagFriendsViewModel
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>Comment</h4>
+<h1>Create Comment</h1>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Content" class="control-label"></label>
-                <input asp-for="Content" class="form-control" />
-                <span asp-validation-for="Content" class="text-danger"></span>
+                @if (Model.Tagged.Count > 0)
+                {
+                    var sb = new StringBuilder();
+                    sb.Append(Model.CurrentUser.UserName + "is with");
+                    foreach (var user in Model.Tagged)
+                    {
+                        sb.Append($" {user.UserName},");
+                    }
+                    var result = sb.ToString().TrimEnd(',');
+                    <label>@result</label>
+                }
+                else
+                {
+                    <label>@Model.CurrentUser.UserName</label>
+                }
+                <input asp-for="@Model.Comment.Content" class="form-control" />
+                <span asp-validation-for="@Model.Comment.Content" class="text-danger"></span>
             </div>
+
+            <!--Tag friends-->
+            <div>
+                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Tag Friends</button>
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Friends</h4>
+                            </div>
+                            <div class="modal-body">
+                                <ul>
+                                    @foreach (var user in Model.UserFriends)
+                                    {
+                                        <li>@* Send ViewModel and taggedId to Posts/TagFriend *@
+                                            @Html.ActionLink(user.UserName, "TagFriend", "Comments", new { taggedId = user.Id, viewName = "Create" })
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models;
+using SocialMedia.Models.ViewModels;
 
 namespace SocialMedia.Web.Controllers
 {
@@ -19,6 +20,7 @@ namespace SocialMedia.Web.Controllers
         private readonly UserManager<User> _userManager;
 
         private static int _postId = 0;
+        private static CommentTagFriendsViewModel ViewModel = new CommentTagFriendsViewModel();
 
         public CommentsController(SocialMediaDbContext context,
             SignInManager<User> signInManager,
@@ -28,6 +30,8 @@ namespace SocialMedia.Web.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
         }
+
+        #region CRUD
 
         // GET: Comments
         public async Task<IActionResult> Index()
@@ -59,7 +63,16 @@ namespace SocialMedia.Web.Controllers
         // GET: Comments/Create
         public IActionResult Create()
         {
-            return View();
+            var userId = this._userManager.GetUserId(User);
+            var user = this._context.Users.FirstOrDefault(i => i.Id == userId);
+
+            ViewModel = new CommentTagFriendsViewModel()
+            {
+                CurrentUser = user,
+                UserFriends = GetUserFriends(user)
+            };
+
+            return View(ViewModel);
         }
 
         // POST: Comments/Create
@@ -67,16 +80,22 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Comment comment)
+        public async Task<IActionResult> Create([FromForm]CommentTagFriendsViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
                 //Get current user
                 var user = await this._userManager.GetUserAsync(User);
+                ViewModel.CurrentUser = user;
+                var comment = new Comment()
+                {
+                    Author = user,
+                    AuthorId = user.Id,
+                    DatePosted = DateTime.Now,
+                    Content = viewModel.Comment.Content,
+                    TaggedUsers = TagFriendEntities()
 
-                //Sets current user as a author
-                comment.Author = user;
-                comment.AuthorId = user.Id;
+                };
 
                 //Get the post
                 var post = await this._context.Posts.FirstOrDefaultAsync(i => i.PostId == _postId);
@@ -88,15 +107,14 @@ namespace SocialMedia.Web.Controllers
 
                 comment.CommentedPost = post;
                 comment.CommentedPostId = post.PostId;
-                comment.DatePosted = DateTime.Now;
 
                 this._context.Comments.Add(comment);
-
                 await _context.SaveChangesAsync();
 
+                ViewModel = new CommentTagFriendsViewModel();
                 return RedirectToAction(nameof(Index));
             }
-            return View(comment);
+            return View(viewModel);
         }
 
         // GET: Comments/Edit/5
@@ -196,6 +214,80 @@ namespace SocialMedia.Web.Controllers
         private bool CommentExists(int id)
         {
             return _context.Comments.Any(e => e.Id == id);
+        }
+
+        #endregion
+
+        //TODO:Friendship service : GetUserFriends
+        private List<User> GetUserFriends(User currentUser)
+        {
+            //Get current user friendships where it is addressee or requester
+            var friendships = this._context.Friendships
+                .Where(i => i.AddresseeId == currentUser.Id && i.Status == 1 ||
+                            i.RequesterId == currentUser.Id && i.Status == 1)
+                .Include(i => i.Addressee)
+                .Include(i => i.Requester)
+                .ToList();
+
+            var friends = new List<User>();
+            //Add all friends
+            foreach (var friendship in friendships)
+            {
+                //If addressee is the current user, add requester if it is not already tagged
+                if (friendship.AddresseeId == currentUser.Id &&
+                    !ViewModel.Tagged.Contains(friendship.Requester))
+                {
+                    /*this._context.Users
+                        .FirstOrDefault(i => i.Id == friendship.RequesterId)*/
+                    friends.Add(friendship.Requester);
+                }
+                else if (friendship.RequesterId == currentUser.Id &&
+                    !ViewModel.Tagged.Contains(friendship.Addressee)) //If requester is current user, add addressee
+                {
+                    //this._context.Users
+                    //    .FirstOrDefault(i => i.Id == friendship.AddresseeId)
+                    friends.Add(friendship.Addressee);
+                }
+            }
+
+            return friends;
+        }
+
+        //TODO: Tag friends service : TagFriend(string taggedId, string taggerId)
+        public IActionResult TagFriend(string taggedId, string viewName)
+        {
+            //TODO Bug : When the view is reloaded adds a duplicate item in the ViewModel.Tagged collection 
+
+            //Adds tagged user in tagged collection of the view model
+            var taggedUser = this._context.Users
+                .FirstOrDefault(i => i.Id == taggedId);
+
+            ViewModel.Tagged.Add(taggedUser);
+
+            //Remove tagged user from user friends list of view model
+            //The concept is that if any of the tagged users exist in this collection, 
+            //it does not make sense to be tagged twice in one post.
+            var item = ViewModel.UserFriends.SingleOrDefault(i => i.Id == taggedUser.Id);
+            ViewModel.UserFriends.Remove(item);
+
+            //viewName variable is used to determine where the form comes from
+            return View(viewName, ViewModel);
+        }
+
+        //TODO: Tag friends service : Entities
+        private ICollection<TagFriends> TagFriendEntities()
+        {
+            var tagFriendsEntities = new List<TagFriends>();
+            foreach (var tagged in ViewModel.Tagged)
+            {
+                var tagFriendsEntity = new TagFriends()
+                {
+                    TaggerId = ViewModel.CurrentUser.Id,
+                    TaggedId = tagged.Id,
+                };
+                tagFriendsEntities.Add(tagFriendsEntity);
+            }
+            return tagFriendsEntities;
         }
     }
 }
