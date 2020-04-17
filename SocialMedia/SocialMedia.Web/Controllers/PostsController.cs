@@ -18,7 +18,7 @@ namespace SocialMedia.Web.Controllers
         private readonly SocialMediaDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        
+
         private static int _groupId = 0;
         private static PostTagFriendsViewModel ViewModel = new PostTagFriendsViewModel();
 
@@ -89,8 +89,8 @@ namespace SocialMedia.Web.Controllers
 
             //Gets the post and its tag friend entities
             var post = await _context.Posts
-                .Include(i =>i.TaggedUsers)
-                .Include(i =>i.Author)
+                .Include(i => i.TaggedUsers)
+                .Include(i => i.Author)
                 .FirstOrDefaultAsync(m => m.PostId == id);
 
             if (post == null)
@@ -98,7 +98,7 @@ namespace SocialMedia.Web.Controllers
                 return NotFound();
             }
 
-            ViewModel = new PostTagFriendsViewModel() 
+            ViewModel = new PostTagFriendsViewModel()
             {
                 CurrentUser = user,
                 Post = post,
@@ -225,13 +225,21 @@ namespace SocialMedia.Web.Controllers
                     var user = await this._userManager.GetUserAsync(User);
                     ViewModel.CurrentUser = user;
                     var post = await this._context.Posts
-                        .Include(i =>i.TaggedUsers)
+                        .Include(i => i.TaggedUsers)
                         .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
 
                     post.Author = user;
                     post.AuthorId = user.Id;
                     post.Content = viewModel.Post.Content;
-                    post.TaggedUsers = TagFriendEntities(post);
+
+                    //Local tag friend entities
+                    var tagFriendEntities = TagFriendEntities(post);
+                    //Connected tag friend entities (In the db)
+                    var postTagFriendEntities = post.TaggedUsers;
+                    //If there is a mismatch between any record in the Local collection will be deleted from the Connected collection 
+                    RemoveTaggedFriendRecords(postTagFriendEntities, tagFriendEntities);
+                    //If there is a mismatch between any record in the Connected collection will be added from the Local collection 
+                    AddLocalTaggedFriends(postTagFriendEntities, tagFriendEntities);
                     
                     await _context.SaveChangesAsync();
                 }
@@ -257,7 +265,7 @@ namespace SocialMedia.Web.Controllers
                     var user = await this._userManager.GetUserAsync(User);
                     ViewModel.CurrentUser = user;
                     var post = await this._context.Posts
-                        .Include(i =>i.TaggedUsers)
+                        .Include(i => i.TaggedUsers)
                         .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
                     var group = await this._context.Groups
                     .FirstOrDefaultAsync(i => i.GroupId == _groupId);
@@ -272,7 +280,13 @@ namespace SocialMedia.Web.Controllers
                     post.Group = group;
                     post.GroupId = group.GroupId;
                     post.Content = viewModel.Post.Content;
-                    post.TaggedUsers = TagFriendEntities(post);
+
+                    //Local tag friend entities
+                    var tagFriendEntities = TagFriendEntities(post);
+                    //Connected tag friend entities (In the db)
+                    var postTagFriendEntities = post.TaggedUsers;
+                    //If there is a mismatch between any record in Local and Connected collections will be deleted
+                    RemoveTaggedFriendRecords(postTagFriendEntities, tagFriendEntities);
 
                     await _context.SaveChangesAsync();
                 }
@@ -287,7 +301,7 @@ namespace SocialMedia.Web.Controllers
                         throw;
                     }
                 }
-                
+
                 ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(GroupPosts));
             }
@@ -351,11 +365,11 @@ namespace SocialMedia.Web.Controllers
 
             foreach (var tagged in ViewModel.Tagged)
             {
-                if (!post.TaggedUsers.Any(i =>i.TaggedId == tagged.Id && 
+                if (!post.TaggedUsers.Any(i => i.TaggedId == tagged.Id &&
                                             i.TaggerId == ViewModel.CurrentUser.Id &&
                                             i.PostId == post.PostId))
                 {
-                    post.TaggedUsers.Add(new TagFriends() 
+                    post.TaggedUsers.Add(new TagFriends()
                     {
                         TaggerId = ViewModel.CurrentUser.Id,
                         TaggedId = tagged.Id,
@@ -462,7 +476,7 @@ namespace SocialMedia.Web.Controllers
             //TagFriend entities where users are tagged by the current user
             var tagFriendsEntities = this._context.TagFriends
                 .Where(i => i.PostId == postId && i.TaggerId == userId)
-                .Include(i =>i.Tagged)
+                .Include(i => i.Tagged)
                 .ToList();
 
             if (tagFriendsEntities != null)
@@ -475,7 +489,25 @@ namespace SocialMedia.Web.Controllers
             return null;
         }
 
-        
+        //Remove TagFriend entity records while edit the post
+        private void RemoveTaggedFriendRecords(ICollection<TagFriends> postTaggedFriends, ICollection<TagFriends> tagFriendEntities)
+        {
+            //Compare already tagged friends collection in the post and
+            //edited tag friends collection 
+            var removedTagFriendEntities = postTaggedFriends.Except(tagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.RemoveRange(removedTagFriendEntities);
+        }
+
+        //Add TagFriend entity which are on local collection to the db 
+        private void AddLocalTaggedFriends(ICollection<TagFriends> postTagFriendEntities, ICollection<TagFriends> tagFriendEntities)
+        {
+            var addedTagFriendEntities = tagFriendEntities.Except(postTagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.AddRange(addedTagFriendEntities);
+        }
     }
 
 }

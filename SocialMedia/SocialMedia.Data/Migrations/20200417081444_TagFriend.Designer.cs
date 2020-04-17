@@ -10,8 +10,8 @@ using SocialMedia.Data;
 namespace SocialMedia.Data.Migrations
 {
     [DbContext(typeof(SocialMediaDbContext))]
-    [Migration("20200320233436_UsersCityAndCountry")]
-    partial class UsersCityAndCountry
+    [Migration("20200417081444_TagFriend")]
+    partial class TagFriend
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -249,6 +249,39 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Posts");
                 });
 
+            modelBuilder.Entity("SocialMedia.Models.TagFriends", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TaggedId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TaggerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id")
+                        .HasName("TagFriends_PK");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("TaggedId");
+
+                    b.HasIndex("TaggerId");
+
+                    b.ToTable("TagFriends");
+                });
+
             modelBuilder.Entity("SocialMedia.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -469,6 +502,29 @@ namespace SocialMedia.Data.Migrations
                         .WithMany("Posts")
                         .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SocialMedia.Models.TagFriends", b =>
+                {
+                    b.HasOne("SocialMedia.Models.Comment", "Comment")
+                        .WithMany("TaggedUsers")
+                        .HasForeignKey("CommentId")
+                        .HasConstraintName("TagFreindsToComment_FK");
+
+                    b.HasOne("SocialMedia.Models.Post", "Post")
+                        .WithMany("TaggedUsers")
+                        .HasForeignKey("PostId")
+                        .HasConstraintName("TagFriendsToPost_FK");
+
+                    b.HasOne("SocialMedia.Models.User", "Tagged")
+                        .WithMany("Tagged")
+                        .HasForeignKey("TaggedId")
+                        .HasConstraintName("TagFriendsToTagged_FK");
+
+                    b.HasOne("SocialMedia.Models.User", "Tagger")
+                        .WithMany("Tagger")
+                        .HasForeignKey("TaggerId")
+                        .HasConstraintName("TagFriendsToTagger_FK");
                 });
 
             modelBuilder.Entity("SocialMedia.Models.UserInGroup", b =>

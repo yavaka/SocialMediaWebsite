@@ -19,6 +19,10 @@
     <Compile Remove="Migrations\20200318024646_DateFormat.Designer.cs" />
     <Compile Remove="Migrations\20200318040025_MultilineBio.cs" />
     <Compile Remove="Migrations\20200318040025_MultilineBio.Designer.cs" />
+    <Compile Remove="Migrations\20200320233436_UsersCityAndCountry.cs" />
+    <Compile Remove="Migrations\20200320233436_UsersCityAndCountry.Designer.cs" />
+    <Compile Remove="Migrations\20200410130043_TagFriend.cs" />
+    <Compile Remove="Migrations\20200410130043_TagFriend.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
