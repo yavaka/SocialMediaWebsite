@@ -23,6 +23,8 @@
     <Compile Remove="Migrations\20200320233436_UsersCityAndCountry.Designer.cs" />
     <Compile Remove="Migrations\20200410130043_TagFriend.cs" />
     <Compile Remove="Migrations\20200410130043_TagFriend.Designer.cs" />
+    <Compile Remove="Migrations\20200417093831_PostContentRequired.cs" />
+    <Compile Remove="Migrations\20200417093831_PostContentRequired.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
