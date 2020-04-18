@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -333,19 +334,36 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var post = await _context.Posts.FindAsync(id);
-            var taggedFriends = _context.TagFriends
-                .Where(i => i.PostId == id);
+            var post = await _context.Posts
+                .Include(i =>i.TaggedUsers)
+                .Include(c =>c.Comments)
+                .FirstOrDefaultAsync(i =>i.PostId == id);
 
-            //Removes all tagged friends in the post
-            foreach (var taggedFriend in taggedFriends)
-            {
-                _context.TagFriends.Remove(taggedFriend);
-            }
+            //Gets all comments tagged users
+            var commentsTaggedUsers = GetCommentsTaggedUsers(post.Comments);
+
+            //Removes all tagged friends in this post and this post`s comments
+            _context.TagFriends.RemoveRange(post.TaggedUsers.ToList());
 
             _context.Posts.Remove(post);
+            _context.TagFriends.RemoveRange(commentsTaggedUsers);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(UserPosts));
+        }
+
+        private ICollection<TagFriends> GetCommentsTaggedUsers(ICollection<Comment> postComments)
+        {
+            var taggedUsers = new List<TagFriends>();
+            foreach (var commentId in postComments.Select(i =>i.Id))
+            {
+                //Gets the comment with tagged users collection
+                var comment = this._context.Comments
+                    .Include(i => i.TaggedUsers)
+                    .FirstOrDefault(i =>i.Id == commentId);
+                
+                taggedUsers.AddRange(comment.TaggedUsers);
+            }
+            return taggedUsers;
         }
 
         private bool PostExists(int id)

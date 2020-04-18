@@ -205,7 +205,13 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments
+                .Include(t =>t.TaggedUsers)
+                .FirstOrDefaultAsync(i =>i.Id == id);
+            
+            //Removes all tagged friends
+            _context.TagFriends.RemoveRange(comment.TaggedUsers);
+            
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
