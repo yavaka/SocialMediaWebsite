@@ -126,13 +126,24 @@ namespace SocialMedia.Web.Controllers
             }
 
             var comment = await _context.Comments.FindAsync(id);
-
             if (comment == null)
             {
                 return NotFound();
             }
 
-            return View(comment);
+            var user = await this._userManager.GetUserAsync(User);
+
+            ViewModel = new CommentTagFriendsViewModel();
+            ViewModel.CurrentUser = user;
+            ViewModel.Comment = comment;
+            ViewModel.Tagged = GetTaggedFriends(comment.Id, user.Id);
+            /*If this method is invoked before GetTaggedFriends, 
+             there will add all of the current user`s friends.
+             Let`s get that user x is already tagged from the creation of the comment.
+             It does not make sense the current user to be allowed to tag user x twice.*/
+            ViewModel.UserFriends = GetUserFriends(user);
+
+            return View(ViewModel);
         }
 
         // POST: Comments/Edit/5
@@ -140,21 +151,19 @@ namespace SocialMedia.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Comment updatedComment)
+        public async Task<IActionResult> Edit([FromForm]CommentTagFriendsViewModel viewModel)
         {
-            if (id != updatedComment.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var user = await this._userManager
-                        .GetUserAsync(User);
+                    var user = await this._userManager.GetUserAsync(User);
+                    ViewModel.CurrentUser = user;
+                    
                     var comment = await this._context.Comments
-                        .FirstOrDefaultAsync(i => i.Id == id);
+                        .Include(i =>i.TaggedUsers)
+                        .FirstOrDefaultAsync(i => i.Id == viewModel.Comment.Id);
+
                     var post = await this._context.Posts
                         .FirstOrDefaultAsync(i => i.PostId == _postId);
 
@@ -162,13 +171,22 @@ namespace SocialMedia.Web.Controllers
                     comment.Author = user;
                     comment.CommentedPostId = post.PostId;
                     comment.CommentedPost = post;
-                    comment.Content = updatedComment.Content;
+                    comment.Content = viewModel.Comment.Content;
+
+                    //Local TagFriend entities
+                    var tagFriendEntities = TagFriendEntities(comment);
+                    //Connected TagFriend entities (In the db)
+                    var commentTagFriendEntities = comment.TaggedUsers;
+                    //If there is a mismatch between any record in the Local collection will be deleted from the Connected collection 
+                    RemoveTaggedFriendRecords(commentTagFriendEntities, tagFriendEntities);
+                    //If there is a mismatch between any record in the Connected collection will be added from the Local collection 
+                    AddLocalTaggedFriends(commentTagFriendEntities, tagFriendEntities);
 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(updatedComment.Id))
+                    if (!CommentExists(viewModel.Comment.Id))
                     {
                         return NotFound();
                     }
@@ -177,9 +195,10 @@ namespace SocialMedia.Web.Controllers
                         throw;
                     }
                 }
+                ViewModel = new CommentTagFriendsViewModel();
                 return RedirectToAction(nameof(Index));
             }
-            return View(updatedComment);
+            return View(viewModel);
         }
 
         // GET: Comments/Delete/5
@@ -224,6 +243,86 @@ namespace SocialMedia.Web.Controllers
 
         #endregion
 
+        //TODO: Tag friends service : TagFriend(string taggedId, string taggerId)
+        public IActionResult TagFriend(string taggedId, string viewName)
+        {
+            //TODO Bug : When the view is reloaded adds a duplicate item in the ViewModel.Tagged collection 
+
+            //Adds tagged user in tagged collection of the view model
+            var taggedUser = this._context.Users
+                .FirstOrDefault(i => i.Id == taggedId);
+
+            ViewModel.Tagged.Add(taggedUser);
+
+            //Remove tagged user from user friends list of view model
+            //The concept is that if any of the tagged users exist in this collection, 
+            //it does not make sense to be tagged twice in one post.
+            var item = ViewModel.UserFriends.SingleOrDefault(i => i.Id == taggedUser.Id);
+            ViewModel.UserFriends.Remove(item);
+
+            //viewName variable is used to determine where the form comes from
+            return View(viewName, ViewModel);
+        }
+
+        //TODO:Tag friends service : RemoveTaggedFriendById(string id)
+        public IActionResult RemoveTaggedFriend(string taggedId)
+        {
+            //Gets the tagged user
+            var taggedUser = ViewModel.Tagged
+                .FirstOrDefault(i => i.Id == taggedId);
+
+            //Removes the tagged user 
+            ViewModel.Tagged
+                .Remove(taggedUser);
+
+            //Adds already non tagged user in the UserFriends, 
+            //so the current user can decide to tag it again in the same post.
+            ViewModel.UserFriends.Add(taggedUser);
+
+            return View("Edit", ViewModel);
+        }
+
+        //TODO: Tag friends service : Entities
+        private ICollection<TagFriends> TagFriendEntities()
+        {
+            var tagFriendsEntities = new List<TagFriends>();
+            foreach (var tagged in ViewModel.Tagged)
+            {
+                var tagFriendsEntity = new TagFriends()
+                {
+                    TaggerId = ViewModel.CurrentUser.Id,
+                    TaggedId = tagged.Id,
+                };
+                tagFriendsEntities.Add(tagFriendsEntity);
+            }
+            return tagFriendsEntities;
+        }
+
+        //TODO: Tag friends service : Entities(Comment comment)
+        private ICollection<TagFriends> TagFriendEntities(Comment comment)
+        {
+            if (ViewModel.Tagged.Count == 0)
+            {
+                return new List<TagFriends>();
+            }
+
+            foreach (var tagged in ViewModel.Tagged)
+            {
+                if (!comment.TaggedUsers.Any(i => i.TaggedId == tagged.Id &&
+                                            i.TaggerId == ViewModel.CurrentUser.Id &&
+                                            i.CommentId == comment.Id))
+                {
+                    comment.TaggedUsers.Add(new TagFriends()
+                    {
+                        TaggerId = ViewModel.CurrentUser.Id,
+                        TaggedId = tagged.Id,
+                    });
+                }
+            }
+            //change it then
+            return comment.TaggedUsers;
+        }
+
         //TODO:Friendship service : GetUserFriends
         private List<User> GetUserFriends(User currentUser)
         {
@@ -259,41 +358,43 @@ namespace SocialMedia.Web.Controllers
             return friends;
         }
 
-        //TODO: Tag friends service : TagFriend(string taggedId, string taggerId)
-        public IActionResult TagFriend(string taggedId, string viewName)
+        //TODO:Tag friends service : GetTaggedFriendsByCommentIdAndUserId(int postId) 
+        private ICollection<User> GetTaggedFriends(int commentId, string userId)
         {
-            //TODO Bug : When the view is reloaded adds a duplicate item in the ViewModel.Tagged collection 
+            //TagFriend entities where users are tagged by the current user
+            var tagFriendsEntities = this._context.TagFriends
+                .Where(i => i.CommentId == commentId && i.TaggerId == userId)
+                .Include(i => i.Tagged)
+                .ToList();
 
-            //Adds tagged user in tagged collection of the view model
-            var taggedUser = this._context.Users
-                .FirstOrDefault(i => i.Id == taggedId);
+            if (tagFriendsEntities != null)
+            {
+                return tagFriendsEntities
+                    .Select(i => i.Tagged)
+                    .ToList();
+            }
 
-            ViewModel.Tagged.Add(taggedUser);
-
-            //Remove tagged user from user friends list of view model
-            //The concept is that if any of the tagged users exist in this collection, 
-            //it does not make sense to be tagged twice in one post.
-            var item = ViewModel.UserFriends.SingleOrDefault(i => i.Id == taggedUser.Id);
-            ViewModel.UserFriends.Remove(item);
-
-            //viewName variable is used to determine where the form comes from
-            return View(viewName, ViewModel);
+            return null;
         }
 
-        //TODO: Tag friends service : Entities
-        private ICollection<TagFriends> TagFriendEntities()
+        //Remove TagFriend entity records while edit the comment
+        private void RemoveTaggedFriendRecords(ICollection<TagFriends> commentTaggedFriends, ICollection<TagFriends> tagFriendEntities)
         {
-            var tagFriendsEntities = new List<TagFriends>();
-            foreach (var tagged in ViewModel.Tagged)
-            {
-                var tagFriendsEntity = new TagFriends()
-                {
-                    TaggerId = ViewModel.CurrentUser.Id,
-                    TaggedId = tagged.Id,
-                };
-                tagFriendsEntities.Add(tagFriendsEntity);
-            }
-            return tagFriendsEntities;
+            //Compare already tagged friends collection in the comment and
+            //edited tag friends collection 
+            var removedTagFriendEntities = commentTaggedFriends.Except(tagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.RemoveRange(removedTagFriendEntities);
+        }
+
+        //Add TagFriend entities which are on local collection to the db 
+        private void AddLocalTaggedFriends(ICollection<TagFriends> commentTagFriendEntities, ICollection<TagFriends> tagFriendEntities)
+        {
+            var addedTagFriendEntities = tagFriendEntities.Except(commentTagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.AddRange(addedTagFriendEntities);
         }
     }
 }

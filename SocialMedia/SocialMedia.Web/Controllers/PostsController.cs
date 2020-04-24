@@ -225,6 +225,7 @@ namespace SocialMedia.Web.Controllers
                 {
                     var user = await this._userManager.GetUserAsync(User);
                     ViewModel.CurrentUser = user;
+                    
                     var post = await this._context.Posts
                         .Include(i => i.TaggedUsers)
                         .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
@@ -453,6 +454,45 @@ namespace SocialMedia.Web.Controllers
             return View("Edit", ViewModel);
         }
 
+        //TODO:Tag friends service : GetTaggedFriendsByPostIdAndUserId(int postId)
+        private ICollection<User> GetTaggedFriends(int postId, string userId)
+        {
+            //TagFriend entities where users are tagged by the current user
+            var tagFriendsEntities = this._context.TagFriends
+                .Where(i => i.PostId == postId && i.TaggerId == userId)
+                .Include(i => i.Tagged)
+                .ToList();
+
+            if (tagFriendsEntities != null)
+            {
+                return tagFriendsEntities
+                    .Select(i => i.Tagged)
+                    .ToList();
+            }
+
+            return null;
+        }
+
+        //Remove TagFriend entity records while edit the post
+        private void RemoveTaggedFriendRecords(ICollection<TagFriends> postTaggedFriends, ICollection<TagFriends> tagFriendEntities)
+        {
+            //Compare already tagged friends collection in the post and
+            //edited tag friends collection 
+            var removedTagFriendEntities = postTaggedFriends.Except(tagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.RemoveRange(removedTagFriendEntities);
+        }
+
+        //Add TagFriend entities which are on local collection to the db 
+        private void AddLocalTaggedFriends(ICollection<TagFriends> postTagFriendEntities, ICollection<TagFriends> tagFriendEntities)
+        {
+            var addedTagFriendEntities = tagFriendEntities.Except(postTagFriendEntities)
+                .ToList();
+
+            this._context.TagFriends.AddRange(addedTagFriendEntities);
+        }
+
         //TODO:Friendship service : GetUserFriends
         private List<User> GetUserFriends(User currentUser)
         {
@@ -486,45 +526,6 @@ namespace SocialMedia.Web.Controllers
             }
 
             return friends;
-        }
-
-        //TODO:Tag friends service : GetTaggedFriendsByPostId(int postId)
-        private ICollection<User> GetTaggedFriends(int postId, string userId)
-        {
-            //TagFriend entities where users are tagged by the current user
-            var tagFriendsEntities = this._context.TagFriends
-                .Where(i => i.PostId == postId && i.TaggerId == userId)
-                .Include(i => i.Tagged)
-                .ToList();
-
-            if (tagFriendsEntities != null)
-            {
-                return tagFriendsEntities
-                    .Select(i => i.Tagged)
-                    .ToList();
-            }
-
-            return null;
-        }
-
-        //Remove TagFriend entity records while edit the post
-        private void RemoveTaggedFriendRecords(ICollection<TagFriends> postTaggedFriends, ICollection<TagFriends> tagFriendEntities)
-        {
-            //Compare already tagged friends collection in the post and
-            //edited tag friends collection 
-            var removedTagFriendEntities = postTaggedFriends.Except(tagFriendEntities)
-                .ToList();
-
-            this._context.TagFriends.RemoveRange(removedTagFriendEntities);
-        }
-
-        //Add TagFriend entity which are on local collection to the db 
-        private void AddLocalTaggedFriends(ICollection<TagFriends> postTagFriendEntities, ICollection<TagFriends> tagFriendEntities)
-        {
-            var addedTagFriendEntities = tagFriendEntities.Except(postTagFriendEntities)
-                .ToList();
-
-            this._context.TagFriends.AddRange(addedTagFriendEntities);
         }
     }
 

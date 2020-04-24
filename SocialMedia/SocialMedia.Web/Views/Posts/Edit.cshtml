@@ -2,7 +2,7 @@
 @model SocialMedia.Models.ViewModels.PostTagFriendsViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit post";
 }
 
 <h1>Edit Post</h1>
@@ -86,7 +86,6 @@
                                     @foreach (var user in Model.Tagged)
                                     {
                                         <li>
-                                            @* Send ViewModel and taggedId to Posts/RemoveTaggedFriend *@
                                             @Html.ActionLink(user.UserName, "RemoveTaggedFriend", "Posts", new {taggedId = user.Id})
                                         </li>
                                     }
