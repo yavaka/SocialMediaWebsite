@@ -20,9 +20,9 @@ namespace SocialMedia.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        private static int _groupId = 0;
         private static PostTagFriendsViewModel ViewModel = new PostTagFriendsViewModel();
 
+        private static int _groupId = 0;
         public PostsController(SocialMediaDbContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
@@ -35,18 +35,20 @@ namespace SocialMedia.Web.Controllers
         #region Posts
 
         // GET: GroupPosts
-        public async Task<IActionResult> GroupPosts()
+        public async Task<IActionResult> GroupPosts(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             var user = await this._userManager.GetUserAsync(User);
 
             TempData["groupPost"] = "true";
-            if (TempData["groupId"] != null)
-            {
-                _groupId = int.Parse(TempData["groupId"].ToString());
-            }
 
             var posts = await _context.Posts
-                .Where(a => a.GroupId == _groupId)
+                .Where(a => a.GroupId == id)
+                .Include(i =>i.Group)
                 .ToListAsync();
 
             //If the current user is author of some post, it can be edited and deleted

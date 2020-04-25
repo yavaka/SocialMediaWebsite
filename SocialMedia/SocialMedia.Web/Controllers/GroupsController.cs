@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models;
+using SocialMedia.Models.ViewModels;
 
 namespace SocialMedia.Web.Controllers
 {
@@ -15,7 +16,7 @@ namespace SocialMedia.Web.Controllers
     {
         private readonly SocialMediaDbContext _context;
         private readonly UserManager<User> _userManager;
-
+        private static GroupViewModel ViewModel = new GroupViewModel();
         public GroupsController(SocialMediaDbContext context, UserManager<User> userManager)
         {
             this._context = context;

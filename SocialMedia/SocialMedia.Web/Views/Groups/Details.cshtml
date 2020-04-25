@@ -23,7 +23,7 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dd class="col-sm-10">
-            <a asp-controller="Posts" asp-action="GroupPosts">Posts</a>
+            @Html.ActionLink("Posts", "GroupPosts", "Posts", new { id = Model.GroupId})
         </dd>
         <dd class="col-sm-10">
             <a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.GroupId">Members</a>

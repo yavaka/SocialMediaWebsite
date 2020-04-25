@@ -4,10 +4,9 @@ using System.Text;
 
 namespace SocialMedia.Models.ViewModels
 {
-    public interface ITagFriendsViewModel
+    public interface ITagFriendsViewModel : IViewModel
     {
         ICollection<User> UserFriends { get; set; }
         ICollection<User> Tagged { get; set; }
-        User CurrentUser { get; set; }
     }
 }

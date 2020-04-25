@@ -12,9 +12,9 @@ namespace SocialMedia.Models.ViewModels
             this.Tagged = new List<User>();
         }
 
-        public ICollection<User> UserFriends { get; set; }
-        public ICollection<User> Tagged { get; set; }
         public Comment Comment { get; set; }
         public User CurrentUser { get; set; }
+        public ICollection<User> UserFriends { get; set; }
+        public ICollection<User> Tagged { get; set; }
     }
 }
