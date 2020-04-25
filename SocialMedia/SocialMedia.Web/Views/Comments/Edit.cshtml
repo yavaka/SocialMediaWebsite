@@ -70,31 +70,33 @@
                 </div>
             </div>
 
-            <!--Remove tagged friend-->
-            <div class="col-md-6">
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Remove tags</button>
-                <!-- Modal -->
-                <div class="modal fade" id="myModal2" role="dialog">
-                    <div class="modal-dialog modal-sm">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Remove tags</h4>
-                            </div>
-                            <div class="modal-body">
-                                <ul>
-                                    @foreach (var user in Model.Tagged)
-                                    {
-                                        <li>
-                                            @Html.ActionLink(user.UserName, "RemoveTaggedFriend", "Comments", new { taggedId = user.Id })
-                                        </li>
-                                    }
-                                </ul>
+            @if (Model.Tagged.Count > 0)
+            {
+                <!--Remove tagged friend-->
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Remove tags</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal2" role="dialog">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Remove tags</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <ul>
+                                        @foreach (var user in Model.Tagged)
+                                        {
+                                            <li>
+                                                @Html.ActionLink(user.UserName, "RemoveTaggedFriend", "Comments", new { taggedId = user.Id })
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
+            }
             <div class="form-group">
                 <input type="submit" value="Update" class="btn btn-primary" />
             </div>
