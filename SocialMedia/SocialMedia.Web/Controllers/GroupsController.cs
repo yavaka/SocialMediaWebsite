@@ -56,31 +56,29 @@ namespace SocialMedia.Web.Controllers
         //Get: Groups/MyGroups
         public async Task<IActionResult> MyGroups()
         {
+            ViewModel = new GroupViewModel();
+
             //Gets the current user
-            var user = await this._userManager.GetUserAsync(User);
+            ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
 
             //Gets all data from the mapping table UsersInGroups for the current user
-            var groupsIds = await this._context.UsersInGroups
-                .Where(id => id.UserId == user.Id)
+            var userGroups = await this._context.UsersInGroups
+                .Where(id => id.UserId == ViewModel.CurrentUser.Id)
+                .Include(g =>g.Group)
                 .ToListAsync();
-            //All groups of the current user
-            var groups = new List<Group>();
-            foreach (var groupId in groupsIds)
-            {
-                //Gets the group which match with the groupId from UsersInGroups table
-                var group = await this._context.Groups
-                    .FirstOrDefaultAsync(i => i.GroupId == groupId.GroupId);
 
+            foreach (var userGroup in userGroups)
+            {
                 //Check is the user is admin 
                 //If true set admin in the Message prop of the group
-                if (groupId.Admin == true)
+                if (userGroup.Admin == true)
                 {
-                    group.Message = "admin";
+                    userGroup.Group.Message = "admin";
                 }
 
-                groups.Add(group);
+                ViewModel.MemberGroups.Add(userGroup.Group);
             }
-            return View(groups);
+            return View(ViewModel);
         }
 
         // GET: Groups/NonGroupMemberDetails

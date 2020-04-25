@@ -1,10 +1,10 @@
-﻿@model IEnumerable<SocialMedia.Models.Group>
+﻿@model SocialMedia.Models.ViewModels.GroupViewModel
 
 @{
     ViewData["Title"] = "MyGroups";
 }
 
-<h1>MyGroups</h1>
+<h1>My Groups</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -13,16 +13,16 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Group.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Group.Description)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.MemberGroups)
         {
             <tr>
                 <td>
