@@ -26,19 +26,20 @@ namespace SocialMedia.Web.Controllers
         // GET: Groups
         public async Task<IActionResult> Index()
         {
+            ViewModel = new GroupViewModel();
             //Gets the current user
-            var user = await this._userManager.GetUserAsync(User);
+            ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
 
             //Gets all data from mapping table UsersInGroups of the current user
             var userGroups = await this._context.UsersInGroups
-                .Where(i => i.UserId == user.Id)
+                .Where(i => i.UserId == ViewModel.CurrentUser.Id)
                 .ToListAsync();
 
             //Gets all Groups
             var groups = await this._context.Groups.ToListAsync();
 
             //Assign all groups to collection where the current user is not a member
-            var nonMemberGroups = groups;
+            ViewModel.NonMemberGroups = groups;
 
             //Compare all groups with these groups where the current user is already a member or admin
             foreach (var group in userGroups)
@@ -46,10 +47,40 @@ namespace SocialMedia.Web.Controllers
                 //Gets the group where the user is already a member
                 var memberGroup = groups.Find(i => i.GroupId == group.GroupId);
                 //Removes the group where the current user is already a member
-                nonMemberGroups.Remove(memberGroup);
+                ViewModel.NonMemberGroups.Remove(memberGroup);
             }
 
-            return View(nonMemberGroups);
+            return View(ViewModel);
+        }
+
+        //Get: Groups/MyGroups
+        public async Task<IActionResult> MyGroups()
+        {
+            //Gets the current user
+            var user = await this._userManager.GetUserAsync(User);
+
+            //Gets all data from the mapping table UsersInGroups for the current user
+            var groupsIds = await this._context.UsersInGroups
+                .Where(id => id.UserId == user.Id)
+                .ToListAsync();
+            //All groups of the current user
+            var groups = new List<Group>();
+            foreach (var groupId in groupsIds)
+            {
+                //Gets the group which match with the groupId from UsersInGroups table
+                var group = await this._context.Groups
+                    .FirstOrDefaultAsync(i => i.GroupId == groupId.GroupId);
+
+                //Check is the user is admin 
+                //If true set admin in the Message prop of the group
+                if (groupId.Admin == true)
+                {
+                    group.Message = "admin";
+                }
+
+                groups.Add(group);
+            }
+            return View(groups);
         }
 
         // GET: Groups/NonGroupMemberDetails
@@ -219,36 +250,6 @@ namespace SocialMedia.Web.Controllers
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(MyGroups));
-        }
-
-        //Get: Groups/MyGroups
-        public async Task<IActionResult> MyGroups()
-        {
-            //Gets the current user
-            var user = await this._userManager.GetUserAsync(User);
-
-            //Gets all data from the mapping table UsersInGroups for the current user
-            var groupsIds = await this._context.UsersInGroups
-                .Where(id => id.UserId == user.Id)
-                .ToListAsync();
-            //All groups of the current user
-            var groups = new List<Group>();
-            foreach (var groupId in groupsIds)
-            {
-                //Gets the group which match with the groupId from UsersInGroups table
-                var group = await this._context.Groups
-                    .FirstOrDefaultAsync(i => i.GroupId == groupId.GroupId);
-
-                //Check is the user is admin 
-                //If true set admin in the Message prop of the group
-                if (groupId.Admin == true)
-                {
-                    group.Message = "admin";
-                }
-
-                groups.Add(group);
-            }
-            return View(groups);
         }
 
         //Post: Groups/JoinGroup

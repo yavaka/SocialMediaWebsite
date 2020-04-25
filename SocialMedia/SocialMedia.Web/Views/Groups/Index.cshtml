@@ -1,10 +1,10 @@
-﻿@model IEnumerable<SocialMedia.Models.Group>
+﻿@model SocialMedia.Models.ViewModels.GroupViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Groups";
 }
 
-<h1>Index</h1>
+<h1>Groups</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -13,27 +13,29 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.Group.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Group.Description)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                <a asp-action="NonGroupMemberDetails" asp-route-id="@item.GroupId">Details</a>
-            </td>
-        </tr>
-}
+        @*List all groups where the current user is not a member*@
+        @foreach (var item in Model.NonMemberGroups)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    <a asp-action="NonGroupMemberDetails" asp-route-id="@item.GroupId">Details</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
