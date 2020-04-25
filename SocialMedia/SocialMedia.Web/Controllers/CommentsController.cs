@@ -246,7 +246,15 @@ namespace SocialMedia.Web.Controllers
         //TODO: Tag friends service : TagFriend(string taggedId, string taggerId)
         public IActionResult TagFriend(string taggedId, string viewName)
         {
-            //TODO Bug : When the view is reloaded adds a duplicate item in the ViewModel.Tagged collection 
+            //Check is the last tagged friend is already been tagged,
+            //if the tagged friends collection is not empty.
+            if (ViewModel.Tagged.Count > 0)
+            {
+                if (ViewModel.Tagged.Last().Id == taggedId)
+                {
+                    return View(viewName, ViewModel);
+                }
+            }
 
             //Adds tagged user in tagged collection of the view model
             var taggedUser = this._context.Users

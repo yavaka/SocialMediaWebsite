@@ -44,11 +44,21 @@
                             </div>
                             <div class="modal-body">
                                 <ul>
-                                    @foreach (var user in Model.UserFriends)
+                                    @if (Model.UserFriends.Count == 0)
                                     {
-                                        <li>@* Send ViewModel and taggedId to Posts/TagFriend *@
-                                            @Html.ActionLink(user.UserName, "TagFriend", "Comments", new { taggedId = user.Id, viewName = "Create" })
+                                        <li>
+                                            @Model.CurrentUser.UserName, you do not have any more friends.
                                         </li>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var user in Model.UserFriends)
+                                        {
+                                            <li>
+                                                @* Send ViewModel and taggedId to Posts/TagFriend *@
+                                                @Html.ActionLink(user.UserName, "TagFriend", "Comments", new { taggedId = user.Id, viewName = "Create" })
+                                            </li>
+                                        }
                                     }
                                 </ul>
                             </div>
