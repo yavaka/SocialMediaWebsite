@@ -64,7 +64,7 @@ namespace SocialMedia.Web.Controllers
             //Gets all data from the mapping table UsersInGroups for the current user
             var userGroups = await this._context.UsersInGroups
                 .Where(id => id.UserId == ViewModel.CurrentUser.Id)
-                .Include(g =>g.Group)
+                .Include(g => g.Group)
                 .ToListAsync();
 
             foreach (var userGroup in userGroups)
@@ -109,15 +109,13 @@ namespace SocialMedia.Web.Controllers
             }
 
             var group = await _context.Groups
+                .Include(p => p.Posts)
                 .FirstOrDefaultAsync(m => m.GroupId == id);
 
             if (group == null)
             {
                 return NotFound();
             }
-
-            //Pass groupId to PostsController
-            TempData["groupId"] = id;
 
             return View(group);
         }
@@ -131,33 +129,43 @@ namespace SocialMedia.Web.Controllers
         // POST: Groups/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GroupId,Title,Description")] Group group)
+        public async Task<IActionResult> Create([FromForm]GroupViewModel viewModel)
         {
-            //Unique title
-            if (await this._context.Groups.AnyAsync(i =>i.Title == group.Title))
+            if (viewModel.Group == null)
             {
-                ModelState.AddModelError("Title", $"Title {group.Title} already exists. Title must be unique!");
-                return View();
+                return NotFound();
             }
-           
+            else
+            {
+                ViewModel.Group = viewModel.Group;
+            }
+
+            //Unique title
+            if (await this._context.Groups.AnyAsync(i => i.Title == ViewModel.Group.Title))
+            {
+                ModelState.AddModelError("Title", $"Title {ViewModel.Group.Title} already exists. Title must be unique!");
+                return View(ViewModel);
+            }
+
             if (ModelState.IsValid)
             {
                 //Gets the current user 
-                var user = await this._userManager.GetUserAsync(User);
+                ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
 
                 //Create new row in the UsersInGroups table where the current user is admin
-                var newGroup = new UserInGroup()
+                var adminGroup = new UserInGroup()
                 {
-                    UserId = user.Id,
-                    User = user,
-                    GroupId = group.GroupId,
-                    Group = group,
+                    UserId = ViewModel.CurrentUser.Id,
+                    User = ViewModel.CurrentUser,
+                    GroupId = ViewModel.Group.GroupId,
+                    Group = ViewModel.Group,
                     Admin = true
                 };
 
-                await this._context.UsersInGroups.AddAsync(newGroup);
-                await this._context.Groups.AddAsync(group);
+                await this._context.UsersInGroups.AddAsync(adminGroup);
+                await this._context.Groups.AddAsync(ViewModel.Group);
                 await _context.SaveChangesAsync();
+                ViewModel = new GroupViewModel();
                 return RedirectToAction(nameof(MyGroups));
             }
             return View();
@@ -272,7 +280,7 @@ namespace SocialMedia.Web.Controllers
             this._context.UsersInGroups.Add(joinGroup);
             await this._context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("MyGroups");
         }
 
         //Get: Groups/GroupMembers/

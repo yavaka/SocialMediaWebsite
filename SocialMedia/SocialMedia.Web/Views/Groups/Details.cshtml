@@ -23,6 +23,7 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dd class="col-sm-10">
+            <!--Sends the group id to PostsController in a GroupPosts method-->
             @Html.ActionLink("Posts", "GroupPosts", "Posts", new { id = Model.GroupId})
         </dd>
         <dd class="col-sm-10">

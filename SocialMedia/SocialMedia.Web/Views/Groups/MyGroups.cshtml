@@ -15,30 +15,23 @@
             <th>
                 @Html.DisplayNameFor(model => model.Group.Title)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Group.Description)
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.MemberGroups)
+        @foreach (var group in Model.MemberGroups)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    @Html.DisplayFor(modelItem => group.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Description)
+                    @Html.ActionLink("Details", "Details", "Groups", new { id = group.GroupId})
                 </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.GroupId">Details</a>
-                </td>
-                @if (item.Message == "admin")
+                @if (group.Message == "admin")
                 {
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.GroupId">Edit</a> |
-                        <a asp-action="Delete" asp-route-id="@item.GroupId">Delete</a>
+                        <a asp-action="Edit" asp-route-id="@group.GroupId">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@group.GroupId">Delete</a>
                     </td>
                 }
             </tr>

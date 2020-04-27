@@ -55,7 +55,6 @@
                                         @foreach (var user in Model.UserFriends)
                                         {
                                             <li>
-                                                @* Send ViewModel and taggedId to Posts/TagFriend *@
                                                 @Html.ActionLink(user.UserName, "TagFriend", "Comments", new { taggedId = user.Id, viewName = "Create" })
                                             </li>
                                         }

@@ -15,25 +15,18 @@
             <th>
                 @Html.DisplayNameFor(model => model.Group.Title)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Group.Description)
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
         @*List all groups where the current user is not a member*@
-        @foreach (var item in Model.NonMemberGroups)
+        @foreach (var group in Model.NonMemberGroups)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    @Html.DisplayFor(modelItem => group.Title)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    <a asp-action="NonGroupMemberDetails" asp-route-id="@item.GroupId">Details</a>
+                    @Html.ActionLink("Details", "NonGroupMemberDetails", "Groups", new { id = group.GroupId })
                 </td>
             </tr>
         }
