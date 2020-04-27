@@ -179,43 +179,52 @@ namespace SocialMedia.Web.Controllers
                 return NotFound();
             }
 
-            var group = await _context.Groups.FindAsync(id);
-            if (group == null)
+            ViewModel = new GroupViewModel();
+            ViewModel.Group = await _context.Groups
+                .FirstOrDefaultAsync(i => i.GroupId == id);
+
+            if (ViewModel.Group == null)
             {
                 return NotFound();
             }
-            return View(group);
+            return View(ViewModel);
         }
 
         // POST: Groups/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("GroupId,Title,Description")] Group group)
+        public async Task<IActionResult> Edit(GroupViewModel viewModel)
         {
-            if (id != group.GroupId)
+            if (viewModel.Group == null)
             {
                 return NotFound();
             }
-
-            //Unique title
-            if (await this._context.Groups.AnyAsync(i => i.Title == group.Title))
+            //If viewModel parameter has a different title than in a connected record,
+            //will be assigned to the connected record
+            if (viewModel.Group.Title != ViewModel.Group.Title)
             {
-                ModelState.AddModelError("Title", $"Title {group.Title} already exists. Title must be unique!");
-                return View();
+                //Unique title
+                if (await this._context.Groups.AnyAsync(i => i.Title == viewModel.Group.Title))
+                {
+                    ModelState.AddModelError("Title", $"Title {viewModel.Group.Title} already exists. Title must be unique!");
+                    return View();
+                }
+                else
+                {
+                    ViewModel.Group.Title = viewModel.Group.Title;
+                }
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(group);
+                    _context.Update(viewModel.Group);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!GroupExists(group.GroupId))
+                    if (!GroupExists(viewModel.Group.GroupId))
                     {
                         return NotFound();
                     }
@@ -226,7 +235,7 @@ namespace SocialMedia.Web.Controllers
                 }
                 return RedirectToAction(nameof(MyGroups));
             }
-            return View(group);
+            return View(viewModel);
         }
 
         // GET: Groups/Delete/5
