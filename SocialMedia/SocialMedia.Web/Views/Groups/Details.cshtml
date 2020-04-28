@@ -15,11 +15,14 @@
             @Html.DisplayFor(model => model.Group.Description)
         </div">
         <div class="col-md-2"><a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.Group.GroupId">Members</a></div>
-        <div class="col-sm-10"></div>
+        <div class="col-md-8"></div>
+        <div class="col-md-2">
+            <button>@Html.ActionLink("Leave group", "LeaveGroup", "Groups", new { id = Model.Group.GroupId })</button>
+        </div>
 </div>
-
 <hr />
 
+<!--Group posts-->
 <div class="container">
     @if (Model.Posts.Count == 0)
     {
@@ -42,5 +45,4 @@
             </div>
         }
     }
-    <!--Group posts-->
 </div>

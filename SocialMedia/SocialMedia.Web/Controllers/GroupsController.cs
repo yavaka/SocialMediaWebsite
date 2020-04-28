@@ -283,12 +283,18 @@ namespace SocialMedia.Web.Controllers
             var group = await _context.Groups.FindAsync(id);
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
+           
             return RedirectToAction(nameof(MyGroups));
         }
 
         //Post: Groups/JoinGroup
-        public async Task<IActionResult> JoinGroup(int id)
+        public async Task<IActionResult> JoinGroup(int? id)
         {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
             //Gets the current user
             var user = await this._userManager.GetUserAsync(User);
 
@@ -301,7 +307,7 @@ namespace SocialMedia.Web.Controllers
             {
                 UserId = user.Id,
                 User = user,
-                GroupId = id,
+                GroupId = (int)id,
                 Group = group
             };
 
@@ -311,13 +317,40 @@ namespace SocialMedia.Web.Controllers
             return RedirectToAction("MyGroups");
         }
 
-        //Get: Groups/GroupMembers/
+        public async Task<IActionResult> LeaveGroup(int? id) 
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            //Gets the current user
+            var user = await this._userManager.GetUserAsync(User);
+
+            var userInGroupEntity = await this._context.UsersInGroups
+                .FirstOrDefaultAsync(i => i.GroupId == id && 
+                                          i.UserId == user.Id);
+
+            this._context.UsersInGroups.Remove(userInGroupEntity);
+            this._context.SaveChanges();
+
+            return RedirectToAction(nameof(MyGroups));
+        }
+
+        private bool GroupExists(int id)
+        {
+            return _context.Groups.Any(e => e.GroupId == id);
+        }
+
+        #endregion
+
+        //Get: Groups/GroupMembers
         public async Task<IActionResult> GroupMembers(int id)
         {
             var user = await this._userManager.GetUserAsync(User);
             //Gets all of the members in the group with id from UsersInGroups table
             var membersInTheGroup = await this._context.UsersInGroups
-                .Include(u =>u.User)
+                .Include(u => u.User)
                 .Where(gId => gId.GroupId == id)
                 .ToListAsync();
 
@@ -332,14 +365,6 @@ namespace SocialMedia.Web.Controllers
 
             return View(members);
         }
-
-        private bool GroupExists(int id)
-        {
-            return _context.Groups.Any(e => e.GroupId == id);
-        }
-        
-        #endregion
-
 
         //TODO: Tag friends service: GetTaggedUsersByPostId(int postId)
         private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriends)
@@ -362,5 +387,6 @@ namespace SocialMedia.Web.Controllers
                 .Include(a => a.Author)
                 .FirstOrDefault(i => i.PostId == postId);
         }
+
     }
 }
