@@ -23,6 +23,7 @@ namespace SocialMedia.Web.Controllers
             this._userManager = userManager;
         }
 
+        #region CRUD
         // GET: Groups
         public async Task<IActionResult> Index()
         {
@@ -82,7 +83,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Groups/NonGroupMemberDetails
-        public async Task<IActionResult> NonGroupMemberDetails(int? id)
+        public async Task<IActionResult> NonMemberDetails(int? id)
         {
             if (id == null)
             {
@@ -107,17 +108,35 @@ namespace SocialMedia.Web.Controllers
             {
                 return NotFound();
             }
-
-            var group = await _context.Groups
-                .Include(p => p.Posts)
+            ViewModel = new GroupViewModel();
+            //Gets the group
+            ViewModel.Group = await _context.Groups
+                .Include(p =>p.Posts)
                 .FirstOrDefaultAsync(m => m.GroupId == id);
 
-            if (group == null)
+            if (ViewModel.Group == null)
             {
                 return NotFound();
             }
 
-            return View(group);
+            if (ViewModel.Group.Posts.Count > 0)
+            {
+                //Iterate the group`s posts
+                foreach (var post in ViewModel.Group.Posts)
+                {
+                    //Gets the current post with TagFriends and Author db records
+                    var postTFEntities = GetPostById(post.PostId);
+                    ViewModel.Posts.Add(new PostTagFriendsViewModel() 
+                    {
+                        Post = postTFEntities,
+                        Tagged = (postTFEntities.TaggedUsers.Count > 0) 
+                                    ? await GetTaggedUsersAsync(postTFEntities.TaggedUsers) 
+                                    : new List<User>()
+                    });
+                }
+            }
+
+            return View(ViewModel);
         }
 
         // GET: Groups/Create
@@ -298,6 +317,7 @@ namespace SocialMedia.Web.Controllers
             var user = await this._userManager.GetUserAsync(User);
             //Gets all of the members in the group with id from UsersInGroups table
             var membersInTheGroup = await this._context.UsersInGroups
+                .Include(u =>u.User)
                 .Where(gId => gId.GroupId == id)
                 .ToListAsync();
 
@@ -306,8 +326,7 @@ namespace SocialMedia.Web.Controllers
             {
                 if (member.UserId != user.Id)
                 {
-                    members.Add(await this._context.Users
-                    .FirstOrDefaultAsync(i => i.Id == member.UserId));
+                    members.Add(member.User);
                 }
             }
 
@@ -317,6 +336,31 @@ namespace SocialMedia.Web.Controllers
         private bool GroupExists(int id)
         {
             return _context.Groups.Any(e => e.GroupId == id);
+        }
+        
+        #endregion
+
+
+        //TODO: Tag friends service: GetTaggedUsersByPostId(int postId)
+        private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriends)
+        {
+            //Gets the tagged users
+            var taggedUsers = new List<User>();
+            foreach (var tagged in tagFriends)
+            {
+                taggedUsers.Add(await this._userManager.FindByIdAsync(tagged.TaggedId));
+            }
+
+            return taggedUsers;
+        }
+
+        //TODO: Posts service: GetPostById(int postId)
+        private Post GetPostById(int postId)
+        {
+            return this._context.Posts
+                .Include(tf => tf.TaggedUsers)
+                .Include(a => a.Author)
+                .FirstOrDefault(i => i.PostId == postId);
         }
     }
 }

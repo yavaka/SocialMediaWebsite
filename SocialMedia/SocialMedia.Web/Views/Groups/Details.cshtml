@@ -1,33 +1,46 @@
-﻿@model SocialMedia.Models.Group
+﻿@model SocialMedia.Models.ViewModels.GroupViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>@Model.Group.Title</h1>
 
-<div>
-    <h4>Group</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dd class="col-sm-10">
-            <!--Sends the group id to PostsController in a GroupPosts method-->
-            @Html.ActionLink("Posts", "GroupPosts", "Posts", new { id = Model.GroupId})
-        </dd>
-        <dd class="col-sm-10">
-            <a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.GroupId">Members</a>
-        </dd>
-    </dl>
+<!--Group information-->
+<div class="row">
+        <div class="col-sm-4">
+            <b>Group @Html.DisplayNameFor(model => model.Group.Description)</b> : 
+        </div>
+        <div" class="col-sm-8">
+            @Html.DisplayFor(model => model.Group.Description)
+        </div">
+        <div class="col-md-2"><a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.Group.GroupId">Members</a></div>
+        <div class="col-sm-10"></div>
+</div>
+
+<hr />
+
+<div class="container">
+    @if (Model.Posts.Count == 0)
+    {
+        <div class="jumbotron">
+            <h3>There are no posts in this group yet.</h3>
+        </div>
+    }
+    else
+    {
+        @foreach (var post in Model.Posts)
+        {
+            <div class="jumbotron">
+                <h3>@post.Post.Author.UserName</h3>
+                @if (post.Tagged.Count > 0)
+                {
+                    <h4>@String.Join(',', post.Tagged)</h4>
+                }
+                <p>@post.Post.Content</p>
+                <span>@post.Post.DatePosted.Date</span>
+            </div>
+        }
+    }
+    <!--Group posts-->
 </div>

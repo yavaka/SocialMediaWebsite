@@ -22,7 +22,6 @@ namespace SocialMedia.Web.Controllers
 
         private static PostTagFriendsViewModel ViewModel = new PostTagFriendsViewModel();
 
-        private static int _groupId = 0;
         public PostsController(SocialMediaDbContext context,
             UserManager<User> userManager,
             SignInManager<User> signInManager)
@@ -33,35 +32,6 @@ namespace SocialMedia.Web.Controllers
         }
 
         #region Posts
-
-        // GET: GroupPosts
-        public async Task<IActionResult> GroupPosts(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await this._userManager.GetUserAsync(User);
-
-            TempData["groupPost"] = "true";
-
-            var posts = await _context.Posts
-                .Where(a => a.GroupId == id)
-                .Include(i =>i.Group)
-                .ToListAsync();
-
-            //If the current user is author of some post, it can be edited and deleted
-            foreach (var post in posts)
-            {
-                if (post.AuthorId == user.Id)
-                {
-                    post.Message = "author";
-                }
-            }
-
-            return View(posts);
-        }
 
         // GET: UserPosts
         public async Task<IActionResult> UserPosts()
@@ -138,7 +108,7 @@ namespace SocialMedia.Web.Controllers
             var user = await this._userManager.GetUserAsync(User);
             ViewModel.CurrentUser = user;
             //Creates post in the current user`s profile
-            if (ModelState.IsValid && TempData["userPost"].ToString() == "true")
+            if (ModelState.IsValid)
             {
                 var post = new Post()
                 {
@@ -146,7 +116,7 @@ namespace SocialMedia.Web.Controllers
                     AuthorId = user.Id,
                     DatePosted = DateTime.Now,
                     Content = viewModel.Post.Content,
-                    TaggedUsers = TagFriendEntities()
+                    TaggedUsers = TagFriendEntities(),
                 };
 
                 _context.Posts.Add(post);
@@ -154,34 +124,6 @@ namespace SocialMedia.Web.Controllers
 
                 ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(UserPosts));
-            }
-            //Creates post in a group
-            else if (ModelState.IsValid && TempData["userGroup"].ToString() == "true")
-            {
-                var group = await this._context.Groups
-                    .FirstOrDefaultAsync(i => i.GroupId == _groupId);
-
-                if (group == null)
-                {
-                    return NotFound();
-                }
-
-                var post = new Post()
-                {
-                    Author = user,
-                    AuthorId = user.Id,
-                    DatePosted = DateTime.Now,
-                    Content = viewModel.Post.Content,
-                    GroupId = group.GroupId,
-                    Group = group,
-                    TaggedUsers = TagFriendEntities()
-                };
-
-                _context.Posts.Add(post);
-                await _context.SaveChangesAsync();
-
-                ViewModel = new PostTagFriendsViewModel();
-                return RedirectToAction(nameof(GroupPosts));
             }
 
             return View(viewModel);
@@ -221,7 +163,7 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromForm]PostTagFriendsViewModel viewModel)
         {
-            if (ModelState.IsValid && _groupId == 0)
+            if (ModelState.IsValid)
             {
                 try
                 {
@@ -261,53 +203,6 @@ namespace SocialMedia.Web.Controllers
 
                 ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(UserPosts));
-            }
-            else if (ModelState.IsValid && _groupId != 0)
-            {
-                try
-                {
-                    var user = await this._userManager.GetUserAsync(User);
-                    ViewModel.CurrentUser = user;
-                    var post = await this._context.Posts
-                        .Include(i => i.TaggedUsers)
-                        .FirstOrDefaultAsync(i => i.PostId == viewModel.Post.PostId);
-                    var group = await this._context.Groups
-                    .FirstOrDefaultAsync(i => i.GroupId == _groupId);
-
-                    if (group == null)
-                    {
-                        return NotFound();
-                    }
-
-                    post.Author = user;
-                    post.AuthorId = user.Id;
-                    post.Group = group;
-                    post.GroupId = group.GroupId;
-                    post.Content = viewModel.Post.Content;
-
-                    //Local tag friend entities
-                    var tagFriendEntities = TagFriendEntities(post);
-                    //Connected tag friend entities (In the db)
-                    var postTagFriendEntities = post.TaggedUsers;
-                    //If there is a mismatch between any record in Local and Connected collections will be deleted
-                    RemoveTaggedFriendRecords(postTagFriendEntities, tagFriendEntities);
-
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PostExists(viewModel.Post.PostId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
-                ViewModel = new PostTagFriendsViewModel();
-                return RedirectToAction(nameof(GroupPosts));
             }
 
             return View(viewModel);

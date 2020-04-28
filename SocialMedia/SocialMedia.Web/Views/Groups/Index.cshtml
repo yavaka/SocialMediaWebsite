@@ -26,7 +26,7 @@
                     @Html.DisplayFor(modelItem => group.Title)
                 </td>
                 <td>
-                    @Html.ActionLink("Details", "NonGroupMemberDetails", "Groups", new { id = group.GroupId })
+                    @Html.ActionLink("Details", "NonMemberDetails", "Groups", new { id = group.GroupId })
                 </td>
             </tr>
         }
