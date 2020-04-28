@@ -13,12 +13,6 @@
             <th>
                 Username
             </th>
-            <th>
-                Full name
-            </th>
-            <th>
-                Nationality
-            </th>
         </tr>
     </thead>
     <tbody>
@@ -28,12 +22,12 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.UserName)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Country)
-                </td>
+                @if (item.Message == "admin")
+                {
+                    <td>
+                        admin
+                    </td>
+                }
                 <td>
                     <a asp-controller="Friendships" asp-action="UserProfile" asp-route-id="@item.Id">View Profile</a>
                 </td>

@@ -287,6 +287,13 @@ namespace SocialMedia.Web.Controllers
             return RedirectToAction(nameof(MyGroups));
         }
 
+        private bool GroupExists(int id)
+        {
+            return _context.Groups.Any(e => e.GroupId == id);
+        }
+
+        #endregion
+
         //Post: Groups/JoinGroup
         public async Task<IActionResult> JoinGroup(int? id)
         {
@@ -317,7 +324,7 @@ namespace SocialMedia.Web.Controllers
             return RedirectToAction("MyGroups");
         }
 
-        public async Task<IActionResult> LeaveGroup(int? id) 
+        public async Task<IActionResult> LeaveGroup(int? id)
         {
             if (id == null)
             {
@@ -328,7 +335,7 @@ namespace SocialMedia.Web.Controllers
             var user = await this._userManager.GetUserAsync(User);
 
             var userInGroupEntity = await this._context.UsersInGroups
-                .FirstOrDefaultAsync(i => i.GroupId == id && 
+                .FirstOrDefaultAsync(i => i.GroupId == id &&
                                           i.UserId == user.Id);
 
             this._context.UsersInGroups.Remove(userInGroupEntity);
@@ -336,13 +343,6 @@ namespace SocialMedia.Web.Controllers
 
             return RedirectToAction(nameof(MyGroups));
         }
-
-        private bool GroupExists(int id)
-        {
-            return _context.Groups.Any(e => e.GroupId == id);
-        }
-
-        #endregion
 
         //Get: Groups/GroupMembers
         public async Task<IActionResult> GroupMembers(int id)
@@ -359,6 +359,10 @@ namespace SocialMedia.Web.Controllers
             {
                 if (member.UserId != user.Id)
                 {
+                    if (member.Admin == true)
+                    {
+                        member.User.Message = "admin";
+                    }
                     members.Add(member.User);
                 }
             }
