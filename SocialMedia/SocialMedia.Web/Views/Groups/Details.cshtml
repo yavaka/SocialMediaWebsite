@@ -24,6 +24,9 @@
 
 <!--Group posts-->
 <div class="container">
+    <div class="jumbotron">
+        <button>@Html.ActionLink("Create post", "Create", "Posts", new { id = Model.Group.GroupId })</button>
+    </div>
     @if (Model.Posts.Count == 0)
     {
         <div class="jumbotron">
@@ -32,7 +35,8 @@
     }
     else
     {
-        @foreach (var post in Model.Posts)
+        var posts = Model.Posts.OrderByDescending(d => d.Post.DatePosted);
+        @foreach (var post in posts)
         {
             <div class="jumbotron">
                 <h3>@post.Post.Author.UserName</h3>
@@ -40,7 +44,8 @@
                 {
                     <h4>@String.Join(',', post.Tagged)</h4>
                 }
-                <p>@post.Post.Content</p>
+            <hr />
+                <p style="font-size:24px">@post.Post.Content</p>
                 <span>@post.Post.DatePosted.Date</span>
             </div>
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models;
@@ -86,7 +87,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Posts/Create
-        public IActionResult Create()
+        public IActionResult Create(int? id)
         {
             var userId = this._userManager.GetUserId(User);
             var user = this._context.Users.FirstOrDefault(i => i.Id == userId);
@@ -96,6 +97,15 @@ namespace SocialMedia.Web.Controllers
                 CurrentUser = user,
                 UserFriends = GetUserFriends(user)
             };
+            
+            //Assign the group id if it is not null
+            if (id != null)
+            {
+                ViewModel.Post = new Post() 
+                {
+                    GroupId = id
+                };
+            }
 
             return View(ViewModel);
         }
@@ -118,11 +128,23 @@ namespace SocialMedia.Web.Controllers
                     Content = viewModel.Post.Content,
                     TaggedUsers = TagFriendEntities(),
                 };
+                
+                if (viewModel.Post.GroupId != null)
+                {
+                    post.GroupId = viewModel.Post.GroupId;
+                }
 
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
 
                 ViewModel = new PostTagFriendsViewModel();
+                
+                //Redirect to the given group details view
+                if (viewModel.Post.GroupId != null)
+                {
+                    return RedirectToAction("Details","Groups",new { id = post.GroupId});
+                }
+
                 return RedirectToAction(nameof(UserPosts));
             }
 

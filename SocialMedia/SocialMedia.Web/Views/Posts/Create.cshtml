@@ -12,6 +12,10 @@
     <div class="col-md-4">
         <form asp-action="Create" method="post">
             <!--Post model-->
+            @if (Model.Post.GroupId != null)
+            {
+                <input type="hidden" asp-for="@Model.Post.GroupId" value="@Model.Post.GroupId"/>
+            }
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 @*--Tagged users--*@
