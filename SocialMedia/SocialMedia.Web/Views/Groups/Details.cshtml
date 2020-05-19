@@ -8,17 +8,17 @@
 
 <!--Group information-->
 <div class="row">
-        <div class="col-sm-4">
-            <b>Group @Html.DisplayNameFor(model => model.Group.Description)</b> : 
-        </div>
-        <div" class="col-sm-8">
-            @Html.DisplayFor(model => model.Group.Description)
-        </div">
-        <div class="col-md-2"><a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.Group.GroupId">Members</a></div>
-        <div class="col-md-8"></div>
-        <div class="col-md-2">
-            <button>@Html.ActionLink("Leave group", "LeaveGroup", "Groups", new { id = Model.Group.GroupId })</button>
-        </div>
+    <div class="col-sm-4">
+        <b>Group @Html.DisplayNameFor(model => model.Group.Description)</b> :
+    </div>
+    <div" class="col-sm-8">
+        @Html.DisplayFor(model => model.Group.Description)
+    </div">
+    <div class="col-md-2"><a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.Group.GroupId">Members</a></div>
+    <div class="col-md-8"></div>
+    <div class="col-md-2">
+        <button>@Html.ActionLink("Leave group", "LeaveGroup", "Groups", new { id = Model.Group.GroupId })</button>
+    </div>
 </div>
 <hr />
 
@@ -36,17 +36,23 @@
     else
     {
         var posts = Model.Posts.OrderByDescending(d => d.Post.DatePosted);
-        @foreach (var post in posts)
+
+        @foreach (var postViewModel in posts)
         {
             <div class="jumbotron">
-                <h3>@post.Post.Author.UserName</h3>
-                @if (post.Tagged.Count > 0)
+                <h3>@postViewModel.Post.Author.UserName</h3>
+                @* Tagged users *@
+                @if (postViewModel.Tagged.Count > 0)
                 {
-                    <h4>@String.Join(',', post.Tagged)</h4>
+                    <h4>@String.Join(',', postViewModel.Tagged)</h4>
                 }
-            <hr />
-                <p style="font-size:24px">@post.Post.Content</p>
-                <span>@post.Post.DatePosted.Date</span>
+                <hr />
+                <p style="font-size:24px">@postViewModel.Post.Content</p>
+                <span>@postViewModel.Post.DatePosted.Date</span>
+                <hr />
+
+                <button class="btn btn-outline-info">@Html.ActionLink("Comments", "Index", "Comments", new { id = postViewModel.Post.PostId })</button>
+                <button class="btn btn-outline-primary">@Html.ActionLink("Add comment", "Create", "Comments", new { id = postViewModel.Post.PostId })</button>
             </div>
         }
     }

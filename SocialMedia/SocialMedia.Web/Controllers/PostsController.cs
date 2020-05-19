@@ -264,26 +264,11 @@ namespace SocialMedia.Web.Controllers
 
             //Removes all tagged friends in this post and this post`s comments
             _context.TagFriends.RemoveRange(post.TaggedUsers.ToList());
-
-            _context.Posts.Remove(post);
             _context.TagFriends.RemoveRange(commentsTaggedUsers);
+            _context.Posts.Remove(post);
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(UserPosts));
-        }
-
-        private ICollection<TagFriends> GetCommentsTaggedUsers(ICollection<Comment> postComments)
-        {
-            var taggedUsers = new List<TagFriends>();
-            foreach (var commentId in postComments.Select(i =>i.Id))
-            {
-                //Gets the comment with tagged users collection
-                var comment = this._context.Comments
-                    .Include(i => i.TaggedUsers)
-                    .FirstOrDefault(i =>i.Id == commentId);
-                
-                taggedUsers.AddRange(comment.TaggedUsers);
-            }
-            return taggedUsers;
         }
 
         private bool PostExists(int id)
@@ -292,6 +277,22 @@ namespace SocialMedia.Web.Controllers
         }
 
         #endregion
+
+        //TODO: Comments service: GetCommentsTaggedUsers(Collection of Comments)
+        private ICollection<TagFriends> GetCommentsTaggedUsers(ICollection<Comment> postComments)
+        {
+            var taggedUsers = new List<TagFriends>();
+            foreach (var commentId in postComments.Select(i => i.Id))
+            {
+                //Gets the comment with tagged users collection
+                var comment = this._context.Comments
+                    .Include(i => i.TaggedUsers)
+                    .FirstOrDefault(i => i.Id == commentId);
+
+                taggedUsers.AddRange(comment.TaggedUsers);
+            }
+            return taggedUsers;
+        }
 
         //TODO: Tag friends service : Entities(Post post)
         private ICollection<TagFriends> TagFriendEntities(Post post)

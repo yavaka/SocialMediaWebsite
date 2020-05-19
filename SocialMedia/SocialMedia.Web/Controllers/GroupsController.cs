@@ -108,6 +108,7 @@ namespace SocialMedia.Web.Controllers
             {
                 return NotFound();
             }
+
             ViewModel = new GroupViewModel();
             //Gets the group
             ViewModel.Group = await _context.Groups
@@ -131,13 +132,15 @@ namespace SocialMedia.Web.Controllers
                         Post = postTFEntities,
                         Tagged = (postTFEntities.TaggedUsers.Count > 0) 
                                     ? await GetTaggedUsersAsync(postTFEntities.TaggedUsers) 
-                                    : new List<User>()
+                                    : new List<User>(),
                     });
                 }
             }
             
             return View(ViewModel);
         }
+        
+       
 
         // GET: Groups/Create
         public IActionResult Create()
@@ -389,8 +392,8 @@ namespace SocialMedia.Web.Controllers
             return this._context.Posts
                 .Include(tf => tf.TaggedUsers)
                 .Include(a => a.Author)
+                .Include(c => c.Comments)
                 .FirstOrDefault(i => i.PostId == postId);
         }
-
     }
 }

@@ -34,20 +34,29 @@ namespace SocialMedia.Web.Controllers
         #region CRUD
 
         // GET: Comments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id)
         {
             //Current postId
-            if (TempData["postId"] != null)
+            if (id != null)
             {
-                _postId = int.Parse(TempData["postId"].ToString());
+                _postId = (int)id;
             }
-
+            //Gets current user
             var user = await this._userManager.GetUserAsync(User);
-
+            
+            var commentViewModels = new List<CommentTagFriendsViewModel>();
+            
+            //Connected: gets comments with TagFriend entities
             var comments = await _context.Comments
+                .Include(t =>t.TaggedUsers)
                 .Where(a => a.CommentedPostId == _postId)
                 .ToListAsync();
 
+            //If there are comments it will add them in commentsViewModels collection
+            if (comments.Count > 0)
+            {
+                commentViewModels = await GetCommentViewModelsAsync(comments);
+            }
             //If the current user is author of some comment, it can be edited and deleted
             foreach (var comment in comments)
             {
@@ -57,14 +66,18 @@ namespace SocialMedia.Web.Controllers
                 }
             }
 
-            return View(comments);
+            return View(commentViewModels);
         }
 
         // GET: Comments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? id)
         {
-            var userId = this._userManager.GetUserId(User);
-            var user = this._context.Users.FirstOrDefault(i => i.Id == userId);
+            if (id != null)
+            {
+                _postId = (int)id;
+            }
+
+            var user = await this._userManager.GetUserAsync(User);
 
             ViewModel = new CommentTagFriendsViewModel()
             {
@@ -76,8 +89,6 @@ namespace SocialMedia.Web.Controllers
         }
 
         // POST: Comments/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromForm]CommentTagFriendsViewModel viewModel)
@@ -159,9 +170,9 @@ namespace SocialMedia.Web.Controllers
                 {
                     var user = await this._userManager.GetUserAsync(User);
                     ViewModel.CurrentUser = user;
-                    
+
                     var comment = await this._context.Comments
-                        .Include(i =>i.TaggedUsers)
+                        .Include(i => i.TaggedUsers)
                         .FirstOrDefaultAsync(i => i.Id == viewModel.Comment.Id);
 
                     var post = await this._context.Posts
@@ -225,12 +236,12 @@ namespace SocialMedia.Web.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var comment = await _context.Comments
-                .Include(t =>t.TaggedUsers)
-                .FirstOrDefaultAsync(i =>i.Id == id);
-            
+                .Include(t => t.TaggedUsers)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
             //Removes all tagged friends
             _context.TagFriends.RemoveRange(comment.TaggedUsers);
-            
+
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -403,6 +414,51 @@ namespace SocialMedia.Web.Controllers
                 .ToList();
 
             this._context.TagFriends.AddRange(addedTagFriendEntities);
+        }
+
+        // Comments service: Add this method
+        //Get post`s comments and tagged users
+        private async Task<List<CommentTagFriendsViewModel>> GetCommentViewModelsAsync(ICollection<Comment> comments)
+        {
+            var commentViewModels = new List<CommentTagFriendsViewModel>();
+            //Get the current comment tagged users and author
+            foreach (var comment in comments)
+            {
+                commentViewModels.Add(await GetCommentViewModelAsync(comment));
+            }
+            return commentViewModels;
+        }
+
+        // Comments service: Add this method
+        //New object of type CommentTagFriendsViewModel
+        private async Task<CommentTagFriendsViewModel> GetCommentViewModelAsync(Comment comment)
+        {
+            //Get connected comment with tag friend entities and author
+            var connectedComment = this._context.Comments
+                .Include(t => t.TaggedUsers)
+                .Include(a => a.Author)
+                .FirstOrDefault(i => i.Id == comment.Id);
+
+            return new CommentTagFriendsViewModel()
+            {
+                Comment = connectedComment,
+                Tagged = (connectedComment.TaggedUsers.Count > 0)
+                            ? await GetTaggedUsersAsync(connectedComment.TaggedUsers)
+                            : new List<User>()
+            };
+        }
+
+        //TagFriends service: GetTaggedUsers(TagFriends entity collection parametter)
+        private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriends)
+        {
+            //Gets the tagged users
+            var taggedUsers = new List<User>();
+            foreach (var tagged in tagFriends)
+            {
+                taggedUsers.Add(await this._userManager.FindByIdAsync(tagged.TaggedId));
+            }
+
+            return taggedUsers;
         }
     }
 }
