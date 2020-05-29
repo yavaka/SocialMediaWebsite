@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using SocialMedia.Data;
 using SocialMedia.Models;
 using SocialMedia.Models.ViewModels;
@@ -139,8 +140,6 @@ namespace SocialMedia.Web.Controllers
             
             return View(ViewModel);
         }
-        
-       
 
         // GET: Groups/Create
         public IActionResult Create()
@@ -283,7 +282,16 @@ namespace SocialMedia.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var group = await _context.Groups.FindAsync(id);
+            var group = await _context.Groups
+                .Include(p => p.Posts)
+                .FirstOrDefaultAsync(i =>i.GroupId == id);
+
+            //Remove all group posts  
+            if (group.Posts.Count > 0)
+            {
+                RemoveGroupPosts(group.GroupId);
+            }
+
             _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
            
@@ -394,6 +402,43 @@ namespace SocialMedia.Web.Controllers
                 .Include(a => a.Author)
                 .Include(c => c.Comments)
                 .FirstOrDefault(i => i.PostId == postId);
+        }
+
+        private void RemoveGroupPosts(int groupId)
+        {
+            //Connected posts
+            var posts = this._context.Posts
+                .Include(t => t.TaggedUsers)
+                .Include(c => c.Comments)
+                .Where(g => g.GroupId == groupId);
+
+            //Get posts`s comments in multi-dimentional collection
+            var postsComments = posts.Select(c => c.Comments).ToList();
+
+            /// Parameter: convert the collection to 1d list
+            /// Remove comments` TagFriends entites without comments because on delete is set to cascade
+            RemoveCommentsTagFriendsEntities(postsComments.SelectMany(c => c.Distinct()));
+
+
+            //Multi-dimensional collection of TagFriends
+            var postsTagFriendEntities = posts.Select(t => t.TaggedUsers).ToList();
+
+            //Convert to 1d list and remove
+            this._context.TagFriends.RemoveRange(
+                postsTagFriendEntities.SelectMany(c => c.Distinct()));
+        }
+
+        private void RemoveCommentsTagFriendsEntities(IEnumerable<Comment> comments)
+        {
+            foreach (var comment in comments)
+            {
+                //Get comment`s TagFriends entities
+                comment.TaggedUsers = this._context.TagFriends
+                    .Where(cId => cId.CommentId == comment.Id)
+                    .ToList();
+
+                this._context.TagFriends.RemoveRange(comment.TaggedUsers);
+            }
         }
     }
 }

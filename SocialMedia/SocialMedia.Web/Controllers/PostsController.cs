@@ -260,7 +260,7 @@ namespace SocialMedia.Web.Controllers
                 .FirstOrDefaultAsync(i =>i.PostId == id);
 
             //Gets all comments tagged users
-            var commentsTaggedUsers = GetCommentsTaggedUsers(post.Comments);
+            var commentsTaggedUsers = GetCommentsTagFriendEntities(post.Comments);
 
             //Removes all tagged friends in this post and this post`s comments
             _context.TagFriends.RemoveRange(post.TaggedUsers.ToList());
@@ -279,7 +279,7 @@ namespace SocialMedia.Web.Controllers
         #endregion
 
         //TODO: Comments service: GetCommentsTaggedUsers(Collection of Comments)
-        private ICollection<TagFriends> GetCommentsTaggedUsers(ICollection<Comment> postComments)
+        private ICollection<TagFriends> GetCommentsTagFriendEntities(ICollection<Comment> postComments)
         {
             var taggedUsers = new List<TagFriends>();
             foreach (var commentId in postComments.Select(i => i.Id))
