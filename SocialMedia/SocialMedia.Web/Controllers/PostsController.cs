@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models;
@@ -14,14 +11,14 @@ using SocialMedia.Models.ViewModels;
 
 namespace SocialMedia.Web.Controllers
 {
-    //TODO: Integrate tag friends functionality in Edit method
     public class PostsController : Controller
     {
         private readonly SocialMediaDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-
         private static PostTagFriendsViewModel ViewModel = new PostTagFriendsViewModel();
+        private static int GroupId = 0;
+
 
         public PostsController(SocialMediaDbContext context,
             UserManager<User> userManager,
@@ -31,6 +28,7 @@ namespace SocialMedia.Web.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
 
         #region Posts
 
@@ -101,10 +99,7 @@ namespace SocialMedia.Web.Controllers
             //Assign the group id if it is not null
             if (id != null)
             {
-                ViewModel.Post = new Post() 
-                {
-                    GroupId = id
-                };
+                GroupId = (int)id;
             }
 
             return View(ViewModel);
@@ -129,9 +124,10 @@ namespace SocialMedia.Web.Controllers
                     TaggedUsers = TagFriendEntities(),
                 };
                 
-                if (viewModel.Post.GroupId != null)
+                //Assign groupId to the newly created post
+                if (GroupId != 0)
                 {
-                    post.GroupId = viewModel.Post.GroupId;
+                    post.GroupId = GroupId;
                 }
 
                 _context.Posts.Add(post);
@@ -140,7 +136,7 @@ namespace SocialMedia.Web.Controllers
                 ViewModel = new PostTagFriendsViewModel();
                 
                 //Redirect to the given group details view
-                if (viewModel.Post.GroupId != null)
+                if (GroupId != 0)
                 {
                     return RedirectToAction("Details","Groups",new { id = post.GroupId});
                 }
@@ -277,6 +273,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         #endregion
+
 
         //TODO: Comments service: GetCommentsTaggedUsers(Collection of Comments)
         private ICollection<TagFriends> GetCommentsTagFriendEntities(ICollection<Comment> postComments)
