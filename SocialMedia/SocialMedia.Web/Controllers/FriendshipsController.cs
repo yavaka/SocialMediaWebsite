@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SocialMedia.Data;
 using SocialMedia.Models;
+using SocialMedia.Models.ViewModels;
 
 namespace SocialMedia.Web.Controllers
 {
@@ -14,14 +15,18 @@ namespace SocialMedia.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SocialMediaDbContext _context;
 
+        
         public FriendshipsController(UserManager<User> userManager,
             SocialMediaDbContext context)
         {
             this._userManager = userManager;
             this._context = context;
         }
-        //TODO: accept/reject view
 
+
+        private static FriendshipViewModel ViewModel { get; set; } = new FriendshipViewModel();
+
+        
         //Friends
         public async Task<IActionResult> Friends()
         {
@@ -145,6 +150,16 @@ namespace SocialMedia.Web.Controllers
             var addressee = await this._userManager.FindByIdAsync(urlPath[3]);
             var requester = await this._userManager.GetUserAsync(User);
 
+            if (addressee == null || requester == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                //Add the addressee user in the pending collection
+                ViewModel.Pending.Add(addressee);
+            }
+
             var friendship = new Friendship()
             {
                 AddresseeId = addressee.Id,
@@ -157,27 +172,27 @@ namespace SocialMedia.Web.Controllers
             await this._context.Friendships.AddAsync(friendship);
             await this._context.SaveChangesAsync();
 
-            return RedirectToAction("NonFriends");
+            return RedirectToAction(nameof(FriendRequests));
         }
 
         //Addressee
         public async Task<IActionResult> FriendRequests()
         {
-            var addressee = await this._userManager.GetUserAsync(User);
+            var currentUser = await this._userManager.GetUserAsync(User);
 
-            var requestersIds = this._context.Friendships
-                .Where(a => a.AddresseeId == addressee.Id && a.Status == 0)
+            ViewModel.Requests = this._context.Friendships
+                .Include(r => r.Requester)
+                .Where(a => a.AddresseeId == currentUser.Id && a.Status == 0)
+                .Select(r =>r.Requester)
                 .ToList();
 
-            var requests = new List<User>();
-            foreach (var requesterId in requestersIds)
-            {
-                requests.Add(
-                    this._context.Users
-                    .FirstOrDefault(i => i.Id == requesterId.RequesterId));
-            }
+            ViewModel.Pending = this._context.Friendships
+                .Include(a => a.Addressee)
+                .Where(r => r.RequesterId == currentUser.Id && r.Status == 0)
+                .Select(a => a.Addressee)
+                .ToList();
 
-            return View(requests);
+            return View(ViewModel);
         }
 
         //Accept request
@@ -200,7 +215,7 @@ namespace SocialMedia.Web.Controllers
 
             await this._context.SaveChangesAsync();
 
-            return RedirectToAction("FriendRequests");
+            return RedirectToAction(nameof(FriendRequests));
         }
 
         //Reject request
@@ -222,9 +237,8 @@ namespace SocialMedia.Web.Controllers
             this._context.Friendships.Remove(friendship);
             await this._context.SaveChangesAsync();
 
-            return RedirectToAction("FriendRequests");
+            return RedirectToAction(nameof(FriendRequests));
         }
-
 
     }
 }
