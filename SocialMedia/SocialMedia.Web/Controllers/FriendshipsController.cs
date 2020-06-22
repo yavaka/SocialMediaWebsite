@@ -52,7 +52,6 @@ namespace SocialMedia.Web.Controllers
                     this._context.Users
                     .FirstOrDefault(i => i.Id == friendId.AddresseeId));
                 }
-
             }
 
             return View(friends);

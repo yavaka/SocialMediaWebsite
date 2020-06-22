@@ -3,43 +3,47 @@
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 
-    <ul class="navbar-nav">
-        @if (SignInManager.IsSignedIn(User))
-        {
-            <li class="nav-item dropdown">
-                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Groups</a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="MyGroups">My Groups</a></li>
-                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">All Groups</a></li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Friendships</a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="Friends">Friends</a></li>
-                    <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="FriendRequests">Requests</a></li>
-                    <li><a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="NonFriends">Non friends</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="UserPosts">Posts</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Account</a>
-            </li>
-            <li class="nav-item">
-                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                    <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-                </form>
-            </li>
-        }
-        else
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-            </li>
-        }
-    </ul>
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Groups</a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="MyGroups">My Groups</a></li>
+                <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="Index">All Groups</a></li>
+            </ul>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Friendships</a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="Friends">Friends</a></li>
+                <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="FriendRequests">Requests</a></li>
+                <li><a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="NonFriends">Non friends</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="UserPosts">Posts</a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" @*aria-haspopup="true"*@ aria-expanded="false" style="cursor:pointer">Account</a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link text-dark" asp-controller="Profile" asp-action="Index">Profile</a></li>
+                <li><a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Settings</a></li>
+                <li>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                        <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
+</ul>
