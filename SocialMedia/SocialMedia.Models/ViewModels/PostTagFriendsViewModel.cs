@@ -11,11 +11,13 @@ namespace SocialMedia.Models.ViewModels
         {
             this.UserFriends = new List<User>();
             this.Tagged = new List<User>();
+            this.Comments = new List<CommentTagFriendsViewModel>();
         }
 
         public Post Post { get; set; }
         public User CurrentUser { get; set; }
         public ICollection<User> UserFriends { get; set; }
         public ICollection<User> Tagged { get; set; }
+        public ICollection<CommentTagFriendsViewModel> Comments{ get; set; }
     }
 }

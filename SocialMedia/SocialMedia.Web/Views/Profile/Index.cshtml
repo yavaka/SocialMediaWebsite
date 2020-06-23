@@ -1,4 +1,4 @@
-﻿@model SocialMedia.Models.User
+﻿@model SocialMedia.Models.ViewModels.ProfileViewModel
 
 @{
     ViewData["Title"] = "Profile";
@@ -15,13 +15,13 @@
                     <tbody>
                         <tr></tr>
                         <tr>
-                            <td><b>@Model.FullName</b></td>
-                            <td><b>@Model.UserName</b></td>
+                            <td><b>@Model.CurrentUser.FullName</b></td>
+                            <td><b>@Model.CurrentUser.UserName</b></td>
                         </tr>
                         <tr></tr>
                         <tr>
-                            <td>@Model.Country</td>
-                            <td>@Model.DOB</td>
+                            <td>@Model.CurrentUser.Country</td>
+                            <td>@Model.CurrentUser.DOB</td>
                         </tr>
                     </tbody>
                 </table>
@@ -51,6 +51,7 @@
 
 <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
+<!-- New post -->
 <div class="container mt-3 border p-3">
     <h2>New Post</h2>
     <div class="media border p-3">
@@ -69,54 +70,40 @@
     </div>
 </div>
 
-<div class="container mt-3">
-    <div class="media border p-3">
-        <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-        <div class="media-body">
-            <h4>Username <small><i>Posted on DateTime</i></small></h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua.
-            </p>
-        </div>
-    </div>
-</div>
+<!-- Posts -->
+@if (Model.Posts.Count > 0)
+{
+    foreach (var post in Model.Posts.OrderByDescending(d => d.Post.DatePosted))
+    {
 
-<div class="container mt-3">
-    <div class="media border p-3">
-        <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-        <div class="media-body">
-            <h4>Username <small><i>Posted on DateTime</i></small></h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua.
-            </p>
-        </div>
-    </div>
-</div>
+        <div class="container mt-3">
+            <div class="media border p-3">
+                <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                <div class="media-body">
 
-<div class="container mt-3">
-    <div class="media border p-3">
-        <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-        <div class="media-body">
-            <h4>Username <small><i>Posted on DateTime</i></small></h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua.
-            </p>
-        </div>
-    </div>
-</div>
+                    @if (post.Post.Group != null)
+                    {
+                        <h4>@Model.CurrentUser.UserName <small><i>Posted in <b>@post.Post.Group.Title</b> on @post.Post.DatePosted.Date</i></small></h4>
 
-<div class="container mt-3">
-    <div class="media border p-3">
-        <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-        <div class="media-body">
-            <h4>Username <small><i>Posted on DateTime</i></small></h4>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua.
-            </p>
+                    }
+                    else
+                    {
+                        <h4>@Model.CurrentUser.UserName <small><i>Posted on @post.Post.DatePosted.Date</i></small></h4>
+                    }
+
+                    @if (post.Tagged.Count > 0)
+                    {
+                        foreach (var user in post.Tagged)
+                        {
+                            <a href="#" class="badge badge-primary">@user.UserName</a>
+                        }
+                    }
+                    <p>
+                        @post.Post.Content
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+
+    }
+}

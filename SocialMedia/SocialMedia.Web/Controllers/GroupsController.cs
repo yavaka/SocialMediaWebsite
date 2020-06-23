@@ -108,6 +108,7 @@ namespace SocialMedia.Web.Controllers
             }
 
             ViewModel = new GroupViewModel();
+            
             //Gets the group
             ViewModel.Group = await _context.Groups
                 .Include(p =>p.Posts)
@@ -379,11 +380,11 @@ namespace SocialMedia.Web.Controllers
         }
 
         //TODO: Tag friends service: GetTaggedUsersByPostId(int postId)
-        private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriends)
+        private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriendEntities)
         {
             //Gets the tagged users
             var taggedUsers = new List<User>();
-            foreach (var tagged in tagFriends)
+            foreach (var tagged in tagFriendEntities)
             {
                 taggedUsers.Add(await this._userManager.FindByIdAsync(tagged.TaggedId));
             }
