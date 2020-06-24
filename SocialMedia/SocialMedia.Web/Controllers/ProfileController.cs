@@ -120,7 +120,7 @@ namespace SocialMedia.Web.Controllers
             {
                 taggedUsers.Add(await this._userManager.FindByIdAsync(tagged.TaggedId));
             }
-
+            
             return taggedUsers;
         }
     }

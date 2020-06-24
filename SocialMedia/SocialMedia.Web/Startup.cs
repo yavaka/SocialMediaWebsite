@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SocialMedia.Data;
@@ -38,7 +40,7 @@ namespace SocialMedia.Web
             var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
             services.AddDbContext<SocialMediaDbContext>(opt => opt.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True"));
 
-            services.AddIdentity<User, IdentityRole>(options => 
+            services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
@@ -49,7 +51,7 @@ namespace SocialMedia.Web
                 options.User.RequireUniqueEmail = true;
             })
                 .AddEntityFrameworkStores<SocialMediaDbContext>()
-                .AddDefaultTokenProviders(); 
+                .AddDefaultTokenProviders();
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
 
@@ -72,6 +74,13 @@ namespace SocialMedia.Web
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                RequestPath = "/wwwroot"
+            });
+
             app.UseAuthentication();
 
             app.UseRouting();

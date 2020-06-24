@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container">
@@ -75,10 +76,9 @@
 {
     foreach (var post in Model.Posts.OrderByDescending(d => d.Post.DatePosted))
     {
-
-        <div class="container mt-3">
+        <div class="container">
             <div class="media border p-3">
-                <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
                 <div class="media-body">
 
                     @if (post.Post.Group != null)
@@ -101,9 +101,61 @@
                     <p>
                         @post.Post.Content
                     </p>
+
+                    <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+
+                    <!-- New Comment-->
+                    <div class="container">
+                        <div class="media">
+                            <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                            <div class="media-body">
+                                <form>
+                                    <div class="form-group">
+                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Drop a comment"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <img src="https://img.icons8.com/ultraviolet/40/000000/paper-plane.png" />Comment
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+
+                    <!-- Comments -->
+                    @if (post.Comments.Count > 0)
+                    {
+                        foreach (var comment in post.Comments)
+                        {
+                            <div class="container mt-3">
+                                <div class="media border p-3">
+                                    <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                                    <div class="media-body">
+                                        <!-- Author and posted date-->
+                                        <h4>@comment.Comment.Author.UserName <small><i>Posted on @comment.Comment.DatePosted</i></small></h4>
+
+                                        <!-- Tagged users -->
+                                        @if (comment.Tagged.Count > 0)
+                                        {
+                                            foreach (var user in comment.Tagged)
+                                            {
+                                                <a href="#" class="badge badge-primary">@user.UserName</a>
+                                            }
+                                        }
+
+                                        <!-- Content -->
+                                        <p>@comment.Comment.Content</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
                 </div>
             </div>
         </div>
-
     }
 }
