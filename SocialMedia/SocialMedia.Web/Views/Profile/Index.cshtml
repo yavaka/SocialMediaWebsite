@@ -52,23 +52,8 @@
 
 <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-<!-- New post -->
-<div class="container mt-3 border p-3">
-    <h2>New Post</h2>
-    <div class="media border p-3">
-        <img src="~/img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-        <div class="media-body">
-            <form>
-                <div class="form-group">
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
-                              placeholder="What is on your mind?"></textarea>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-outline-primary"><img src="https://img.icons8.com/ultraviolet/40/000000/paper-plane.png" />  Post</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="container">
+    <button class="btn btn-outline-primary">@Html.ActionLink("Add Post", "Create", "Posts", new { invokedFrom = "profile page" })</button>
 </div>
 
 <!-- Posts -->
@@ -104,31 +89,14 @@
 
                     <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-                    <!-- New Comment-->
-                    <div class="container">
-                        <div class="media">
-                            <img src="img/profile_pic.png" alt="John Doe" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-                            <div class="media-body">
-                                <form>
-                                    <div class="form-group">
-                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Drop a comment"></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-outline-primary">
-                                            <img src="https://img.icons8.com/ultraviolet/40/000000/paper-plane.png" />Comment
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="btn btn-outline-primary">@Html.ActionLink("Add Comment", "Create", "Comments", new {id = post.Post.PostId, invokedFrom = "profile page" })</button>
 
                     <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
                     <!-- Comments -->
                     @if (post.Comments.Count > 0)
                     {
-                        foreach (var comment in post.Comments)
+                        foreach (var comment in post.Comments.OrderByDescending(d =>d.Comment.DatePosted))
                         {
                             <div class="container mt-3">
                                 <div class="media border p-3">

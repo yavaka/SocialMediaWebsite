@@ -30,10 +30,10 @@ namespace SocialMedia.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> IndexAsync()
         {
-            ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
+            this.ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
 
             //Get all post, comments and tagged users in ViewModel
-            ViewModel.Posts = await GetPostViewModelsByUserIdAsync(ViewModel.CurrentUser.Id);
+            this.ViewModel.Posts = await GetPostViewModelsByUserIdAsync(ViewModel.CurrentUser.Id);
 
             return View(ViewModel);
         }
@@ -54,7 +54,6 @@ namespace SocialMedia.Web.Controllers
 
             return postViewModels;
         }
-
 
         private async Task<PostTagFriendsViewModel> NewPostViewModelAsync(int postId)
         {

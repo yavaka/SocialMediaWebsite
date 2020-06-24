@@ -17,5 +17,7 @@ namespace SocialMedia.Models.ViewModels
         public ICollection<User> UserFriends { get; set; }
         public ICollection<User> Tagged { get; set; }
 
+        public string Message { get; set; }
+
     }
 }

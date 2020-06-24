@@ -70,7 +70,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Comments/Create
-        public async Task<IActionResult> Create(int? id)
+        public async Task<IActionResult> Create(int? id, string invokedFrom)
         {
             if (id != null)
             {
@@ -82,7 +82,8 @@ namespace SocialMedia.Web.Controllers
             ViewModel = new CommentTagFriendsViewModel()
             {
                 CurrentUser = user,
-                UserFriends = GetUserFriends(user)
+                UserFriends = GetUserFriends(user),
+                Message = invokedFrom
             };
 
             return View(ViewModel);
@@ -121,6 +122,12 @@ namespace SocialMedia.Web.Controllers
 
                 this._context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
+
+                if (ViewModel.Message == "profile page")
+                {
+                    ViewModel = new CommentTagFriendsViewModel();
+                    return RedirectToAction("Index", "Profile");
+                }
 
                 ViewModel = new CommentTagFriendsViewModel();
                 return RedirectToAction(nameof(Index));

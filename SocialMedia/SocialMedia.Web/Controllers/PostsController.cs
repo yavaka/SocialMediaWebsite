@@ -85,7 +85,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         // GET: Posts/Create
-        public IActionResult Create(int? id)
+        public IActionResult Create(int? id, string invokedFrom)
         {
             var userId = this._userManager.GetUserId(User);
             var user = this._context.Users.FirstOrDefault(i => i.Id == userId);
@@ -101,6 +101,8 @@ namespace SocialMedia.Web.Controllers
             {
                 GroupId = (int)id;
             }
+
+            ViewModel.Message = invokedFrom;
 
             return View(ViewModel);
         }
@@ -132,6 +134,12 @@ namespace SocialMedia.Web.Controllers
 
                 _context.Posts.Add(post);
                 await _context.SaveChangesAsync();
+
+                if (ViewModel.Message == "profile page")
+                {
+                    ViewModel = new PostTagFriendsViewModel();
+                    return RedirectToAction("Index", "Profile");
+                }
 
                 ViewModel = new PostTagFriendsViewModel();
                 
