@@ -2,8 +2,13 @@
 
 @{
     ViewData["Title"] = "Profile";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<style type="text/css">
+    .container .posts {
+        margin-bottom: 50px;
+    }
+</style>
 
 <div class="container">
     <div class="jumbotron">
@@ -31,10 +36,10 @@
     </div>
 </div>
 
-<hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+<hr class="container" style="height: 1px; border-width: 0; color: skyblue; background-color: skyblue">
 
 <div class="container">
-    <ul class="nav">
+    <ul class="nav" style="margin: 0, auto;">
         <li class="nav-item col-md-3">
             <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/about.png" />  About </button>
         </li>
@@ -52,30 +57,36 @@
 
 <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-<div class="container">
-    <button class="btn btn-outline-primary">@Html.ActionLink("Add Post", "Create", "Posts", new { invokedFrom = "profile page" })</button>
-</div>
+<div class="container posts">
 
-<!-- Posts -->
-@if (Model.Posts.Count > 0)
-{
-    foreach (var post in Model.Posts.OrderByDescending(d => d.Post.DatePosted))
+    <!-- New Post Btn -->
+    @Html.ActionLink("Add Post", "Create", "Posts", new { invokedFrom = "profile page" }, new { @class = "col-md-12 btn btn-outline-primary", @style = "margin: 20px" })
+
+    <!-- Posts -->
+    @if (Model.Posts.Count > 0)
     {
-        <div class="container">
-            <div class="media border p-3">
+        foreach (var post in Model.Posts.OrderByDescending(d => d.Post.DatePosted))
+        {
+            <div class="media border p-3" style="margin-bottom: 20px;">
                 <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
                 <div class="media-body">
+                    <!-- Post author and posted on-->
+                    <div class="row">
+                        <div class="col-md-10">
+                            @if (post.Post.Group != null)
+                            {
+                                <h5>@Model.CurrentUser.UserName <small><i>Posted in <b>@post.Post.Group.Title</b> on @post.Post.DatePosted.Date</i></small></h5>
 
-                    @if (post.Post.Group != null)
-                    {
-                        <h4>@Model.CurrentUser.UserName <small><i>Posted in <b>@post.Post.Group.Title</b> on @post.Post.DatePosted.Date</i></small></h4>
-
-                    }
-                    else
-                    {
-                        <h4>@Model.CurrentUser.UserName <small><i>Posted on @post.Post.DatePosted.Date</i></small></h4>
-                    }
-
+                            }
+                            else
+                            {
+                                <h5>@Model.CurrentUser.UserName <small><i>Posted on @post.Post.DatePosted.Date</i></small></h5>
+                            }
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary"><img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" /></button>
+                        </div>
+                    </div>
                     @if (post.Tagged.Count > 0)
                     {
                         foreach (var user in post.Tagged)
@@ -83,27 +94,30 @@
                             <a href="#" class="badge badge-primary">@user.UserName</a>
                         }
                     }
-                    <p>
+
+
+                    <p style="margin: 15px">
                         @post.Post.Content
                     </p>
 
-                    <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-                    <button class="btn btn-outline-primary">@Html.ActionLink("Add Comment", "Create", "Comments", new {id = post.Post.PostId, invokedFrom = "profile page" })</button>
+                    <!-- New Comment Btn -->
+                    @Html.ActionLink("Add Comment", "Create", "Comments", new { id = post.Post.PostId, invokedFrom = "profile page" }, new { @class = "btn btn-outline-primary" })
 
-                    <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
                     <!-- Comments -->
                     @if (post.Comments.Count > 0)
                     {
-                        foreach (var comment in post.Comments.OrderByDescending(d =>d.Comment.DatePosted))
+                        foreach (var comment in post.Comments.OrderByDescending(d => d.Comment.DatePosted))
                         {
                             <div class="container mt-3">
                                 <div class="media border p-3">
                                     <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
                                     <div class="media-body">
                                         <!-- Author and posted date-->
-                                        <h4>@comment.Comment.Author.UserName <small><i>Posted on @comment.Comment.DatePosted</i></small></h4>
+                                        <h6>@comment.Comment.Author.UserName <small><i>Posted on @comment.Comment.DatePosted</i></small></h6>
 
                                         <!-- Tagged users -->
                                         @if (comment.Tagged.Count > 0)
@@ -121,9 +135,9 @@
                             </div>
                         }
                     }
-
                 </div>
             </div>
-        </div>
+
+        }
     }
-}
+</div>
