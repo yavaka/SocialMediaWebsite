@@ -156,7 +156,7 @@ namespace SocialMedia.Web.Controllers
         }
 
         //GET: Posts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string invokedFrom)
         {
             if (id == null)
             {
@@ -180,6 +180,7 @@ namespace SocialMedia.Web.Controllers
               Let`s get that user x is already tagged from the creation of the post.
               It does not make sense the current user to be allowed to tag user x twice.*/
             ViewModel.UserFriends = GetUserFriends(user);
+            ViewModel.Message = invokedFrom;
 
             return View(ViewModel);
         }
@@ -227,6 +228,12 @@ namespace SocialMedia.Web.Controllers
                     }
                 }
 
+                if (ViewModel.Message == "profile page")
+                {
+                    ViewModel = new PostTagFriendsViewModel();
+                    return RedirectToAction("Index", "Profile");
+                }
+
                 ViewModel = new PostTagFriendsViewModel();
                 return RedirectToAction(nameof(UserPosts));
             }
@@ -236,7 +243,7 @@ namespace SocialMedia.Web.Controllers
 
         //TODO: The DELETE statement conflicted with the REFERENCE constraint "TagFriendsToPost_FK". The conflict occurred in database "SocialMedia", table "dbo.TagFriends", column 'PostId'.
         // GET: Posts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string invokedFrom)
         {
             if (id == null)
             {
@@ -249,6 +256,8 @@ namespace SocialMedia.Web.Controllers
             {
                 return NotFound();
             }
+
+            ViewModel.Message = invokedFrom;
 
             return View(post);
         }
@@ -272,6 +281,13 @@ namespace SocialMedia.Web.Controllers
             _context.Posts.Remove(post);
             
             await _context.SaveChangesAsync();
+
+            if (ViewModel.Message == "profile page")
+            {
+                ViewModel = new PostTagFriendsViewModel();
+                return RedirectToAction("Index", "Profile");
+            }
+
             return RedirectToAction(nameof(UserPosts));
         }
 
