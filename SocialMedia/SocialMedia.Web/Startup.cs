@@ -1,23 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SocialMedia.Data;
 using SocialMedia.Models;
 using SocialMedia.Web.Identity;
+using SocialMedia.Web.Infrastructure;
 
 namespace SocialMedia.Web
 {
@@ -30,28 +21,17 @@ namespace SocialMedia.Web
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //TODO: routing 
             services.AddLogging();
             services.AddRazorPages();
             services.AddMvc();
-            var migrationAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-            services.AddDbContext<SocialMediaDbContext>(opt => opt.UseSqlServer("Server=(localdb)\\MSSQLLocalDB; Database=SocialMedia; Integrated Security=True; Trusted_Connection=True"));
+            
+            services
+                .AddDbContext<SocialMediaDbContext>(opt => opt
+                .UseSqlServer(Configuration.GetConnectionString("SocialMediaDb")));
 
-            services.AddIdentity<User, IdentityRole>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredUniqueChars = 6;
-                options.User.RequireUniqueEmail = true;
-            })
-                .AddEntityFrameworkStores<SocialMediaDbContext>()
-                .AddDefaultTokenProviders();
+            services.AddIdentity();
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
 
@@ -59,7 +39,6 @@ namespace SocialMedia.Web
             services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Login");
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -74,12 +53,6 @@ namespace SocialMedia.Web
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-                RequestPath = "/wwwroot"
-            });
 
             app.UseAuthentication();
 
@@ -89,9 +62,7 @@ namespace SocialMedia.Web
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
         }
