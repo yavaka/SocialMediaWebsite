@@ -1,23 +1,29 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using SocialMedia.Data;
-using SocialMedia.Models;
-using SocialMedia.Web.Identity;
-using SocialMedia.Web.Infrastructure;
-
 namespace SocialMedia.Web
 {
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using SocialMedia.Data;
+    using SocialMedia.Web.Identity;
+    using Infrastructure;
+    using SocialMedia.Services.TaggedUser;
+    using SocialMedia.Data.Models;
+    using SocialMedia.Services.Post;
+    using SocialMedia.Services.Friendship;
+    using SocialMedia.Services.Profile;
+    using SocialMedia.Services.Comment;
+    using SocialMedia.Services.User;
+    using SocialMedia.Services.Group;
+    using SocialMedia.Services.Url;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+            => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
@@ -26,17 +32,21 @@ namespace SocialMedia.Web
             services.AddLogging();
             services.AddRazorPages();
             services.AddMvc();
-            
+
             services
                 .AddDbContext<SocialMediaDbContext>(opt => opt
-                .UseSqlServer(Configuration.GetConnectionString("SocialMediaDb")));
+                    .UseSqlServer(Configuration.GetConnectionString("SocialMediaDb")));
 
             services.AddIdentity();
 
             services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
 
-            //Cookies for Login
-            services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Login");
+            services.AddConventionalServices();
+
+            // Cookies for Login
+            services
+                .ConfigureApplicationCookie(options => options
+                    .LoginPath = "/Account/Login");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,9 +58,9 @@ namespace SocialMedia.Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

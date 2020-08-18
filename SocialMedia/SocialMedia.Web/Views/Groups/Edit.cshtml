@@ -1,4 +1,4 @@
-﻿@model SocialMedia.Models.ViewModels.GroupViewModel
+﻿@model SocialMedia.Services.Group.GroupServiceModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -11,16 +11,16 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="@Model.Group.GroupId" />
+            <input type="hidden" asp-for="@Model.GroupId" />
             <div class="form-group">
-                <label asp-for="@Model.Group.Title" class="control-label"></label>
-                <input asp-for="@Model.Group.Title" class="form-control" />
-                <span asp-validation-for="@Model.Group.Title" class="text-danger"></span>
+                <label asp-for="@Model.Title" class="control-label"></label>
+                <input asp-for="@Model.Title" class="form-control" />
+                <span asp-validation-for="@Model.Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="@Model.Group.Description" class="control-label"></label>
-                <input asp-for="@Model.Group.Description" class="form-control" />
-                <span asp-validation-for="@Model.Group.Description" class="text-danger"></span>
+                <label asp-for="@Model.Description" class="control-label"></label>
+                <input asp-for="@Model.Description" class="form-control" />
+                <span asp-validation-for="@Model.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

@@ -1,4 +1,4 @@
-﻿@model SocialMedia.Models.Group
+﻿@model SocialMedia.Web.Models.GroupViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -6,10 +6,9 @@
 
 <h1>Delete</h1>
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Are you sure you want to delete this group?</h3>
 <div>
-    <h4>Group</h4>
-    <hr />
+    <hr />  
     <dl class="row">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Title)
@@ -27,7 +26,6 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="GroupId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Delete" class="btn btn-danger" />
     </form>
 </div>

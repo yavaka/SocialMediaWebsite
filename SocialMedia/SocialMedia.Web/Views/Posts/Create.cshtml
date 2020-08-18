@@ -1,5 +1,4 @@
-﻿@using System.Text
-@model SocialMedia.Models.ViewModels.PostTagFriendsViewModel
+﻿@model SocialMedia.Web.Models.PostViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -10,34 +9,18 @@
 
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" method="post">
+        <form asp-controller="Posts">
             <!--Post model-->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                @*--Tagged users--*@
-                @if (Model.Tagged.Count > 0)
-                {
-                    var sb = new StringBuilder();
-                    sb.Append(Model.CurrentUser.UserName + "is with");
-                    foreach (var user in Model.Tagged)
-                    {
-                        sb.Append($" {user.UserName},");
-                    }
-                    var result = sb.ToString().TrimEnd(',');
-                    <label>@result</label>
-                }
-                else
-                {
-                    <label>@Model.CurrentUser.UserName</label>
-                }
-                <input asp-for="@Model.Post.Content" class="form-control" />
-                <span asp-validation-for="@Model.Post.Content" class="text-danger"></span>
+                <input asp-for="@Model.Content" class="form-control" />
+                <input type="hidden" asp-for="@Model.GroupId" value="@Model.GroupId" />
+                <span asp-validation-for="@Model.Content" class="text-danger"></span>
             </div>
 
             <!--Tag friends-->
             <div>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Tag Friends</button>
-                <!-- Modal -->
                 <div class="modal fade" id="myModal" role="dialog">
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
@@ -45,23 +28,20 @@
                                 <h4 class="modal-title">Friends</h4>
                             </div>
                             <div class="modal-body">
-                                <ul>
-                                    @if (Model.UserFriends.Count == 0)
+                                <table>
+                                    @for (int i = 0; i < Model.TagFriends.Friends.Count; i++)
                                     {
-                                        <li>
-                                            @Model.CurrentUser.UserName, you do not have any more friends.
-                                        </li>
+                                        <tr>
+                                            <td>
+                                                @Html.HiddenFor(m => Model.TagFriends.Friends[i].Id)
+                                                @Html.CheckBoxFor(m => Model.TagFriends.Friends[i].Checked)
+                                            </td>
+                                            <td>
+                                                @Html.DisplayFor(m => Model.TagFriends.Friends[i].UserName)
+                                            </td>
+                                        </tr>
                                     }
-                                    else
-                                    {
-                                        @foreach (var user in Model.UserFriends)
-                                        {
-                                            <li>
-                                                @Html.ActionLink(user.UserName, "TagFriend", "Posts", new { taggedId = user.Id, viewName = "Create" })
-                                            </li>
-                                        }
-                                    }
-                                </ul>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -70,12 +50,8 @@
 
             <br />
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">Create</button>
             </div>
         </form>
     </div>
 </div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

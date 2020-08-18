@@ -1,4 +1,4 @@
-﻿@model SocialMedia.Models.ViewModels.FriendshipViewModel
+﻿@model SocialMedia.Services.Friendship.FriendshipServiceModel
 @{
     ViewData["Title"] = "FriendRequests";
 }
@@ -18,20 +18,26 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Requests)
+                @foreach (var user in Model.Requests)
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => item.UserName)
+                            @Html.DisplayFor(modelItem => user.UserName)
                         </td>
                         <td>
-                            <a asp-action="Accept" asp-route-id="@item.Id">Accept</a> |
+                            @Html.ActionLink("Accept", "Accept", "Friendships",
+                         new { requesterId = user.Id },
+                         new { @class = "btn btn-outline-success"})
                         </td>
                         <td>
-                            <a asp-action="Reject" asp-route-id="@item.Id">Reject</a>
+                            @Html.ActionLink("Reject", "Reject", "Friendships",
+                         new { requesterId = user.Id },
+                         new { @class = "btn btn-outline-danger"})
                         </td>
                         <td>
-                            <a asp-action="UserProfile" asp-route-id="@item.Id">View Profile</a>
+                            @Html.ActionLink("View Profile", "FriendshipStatus",
+                        new { userId = user.Id, invokedFrom = "Requests" },
+                        new { @class = "btn btn-outline-primary"})
                         </td>
                     </tr>
                 }
@@ -50,14 +56,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Pending)
+                @foreach (var user in Model.PendingRequests)
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => item.UserName)
+                            @Html.DisplayFor(modelItem => user.UserName)
                         </td>
                         <td>
-                            <a asp-action="UserProfile" asp-route-id="@item.Id">View Profile</a>
+                            @Html.ActionLink("View Profile", "FriendshipStatus",
+                       new { userId = user.Id, invokedFrom = "Pendings"},
+                       new { @class = "btn btn-outline-primary"})
                         </td>
                     </tr>
                 }

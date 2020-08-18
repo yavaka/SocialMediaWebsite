@@ -1,0 +1,40 @@
+﻿@model ICollection<SocialMedia.Services.Group.GroupServiceModel>
+
+@{
+    ViewData["Title"] = "MyGroups";
+}
+
+<h1>My Groups</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Title
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => group.Title)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Groups", new { id = group.GroupId })
+                </td>
+                @if (group.AdminId == TempData["currentUserId"] as string)
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@group.GroupId">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@group.GroupId">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

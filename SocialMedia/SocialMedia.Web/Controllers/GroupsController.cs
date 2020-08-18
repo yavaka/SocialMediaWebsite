@@ -1,442 +1,348 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Data;
-using SocialMedia.Models;
-using SocialMedia.Models.ViewModels;
-
-namespace SocialMedia.Web.Controllers
+﻿namespace SocialMedia.Web.Controllers
 {
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using SocialMedia.Services.Comment;
+    using SocialMedia.Services.Group;
+    using SocialMedia.Services.Post;
+    using SocialMedia.Services.TaggedUser;
+    using SocialMedia.Services.User;
+    using SocialMedia.Web.Models;
+
+    [Authorize]
     public class GroupsController : Controller
     {
-        private readonly SocialMediaDbContext _context;
-        private readonly UserManager<User> _userManager;
-        private static GroupViewModel ViewModel = new GroupViewModel();
-        public GroupsController(SocialMediaDbContext context, UserManager<User> userManager)
+        private readonly IUserService _userService;
+        private readonly IGroupService _groupService;
+        private readonly IPostService _postService;
+        private readonly ICommentService _commentService;
+        private readonly ITaggedUserService _taggedUserService;
+
+        public GroupsController(
+            IUserService userService,
+            IGroupService groupService,
+            IPostService postService,
+            ICommentService commentService,
+            ITaggedUserService taggedUserService)
         {
-            this._context = context;
-            this._userManager = userManager;
+            this._userService = userService;
+            this._groupService = groupService;
+            this._postService = postService;
+            this._commentService = commentService;
+            this._taggedUserService = taggedUserService;
         }
 
-        #region CRUD
-        // GET: Groups
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> NonMemberGroups()
         {
-            ViewModel = new GroupViewModel();
-            //Gets the current user
-            ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
+            var currentUser = await this._userService
+                .GetCurrentUserAsync(User);
 
-            //Gets all data from mapping table UsersInGroups of the current user
-            var userGroups = await this._context.UsersInGroups
-                .Where(i => i.UserId == ViewModel.CurrentUser.Id)
-                .ToListAsync();
+            var nonMemberGroups = await this._groupService
+                .GetNonMemberGroupsAsync(currentUser);
 
-            //Gets all Groups
-            var groups = await this._context.Groups.ToListAsync();
-
-            //Assign all groups to collection where the current user is not a member
-            ViewModel.NonMemberGroups = groups;
-
-            //Compare all groups with these groups where the current user is already a member or admin
-            foreach (var group in userGroups)
-            {
-                //Gets the group where the user is already a member
-                var memberGroup = groups.Find(i => i.GroupId == group.GroupId);
-                //Removes the group where the current user is already a member
-                ViewModel.NonMemberGroups.Remove(memberGroup);
-            }
-
-            return View(ViewModel);
+            return View(nonMemberGroups);
         }
 
-        //Get: Groups/MyGroups
-        public async Task<IActionResult> MyGroups()
+        [HttpGet]
+        public async Task<IActionResult> JoinedGroups()
         {
-            ViewModel = new GroupViewModel();
+            var currentUser = await this._userService
+               .GetCurrentUserAsync(User);
 
-            //Gets the current user
-            ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
+            var joinedGroups = await this._groupService
+                .GetJoinedGroupsAsync(currentUser);
 
-            //Gets all data from the mapping table UsersInGroups for the current user
-            var userGroups = await this._context.UsersInGroups
-                .Where(id => id.UserId == ViewModel.CurrentUser.Id)
-                .Include(g => g.Group)
-                .ToListAsync();
+            TempData["currentUserId"] = currentUser.Id;
 
-            foreach (var userGroup in userGroups)
-            {
-                //Check is the user is admin 
-                //If true set admin in the Message prop of the group
-                if (userGroup.Admin == true)
-                {
-                    userGroup.Group.Message = "admin";
-                }
-
-                ViewModel.MemberGroups.Add(userGroup.Group);
-            }
-            return View(ViewModel);
+            return View(joinedGroups);
         }
 
-        // GET: Groups/NonGroupMemberDetails
-        public async Task<IActionResult> NonMemberDetails(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var group = await _context.Groups
-                .FirstOrDefaultAsync(m => m.GroupId == id);
-
-            if (group == null)
-            {
-                return NotFound();
-            }
-
-            return View(group);
-        }
-
-        // GET: Groups/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            ViewModel = new GroupViewModel();
-            
-            //Gets the group
-            ViewModel.Group = await _context.Groups
-                .Include(p =>p.Posts)
-                .FirstOrDefaultAsync(m => m.GroupId == id);
-
-            if (ViewModel.Group == null)
-            {
-                return NotFound();
-            }
-
-            if (ViewModel.Group.Posts.Count > 0)
-            {
-                //Iterate the group`s posts
-                foreach (var post in ViewModel.Group.Posts)
-                {
-                    //Gets the current post with TagFriends and Author db records
-                    var postTFEntities = GetPostById(post.PostId);
-                    ViewModel.Posts.Add(new PostTagFriendsViewModel() 
-                    {
-                        Post = postTFEntities,
-                        Tagged = (postTFEntities.TaggedUsers.Count > 0) 
-                                    ? await GetTaggedUsersAsync(postTFEntities.TaggedUsers) 
-                                    : new List<User>(),
-                    });
-                }
-            }
-            
-            return View(ViewModel);
-        }
-
-        // GET: Groups/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Groups/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromForm]GroupViewModel viewModel)
+        public async Task<IActionResult> Create(GroupServiceModel serviceModel)
         {
-            if (viewModel.Group == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                ViewModel.Group = viewModel.Group;
-            }
-
-            //Unique title
-            if (await this._context.Groups.AnyAsync(i => i.Title == ViewModel.Group.Title))
-            {
-                ModelState.AddModelError("Title", $"Title {ViewModel.Group.Title} already exists. Title must be unique!");
-                return View(ViewModel);
-            }
-
             if (ModelState.IsValid)
             {
-                //Gets the current user 
-                ViewModel.CurrentUser = await this._userManager.GetUserAsync(User);
-
-                //Create new row in the UsersInGroups table where the current user is admin
-                var adminGroup = new UserInGroup()
+                //Unique title
+                if (await this._groupService.IsTitleExistAsync(serviceModel.Title))
                 {
-                    UserId = ViewModel.CurrentUser.Id,
-                    User = ViewModel.CurrentUser,
-                    GroupId = ViewModel.Group.GroupId,
-                    Group = ViewModel.Group,
-                    Admin = true
-                };
+                    ModelState.AddModelError(
+                        "Title",
+                        $"Title {serviceModel.Title} already exists. Title must be unique!");
 
-                await this._context.UsersInGroups.AddAsync(adminGroup);
-                await this._context.Groups.AddAsync(ViewModel.Group);
-                await _context.SaveChangesAsync();
-                ViewModel = new GroupViewModel();
-                return RedirectToAction(nameof(MyGroups));
+                    return View(serviceModel);
+                }
+
+                serviceModel.AdminId = this._userService
+                    .GetUserId(User);
+
+                await this._groupService.AddGroupAsync(serviceModel);
+
+                return RedirectToAction(nameof(JoinedGroups));
             }
             return View();
         }
 
-        // GET: Groups/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var serviceModel = await this._groupService
+                .GetGroupAsync(id);
 
-            ViewModel = new GroupViewModel();
-            ViewModel.Group = await _context.Groups
-                .FirstOrDefaultAsync(i => i.GroupId == id);
-
-            if (ViewModel.Group == null)
-            {
-                return NotFound();
-            }
-            return View(ViewModel);
+            return View(serviceModel);
         }
 
-        // POST: Groups/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(GroupViewModel viewModel)
+        public async Task<IActionResult> Edit(GroupServiceModel serviceModel)
         {
-            if (viewModel.Group == null)
-            {
-                return NotFound();
-            }
-            //If viewModel parameter has a different title than in a connected record,
-            //will be assigned to the connected record
-            if (viewModel.Group.Title != ViewModel.Group.Title)
-            {
-                //Unique title
-                if (await this._context.Groups.AnyAsync(i => i.Title == viewModel.Group.Title))
-                {
-                    ModelState.AddModelError("Title", $"Title {viewModel.Group.Title} already exists. Title must be unique!");
-                    return View();
-                }
-                else
-                {
-                    ViewModel.Group.Title = viewModel.Group.Title;
-                }
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                var groupTitle = this._groupService
+                    .GetGroupTitle(serviceModel.GroupId);
+                if (groupTitle != serviceModel.Title)
                 {
-                    _context.Update(viewModel.Group);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!GroupExists(viewModel.Group.GroupId))
+                    //Unique title
+                    if (await this._groupService.IsTitleExistAsync(serviceModel.Title))
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        ModelState.AddModelError(
+                            "Title",
+                            $"Title {serviceModel.Title} already exists. Title must be unique!");
+
+                        return View(serviceModel);
                     }
                 }
-                return RedirectToAction(nameof(MyGroups));
+
+                await this._groupService.EditGroupAsync(serviceModel);
+
+                return RedirectToAction(nameof(JoinedGroups));
             }
-            return View(viewModel);
+            return View(serviceModel);
         }
 
-        // GET: Groups/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var group = await this._groupService
+                .GetGroupAsync(id);
 
-            var group = await _context.Groups
-                .FirstOrDefaultAsync(m => m.GroupId == id);
             if (group == null)
             {
                 return NotFound();
             }
 
-            return View(group);
+            var currentUserId = this._userService
+                .GetUserId(User);
+
+            var viewModel = new GroupViewModel
+            {
+                GroupId = group.GroupId,
+                Title = group.Title,
+                Description = group.Description,
+                Admin = await this._userService
+                    .GetUserByIdAsync(group.AdminId),
+                Members = group.Members,
+                Posts = await this._postService
+                    .GetPostsByGroupIdAsync(group.GroupId),
+                CurrentUserId = currentUserId,
+                IsCurrentUserMember = await this._groupService
+                    .IsCurrentUserMember(currentUserId, group.GroupId)
+            };
+
+            return View(viewModel);
         }
 
-        // POST: Groups/Delete/5
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var group = await this._groupService
+                .GetGroupAsync(id);
+
+            var viewModel = new GroupViewModel
+            {
+                GroupId = group.GroupId,
+                Title = group.Title,
+                Description = group.Description
+            };
+
+            return View(viewModel);
+        }
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var group = await _context.Groups
-                .Include(p => p.Posts)
-                .FirstOrDefaultAsync(i =>i.GroupId == id);
+            var posts = await this._postService
+                .GetPostsByGroupIdAsync(id);
 
-            //Remove all group posts  
-            if (group.Posts.Count > 0)
+            foreach (var post in posts)
             {
-                RemoveGroupPosts(group.GroupId);
+                var comments = await this._commentService
+                    .GetCommentsByPostIdAsync(post.PostId);
+
+                //Send collection of all comments ids and delete the tagged friends 
+                await this._taggedUserService.DeleteTaggedFriendsInComments(comments
+                    .Select(i => i.CommentId)
+                    .ToList());
+
+                await this._taggedUserService.DeleteTaggedFriendsPostId(post.PostId);
             }
 
-            _context.Groups.Remove(group);
-            await _context.SaveChangesAsync();
-           
-            return RedirectToAction(nameof(MyGroups));
+            await this._groupService.DeleteGroupAsync(id);
+
+            return RedirectToAction(nameof(JoinedGroups));
         }
 
-        private bool GroupExists(int id)
+        public async Task<IActionResult> Join(int id)
         {
-            return _context.Groups.Any(e => e.GroupId == id);
+            var currentUserId = this._userService
+                .GetUserId(User);
+
+            await this._groupService.JoinGroupAsync(id, currentUserId);
+
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
-        #endregion
-
-        //Post: Groups/JoinGroup
-        public async Task<IActionResult> JoinGroup(int? id)
+        public async Task<IActionResult> Leave(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var currentUserId = this._userService
+                .GetUserId(User);
 
-            //Gets the current user
-            var user = await this._userManager.GetUserAsync(User);
+            await this._groupService.LeaveGroupAsync(id, currentUserId);
 
-            //Gets the group with id sent from Groups/Details view
-            var group = await this._context.Groups
-                .FirstOrDefaultAsync(i => i.GroupId == id);
-
-            //Adds new row in the UsersIngroups table where the current user is not admin
-            var joinGroup = new UserInGroup()
-            {
-                UserId = user.Id,
-                User = user,
-                GroupId = (int)id,
-                Group = group
-            };
-
-            this._context.UsersInGroups.Add(joinGroup);
-            await this._context.SaveChangesAsync();
-
-            return RedirectToAction("MyGroups");
+            return RedirectToAction(nameof(NonMemberGroups));
         }
 
-        public async Task<IActionResult> LeaveGroup(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //// GET: Groups/Delete/5
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            //Gets the current user
-            var user = await this._userManager.GetUserAsync(User);
+        //    var group = await _context.Groups
+        //        .FirstOrDefaultAsync(m => m.GroupId == id);
+        //    if (group == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var userInGroupEntity = await this._context.UsersInGroups
-                .FirstOrDefaultAsync(i => i.GroupId == id &&
-                                          i.UserId == user.Id);
+        //    return View(group);
+        //}
 
-            this._context.UsersInGroups.Remove(userInGroupEntity);
-            this._context.SaveChanges();
+        //// POST: Groups/Delete/5
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> DeleteConfirmed(int id)
+        //{
+        //    var group = await _context.Groups
+        //        .Include(p => p.Posts)
+        //        .FirstOrDefaultAsync(i => i.GroupId == id);
 
-            return RedirectToAction(nameof(MyGroups));
-        }
+        //    //Remove all group posts  
+        //    if (group.Posts.Count > 0)
+        //    {
+        //        RemoveGroupPosts(group.GroupId);
+        //    }
 
-        //Get: Groups/GroupMembers
-        public async Task<IActionResult> GroupMembers(int id)
-        {
-            var user = await this._userManager.GetUserAsync(User);
-            //Gets all of the members in the group with id from UsersInGroups table
-            var membersInTheGroup = await this._context.UsersInGroups
-                .Include(u => u.User)
-                .Where(gId => gId.GroupId == id)
-                .ToListAsync();
+        //    _context.Groups.Remove(group);
+        //    await _context.SaveChangesAsync();
 
-            var members = new List<User>();
-            foreach (var member in membersInTheGroup)
-            {
-                if (member.UserId != user.Id)
-                {
-                    if (member.Admin == true)
-                    {
-                        member.User.Message = "admin";
-                    }
-                    members.Add(member.User);
-                }
-            }
+        //    return RedirectToAction(nameof(MyGroups));
+        //}
 
-            return View(members);
-        }
+        //private bool GroupExists(int id)
+        //{
+        //    return _context.Groups.Any(e => e.GroupId == id);
+        //}
 
-        //TODO: Tag friends service: GetTaggedUsersByPostId(int postId)
-        private async Task<ICollection<User>> GetTaggedUsersAsync(ICollection<TagFriends> tagFriendEntities)
-        {
-            //Gets the tagged users
-            var taggedUsers = new List<User>();
-            foreach (var tagged in tagFriendEntities)
-            {
-                taggedUsers.Add(await this._userManager.FindByIdAsync(tagged.TaggedId));
-            }
+        //#endregion
 
-            return taggedUsers;
-        }
+        ////Post: Groups/JoinGroup
+        //public async Task<IActionResult> JoinGroup(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-        //TODO: Posts service: GetPostById(int postId)
-        private Post GetPostById(int postId)
-        {
-            return this._context.Posts
-                .Include(tf => tf.TaggedUsers)
-                .Include(a => a.Author)
-                .Include(c => c.Comments)
-                .FirstOrDefault(i => i.PostId == postId);
-        }
+        //    //Gets the current user
+        //    var user = await this._userManager.GetUserAsync(User);
 
-        private void RemoveGroupPosts(int groupId)
-        {
-            //Connected posts
-            var posts = this._context.Posts
-                .Include(t => t.TaggedUsers)
-                .Include(c => c.Comments)
-                .Where(g => g.GroupId == groupId);
+        //    //Gets the group with id sent from Groups/Details view
+        //    var group = await this._context.Groups
+        //        .FirstOrDefaultAsync(i => i.GroupId == id);
 
-            //Get posts`s comments in multi-dimentional collection
-            var postsComments = posts.Select(c => c.Comments).ToList();
+        //    //Adds new row in the UsersIngroups table where the current user is not admin
+        //    var joinGroup = new UserInGroup()
+        //    {
+        //        UserId = user.Id,
+        //        User = user,
+        //        GroupId = (int)id,
+        //        Group = group
+        //    };
 
-            /// Parameter: convert the collection to 1d list
-            /// Remove comments` TagFriends entites without comments because on delete is set to cascade
-            RemoveCommentsTagFriendsEntities(postsComments.SelectMany(c => c.Distinct()));
+        //    this._context.UsersInGroups.Add(joinGroup);
+        //    await this._context.SaveChangesAsync();
 
+        //    return RedirectToAction("MyGroups");
+        //}
 
-            //Multi-dimensional collection of TagFriends
-            var postsTagFriendEntities = posts.Select(t => t.TaggedUsers).ToList();
+        //public async Task<IActionResult> LeaveGroup(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            //Convert to 1d list and remove
-            this._context.TagFriends.RemoveRange(
-                postsTagFriendEntities.SelectMany(c => c.Distinct()));
-        }
+        //    //Gets the current user
+        //    var user = await this._userManager.GetUserAsync(User);
 
-        private void RemoveCommentsTagFriendsEntities(IEnumerable<Comment> comments)
-        {
-            foreach (var comment in comments)
-            {
-                //Get comment`s TagFriends entities
-                comment.TaggedUsers = this._context.TagFriends
-                    .Where(cId => cId.CommentId == comment.Id)
-                    .ToList();
+        //    var userInGroupEntity = await this._context.UsersInGroups
+        //        .FirstOrDefaultAsync(i => i.GroupId == id &&
+        //                                  i.UserId == user.Id);
 
-                this._context.TagFriends.RemoveRange(comment.TaggedUsers);
-            }
-        }
+        //    this._context.UsersInGroups.Remove(userInGroupEntity);
+        //    this._context.SaveChanges();
+
+        //    return RedirectToAction(nameof(MyGroups));
+        //}
+
+        ////Get: Groups/GroupMembers
+        //public async Task<IActionResult> GroupMembers(int id)
+        //{
+        //    var user = await this._userManager.GetUserAsync(User);
+        //    //Gets all of the members in the group with id from UsersInGroups table
+        //    var membersInTheGroup = await this._context.UsersInGroups
+        //        .Include(u => u.User)
+        //        .Where(gId => gId.GroupId == id)
+        //        .ToListAsync();
+
+        //    var members = new List<User>();
+        //    foreach (var member in membersInTheGroup)
+        //    {
+        //        if (member.UserId != user.Id)
+        //        {
+        //            if (member.Admin == true)
+        //            {
+        //                member.User.Message = "admin";
+        //            }
+        //            members.Add(member.User);
+        //        }
+        //    }
+
+        //    return View(members);
+        //}
+
     }
 }

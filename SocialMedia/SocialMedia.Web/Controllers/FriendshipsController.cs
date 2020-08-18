@@ -1,243 +1,146 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Data;
-using SocialMedia.Models;
-using SocialMedia.Models.ViewModels;
-
-namespace SocialMedia.Web.Controllers
+﻿namespace SocialMedia.Web.Controllers
 {
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using SocialMedia.Services.Friendship;
+    using SocialMedia.Services.User;
+
+    [Authorize]
     public class FriendshipsController : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SocialMediaDbContext _context;
+        private readonly IFriendshipService _friendshipService;
+        private readonly IUserService _userService;
 
-        
-        public FriendshipsController(UserManager<User> userManager,
-            SocialMediaDbContext context)
+        public FriendshipsController(
+            IFriendshipService friendshipService,
+            IUserService userService)
         {
-            this._userManager = userManager;
-            this._context = context;
+            this._friendshipService = friendshipService;
+            this._userService = userService;
         }
 
-
-        private static FriendshipViewModel ViewModel { get; set; } = new FriendshipViewModel();
-
-        
-        //Friends
         public async Task<IActionResult> Friends()
         {
-            var user = await this._userManager.GetUserAsync(User);
+            TempData.Clear();
+            var currentUserId = this._userService
+                .GetUserId(User);
 
-            var friendsIds = this._context.Friendships
-               .Where(a => a.AddresseeId == user.Id && a.Status == 1 ||
-                      a.RequesterId == user.Id && a.Status == 1)
-               .ToList();
-
-            var friends = new List<User>();
-            foreach (var friendId in friendsIds)
-            {
-                if (friendId.AddresseeId == user.Id)
-                {
-                    friends.Add(
-                    this._context.Users
-                    .FirstOrDefault(i => i.Id == friendId.RequesterId));
-                }
-                else if (friendId.RequesterId == user.Id)
-                {
-                    friends.Add(
-                    this._context.Users
-                    .FirstOrDefault(i => i.Id == friendId.AddresseeId));
-                }
-            }
+            var friends = await this._friendshipService
+                .GetFriendsAsync(currentUserId);
 
             return View(friends);
         }
 
-        //Non friends
-        //Get Account/Users
-        [HttpGet]
         public async Task<IActionResult> NonFriends()
         {
-            //Get the current user
-            var user = await this._userManager.GetUserAsync(User);
+            TempData.Clear();
+            var currentUserId = this._userService
+                .GetUserId(User);
 
-            //Get all other users except the current one
-            var users = this._userManager.Users
-                .Where(i => i.Id != user.Id)
-                .ToList();
-
-            var nonFriends = users;
-
-            //All frienship of the current user
-            var friendships = this._context.Friendships
-                .Where(u => u.RequesterId == user.Id || u.AddresseeId == user.Id)
-                .ToList();
-
-            if (friendships.Count == 0)
-            {
-                return View(users);
-            }
-            else
-            {
-                //Check all of friendships
-                foreach (var item in users.ToList())
-                {
-                    foreach (var friendship in friendships)
-                    {
-                        //If friendship exist user is removed
-                        if (friendship.AddresseeId == item.Id ||
-                            friendship.RequesterId == item.Id)
-                        {
-                            nonFriends.Remove(item);
-                            break;
-                        }
-                    }
-                }
-            }
+            var nonFriends = await this._friendshipService
+                .GetNonFriendsAsync(currentUserId);
 
             return View(nonFriends);
         }
 
-        //User profile
-        //Get Account/UserProfile
         [HttpGet]
-        public async Task<IActionResult> UserProfile()
+        public async Task<IActionResult> FriendshipStatus(string userId, [FromQuery]string invokedFrom)
         {
-            //Gets the url Account/UserProfile/UserId
-            var reqUrl = Request.HttpContext.Request;
-            //Convert the url into array
-            var urlPath = reqUrl.Path
-                .ToString()
-                .Split('/')
-                .ToArray();
-
-            //Gets the current user
-            var currentUser = await this._userManager.GetUserAsync(User);
-
-            //Gets the user
-            var user = await this._userManager.FindByIdAsync(urlPath[3]);
-
-            //Check are the current user and other one are friends
-            if (await this._context.Friendships.AnyAsync(
-                i => i.AddresseeId == currentUser.Id && i.RequesterId == user.Id && i.Status == 1 ||
-                i.AddresseeId == user.Id && i.RequesterId == currentUser.Id && i.Status == 1))
-            {
-                return View("UserProfile", user);
-            }
-            else
-            {
-                return View("NonFriendProfile", user);
-            }
-        }
-
-        //Requester
-        public async Task<IActionResult> SendRequest()
-        {
-            //Gets the url Account/SendRequest/UserId
-            var reqUrl = Request.HttpContext.Request;
-            //Convert the url into array
-            var urlPath = reqUrl.Path
-                .ToString()
-                .Split('/')
-                .ToArray();
-
-            //Gets the user
-            var addressee = await this._userManager.FindByIdAsync(urlPath[3]);
-            var requester = await this._userManager.GetUserAsync(User);
-
-            if (addressee == null || requester == null)
+            if (userId == null)
             {
                 return NotFound();
             }
-            else
+
+            var currentUserId = this._userService
+                .GetUserId(User);
+
+            if (currentUserId == userId)
             {
-                //Add the addressee user in the pending collection
-                ViewModel.Pending.Add(addressee);
+                return RedirectToAction("Index", "Profile", 
+                    new { friendshipStatus = ServiceModelFRStatus.CurrentUser});
             }
 
-            var friendship = new Friendship()
+            var friendshipStatus = await this._friendshipService
+                .GetFriendshipStatusAsync(currentUserId, userId);
+
+            //Check is it invoked from pendings or requests collections
+            if (invokedFrom != null &&
+                friendshipStatus == ServiceModelFRStatus.Pending)
             {
-                AddresseeId = addressee.Id,
-                Addressee = addressee,
-                RequesterId = requester.Id,
-                Requester = requester,
-                Status = 0
-            };
+                if (invokedFrom == "Requests")
+                {
+                    friendshipStatus = ServiceModelFRStatus.Request;
+                }
+            }
 
-            await this._context.Friendships.AddAsync(friendship);
-            await this._context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(FriendRequests));
+            return RedirectToAction("Index", "Profile", new { userId = userId, friendshipStatus = friendshipStatus });
         }
 
-        //Addressee
         public async Task<IActionResult> FriendRequests()
         {
-            var currentUser = await this._userManager.GetUserAsync(User);
+            var model = new FriendshipServiceModel();
 
-            ViewModel.Requests = this._context.Friendships
-                .Include(r => r.Requester)
-                .Where(a => a.AddresseeId == currentUser.Id && a.Status == 0)
-                .Select(r =>r.Requester)
-                .ToList();
+            var currentUserId = this._userService
+                .GetUserId(User);
 
-            ViewModel.Pending = this._context.Friendships
-                .Include(a => a.Addressee)
-                .Where(r => r.RequesterId == currentUser.Id && r.Status == 0)
-                .Select(a => a.Addressee)
-                .ToList();
+            model.Requests = await this._friendshipService
+                .GetFriendRequestsAsync(currentUserId);
 
-            return View(ViewModel);
+            model.PendingRequests = await this._friendshipService
+                .GetPendingRequestsAsync(currentUserId);
+
+            return View(model);
         }
 
-        //Accept request
-        public async Task<IActionResult> Accept()
+        public async Task<IActionResult> SendRequestAsync(string addresseeId)
         {
-            //Gets the url Account/Accept/UserId
-            var reqUrl = Request.HttpContext.Request;
-            //Convert the url into array
-            var urlPath = reqUrl.Path
-                .ToString()
-                .Split('/')
-                .ToArray();
+            if (addresseeId == null)
+            {
+                return NotFound();
+            }
 
-            var addressee = await this._userManager.GetUserAsync(User);
+            var currentUserId = this._userService.GetUserId(User);
 
-            var friendship = await this._context.Friendships
-                .FirstOrDefaultAsync(i => i.RequesterId == urlPath[3] && i.AddresseeId == addressee.Id);
-
-            friendship.Status = 1;
-
-            await this._context.SaveChangesAsync();
+            await this._friendshipService.SendRequestAsync(currentUserId, addresseeId);
 
             return RedirectToAction(nameof(FriendRequests));
         }
 
-        //Reject request
-        public async Task<IActionResult> Reject()
+        public async Task<IActionResult> AcceptAsync(string requesterId)
         {
-            //Gets the url Account/Reject/UserId
-            var reqUrl = Request.HttpContext.Request;
-            //Convert the url into array
-            var urlPath = reqUrl.Path
-                .ToString()
-                .Split('/')
-                .ToArray();
+            var currentUserId = this._userService.GetUserId(User);
 
-            var addressee = await this._userManager.GetUserAsync(User);
-
-            var friendship = await this._context.Friendships
-                        .FirstOrDefaultAsync(i => i.RequesterId == urlPath[3] && i.AddresseeId == addressee.Id);
-
-            this._context.Friendships.Remove(friendship);
-            await this._context.SaveChangesAsync();
+            await this._friendshipService.AcceptRequestAsync(currentUserId, requesterId);
 
             return RedirectToAction(nameof(FriendRequests));
         }
 
+        public async Task<IActionResult> RejectAsync(string requesterId)
+        {
+            var currentUserId = this._userService.GetUserId(User);
+
+            await this._friendshipService.RejectRequestAsync(currentUserId, requesterId);
+
+            return RedirectToAction(nameof(FriendRequests));
+        }
+
+        public async Task<IActionResult> CancelInvitationAsync(string addresseeId)
+        {
+            var currentUserId = this._userService.GetUserId(User);
+
+            await this._friendshipService.CancelInvitationAsync(currentUserId, addresseeId);
+
+            return RedirectToAction(nameof(FriendRequests));
+        }
+
+        public async Task<IActionResult> UnfriendAsync(string friendId) 
+        {
+            var currentUserId = this._userService.GetUserId(User);
+
+            await this._friendshipService.UnfriendAsync(currentUserId, friendId);
+
+            return RedirectToAction(nameof(Friends));
+        }
     }
 }

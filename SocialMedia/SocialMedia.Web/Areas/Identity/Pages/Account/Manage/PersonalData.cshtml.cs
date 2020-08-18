@@ -1,12 +1,12 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using SocialMedia.Models;
-
-namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Logging;
+    using SocialMedia.Data.Models;
+
     public class PersonalDataModel : PageModel
     {
         private readonly UserManager<User> _userManager;

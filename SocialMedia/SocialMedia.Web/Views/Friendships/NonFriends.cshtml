@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SocialMedia.Models.User>
+﻿@model IEnumerable<SocialMedia.Services.User.UserServiceModel>
 
 @{
     ViewData["Title"] = "Users";
@@ -21,22 +21,30 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var user in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UserName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FullName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Country)
-                </td>
-                <td>
-                    <a asp-action="UserProfile" asp-route-id="@item.Id">View Profile</a> |
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => user.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => user.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => user.Country)
+            </td>
+            <td>
+                @Html.ActionLink(
+                  "Add Friend", "SendRequest", "Friendships",
+                  new { addresseeId = user.Id },
+                  new { @class = "btn btn-outline-primary"})
+            </td>
+            <td>
+                @Html.ActionLink("View Profile", "FriendshipStatus",
+                    new { userId = user.Id },
+                    new { @class = "btn btn-outline-info"})
+            </td>
+        </tr>
         }
     </tbody>
 </table>

@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Models;
-
-namespace SocialMedia.Data
+﻿namespace SocialMedia.Data
 {
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using SocialMedia.Data.Models;
+
     public class SocialMediaDbContext : IdentityDbContext<User>
     {
         public SocialMediaDbContext(DbContextOptions<SocialMediaDbContext> options)
@@ -11,48 +11,71 @@ namespace SocialMedia.Data
         {
         }
 
-        public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
+        public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Friendship> Friendships { get; set; }
         public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
-        public virtual DbSet<TagFriends> TagFriends { get; set; }
-        
+        public virtual DbSet<TagFriendInPost> TagFriendsInPosts { get; set; }
+        public virtual DbSet<TagFriendInComment> TagFriendsInComments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //TagFriends
-            modelBuilder.Entity<TagFriends>(entity =>
+            //Tag friend in comment 
+            modelBuilder.Entity<TagFriendInComment>(entity =>
             {
-                entity.ToTable("TagFriends");
+                entity.ToTable("TagFriendsInComments");
 
-                entity.HasKey(pk =>pk.Id)
-                .HasName("TagFriends_PK");
+                entity.HasKey(pk => pk.Id);
 
                 //Tagger
                 entity.HasOne(t => t.Tagger)
-                    .WithMany(u => u.Tagger)
+                    .WithMany(u => u.TaggerInComments)
                     .HasForeignKey(t => t.TaggerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("TagFriendsToTagger_FK");
+                    .HasConstraintName("TagFriendToTaggerInComment_FK");
 
                 //Tagged
                 entity.HasOne(t => t.Tagged)
-                    .WithMany(u => u.Tagged)
+                   .WithMany(u => u.TaggedInComments)
+                   .HasForeignKey(t => t.TaggedId)
+                   .OnDelete(DeleteBehavior.ClientSetNull)
+                   .HasConstraintName("TagFriendToTaggedInComment_FK");
+
+                //Comment
+                entity.HasOne(t => t.Comment)
+                .WithMany(c => c.TaggedUsers)
+                .HasForeignKey(t => t.CommentId)
+                .HasConstraintName("TagFreindToComment_FK");
+            });
+
+            //Tag friend in post
+            modelBuilder.Entity<TagFriendInPost>(entity =>
+            {
+                entity.ToTable("TagFriendsInPosts");
+
+                entity.HasKey(pk => pk.Id)
+                .HasName("TagFriendsInPosts_PK");
+
+                //Tagger
+                entity.HasOne(t => t.Tagger)
+                    .WithMany(u => u.TaggerInPosts)
+                    .HasForeignKey(t => t.TaggerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TagFriendsToTaggerInPost_FK");
+
+                //Tagged
+                entity.HasOne(t => t.Tagged)
+                    .WithMany(u => u.TaggedInPosts)
                     .HasForeignKey(t => t.TaggedId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("TagFriendsToTagged_FK");
+                    .HasConstraintName("TagFriendsToTaggedInPost_FK");
 
                 //Post
                 entity.HasOne(t => t.Post)
                 .WithMany(p => p.TaggedUsers)
                 .HasForeignKey(t => t.PostId)
                 .HasConstraintName("TagFriendsToPost_FK");
-
-                //Comment
-                entity.HasOne(t => t.Comment)
-                .WithMany(c => c.TaggedUsers)
-                .HasForeignKey(t => t.CommentId)
-                .HasConstraintName("TagFreindsToComment_FK");
             });
 
             //Friendships

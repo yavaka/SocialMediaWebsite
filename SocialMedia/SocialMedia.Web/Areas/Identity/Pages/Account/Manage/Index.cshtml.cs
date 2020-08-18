@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using SocialMedia.Data;
-using SocialMedia.Models;
-
-namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 {
+    using System;
+    using System.ComponentModel.DataAnnotations;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
+    using SocialMedia.Data;
+    using SocialMedia.Data.Models;
+
     public partial class IndexModel : PageModel
     {
         private readonly UserManager<User> _userManager;
@@ -45,7 +43,7 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "First name")]
             public string FirstName { get; set; }
-            
+
             [Display(Name = "Last name")]
             public string LastName { get; set; }
 
@@ -53,7 +51,7 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Date of birth")]
             [DisplayFormat(DataFormatString = "{0:dd'/'MM'/'yyyy}", ApplyFormatInEditMode = true)]
             public DateTime? DOB { get; set; }
-            
+
             [Display(Name = "City")]
             public string City { get; set; }
 
@@ -125,7 +123,7 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
                     StatusMessage = "Your first name has not been updated";
                     return RedirectToPage();
                 }
-               
+
             }
             if (Input.LastName != user.LastName)
             {
@@ -207,7 +205,7 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
                 try
                 {
                     var updateUser = await this._context.Users.FirstOrDefaultAsync(i => i.Id == user.Id);
-                    updateUser.City= Input.City;
+                    updateUser.City = Input.City;
                     await this._context.SaveChangesAsync();
                 }
                 catch (Exception)

@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using SocialMedia.Models;
-
-namespace SocialMedia.Web.Areas.Identity.Pages.Account
+﻿namespace SocialMedia.Web.Areas.Identity.Pages.Account
 {
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Logging;
+    using SocialMedia.Data.Models;
+
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
@@ -49,9 +44,9 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account
             [Required]
             [Display(Name = "Username")]
             public string Username
-            { 
-                get { return username.Trim(' '); } 
-                set { username = value.Trim(' '); } 
+            {
+                get { return username.Trim(' '); }
+                set { username = value.Trim(' '); }
             }
 
             [Required]

@@ -1,12 +1,56 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using SocialMedia.Data;
-using SocialMedia.Models;
-
-namespace SocialMedia.Web.Infrastructure
+﻿namespace SocialMedia.Web.Infrastructure
 {
-    public static class ServiceCollectionExtensions 
+    using Data;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.DependencyInjection;
+    using SocialMedia.Data.Models;
+    using SocialMedia.Services.Common;
+    using System.Linq;
+
+    public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Automatic registration of services using reflection
+        /// Cannot register generic services!
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddConventionalServices(this IServiceCollection services)
+        {
+            var serviceInterfaceType = typeof(IService);
+            var singletonServiceInterfaceType = typeof(ISingletonService);
+            var scopedServiceInterfaceType = typeof(IScopedService);
+
+            var types = serviceInterfaceType
+                .Assembly
+                .GetExportedTypes()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Select(t => new
+                {
+                    Service = t.GetInterface($"I{t.Name}"),
+                    Implementation = t
+                })
+                .Where(t => t.Service != null);
+
+            foreach (var type in types)
+            {
+                if (serviceInterfaceType.IsAssignableFrom(type.Service))
+                {
+                    services.AddTransient(type.Service, type.Implementation);
+                }
+                else if (singletonServiceInterfaceType.IsAssignableFrom(type.Service))
+                {
+                    services.AddSingleton(type.Service, type.Implementation);
+                }
+                else if (scopedServiceInterfaceType.IsAssignableFrom(type.Service))
+                {
+                    services.AddScoped(type.Service, type.Implementation);
+                }
+            }
+
+            return services;
+        }
+
         public static IServiceCollection AddIdentity(this IServiceCollection services)
         {
             services
@@ -23,6 +67,12 @@ namespace SocialMedia.Web.Infrastructure
                 .AddEntityFrameworkStores<SocialMediaDbContext>()
                 .AddDefaultTokenProviders();
 
+            return services;
+        }
+
+        public static IServiceCollection AddSocialMediaServices(this IServiceCollection services)
+        {
+            //Add services
             return services;
         }
     }

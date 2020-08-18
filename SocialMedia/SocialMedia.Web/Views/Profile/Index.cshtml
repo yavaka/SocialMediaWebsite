@@ -1,4 +1,5 @@
-﻿@model SocialMedia.Models.ViewModels.ProfileViewModel
+﻿@using SocialMedia.Services.Friendship
+@model SocialMedia.Services.Profile.ProfileServiceModel
 
 @{
     ViewData["Title"] = "Profile";
@@ -16,22 +17,39 @@
             <div class="col-md-3">
                 <img src="~/img/profile_pic.png" class="rounded" alt="Cinque Terre" width="150" height="150">
             </div>
-            <div class="col-md-9">
+            <div class="col-md-7">
                 <table class="table">
                     <tbody>
                         <tr></tr>
                         <tr>
-                            <td><b>@Model.CurrentUser.FullName</b></td>
-                            <td><b>@Model.CurrentUser.UserName</b></td>
+                            <td><b>@Model.User.FullName</b></td>
+                            <td><b>@Model.User.UserName</b></td>
                         </tr>
                         <tr></tr>
                         <tr>
-                            <td>@Model.CurrentUser.Country</td>
-                            <td>@Model.CurrentUser.DOB</td>
+                            <td>@Model.User.Country</td>
+                            <td>@Model.User.DateOfBirth</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            @if (Model.FriendshipStatus == ServiceModelFRStatus.Accepted)
+            {
+                <div class="col-md-1">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                            <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                @Html.ActionLink("Unfriend", "Unfriend", "Friendships",
+                                 new { friendId = Model.User.Id },
+                                 new { @class = "nav-link btn btn-outline-primary" })
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -39,125 +57,229 @@
 <hr class="container" style="height: 1px; border-width: 0; color: skyblue; background-color: skyblue">
 
 <div class="container">
-    <ul class="nav" style="margin: 0, auto;">
-        <li class="nav-item col-md-3">
-            <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/about.png" />  About </button>
-        </li>
-        <li class="nav-item col-md-3">
-            <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/small-icons.png" />  Gallery </button>
-        </li>
-        <li class="nav-item col-md-3">
-            <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/handshake.png" />  Friends </button>
-        </li>
-        <li class="nav-item col-md-3">
-            <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/groups.png" />  Groups </button>
-        </li>
-    </ul>
+    <!-- Model.Message represents the friendship status -->
+    @if (Model.FriendshipStatus == ServiceModelFRStatus.CurrentUser ||
+Model.FriendshipStatus == ServiceModelFRStatus.Accepted)
+    {
+        <ul class="nav" style="margin: 0, auto;">
+            <li class="nav-item col-md-3">
+                <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/about.png" />  About </button>
+            </li>
+            <li class="nav-item col-md-3">
+                <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/small-icons.png" />  Gallery </button>
+            </li>
+            <li class="nav-item col-md-3">
+                <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/handshake.png" />  Friends </button>
+            </li>
+            <li class="nav-item col-md-3">
+                <button class="nav-link btn btn-outline-primary" href="#"><img src="https://img.icons8.com/ultraviolet/40/000000/groups.png" />  Groups </button>
+            </li>
+        </ul>
+    }
+    else if (Model.FriendshipStatus == ServiceModelFRStatus.Request)
+    {
+        <ul class="nav" style="margin: 0, auto;">
+            <li class="nav-item col-md-3"></li>
+            <li class="nav-item col-md-3">
+                @Html.ActionLink("Accept", "Accept", "Friendships",
+                         new { requesterId = Model.User.Id },
+                         new { @class = "btn btn-outline-success" })
+            </li>
+            <li class="nav-item col-md-3">
+                @Html.ActionLink("Reject", "Reject", "Friendships",
+                        new { requesterId = Model.User.Id },
+                        new { @class = "btn btn-outline-danger" })
+            </li>
+            <li class="nav-item col-md-3"></li>
+        </ul>
+    }
+    else if (Model.FriendshipStatus == ServiceModelFRStatus.Pending)
+    {
+        <ul class="nav" style="margin: 0, auto;">
+            <li class="nav-item col-md-3"></li>
+            <li class="nav-item col-md-3">
+                @Html.ActionLink("Cancel Invitation", "CancelInvitation", "Friendships",
+                         new { addresseeId = Model.User.Id },
+                         new { @class = "btn btn-primary" })
+            </li>
+            <li class="nav-item col-md-3"></li>
+            <li class="nav-item col-md-3"></li>
+        </ul>
+    }
+    else if (Model.FriendshipStatus == ServiceModelFRStatus.NonFriends)
+    {
+        <ul class="nav" style="margin: 0, auto;">
+            <li class="nav-item col-md-3"></li>
+            <li class="nav-item col-md-3">
+                @Html.ActionLink(
+                    "Add Friend", "SendRequest", "Friendships",
+                    new { addresseeId = Model.User.Id },
+                    new { @class = "btn btn-outline-primary", @style = "margin: 20px" })
+            </li>
+            <li class="nav-item col-md-3"></li>
+            <li class="nav-item col-md-3"></li>
+        </ul>
+    }
 </div>
 
 <hr class="container" style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
-
-<div class="container posts">
-
-    <!-- New Post Btn -->
-    @Html.ActionLink("Add Post", "Create", "Posts", new { invokedFrom = "profile page" }, new { @class = "col-md-12 btn btn-outline-primary", @style = "margin: 20px" })
-
-    <!-- Posts -->
-    @if (Model.Posts.Count > 0)
-    {
-        foreach (var post in Model.Posts.OrderByDescending(d => d.Post.DatePosted))
+@if (Model.FriendshipStatus == ServiceModelFRStatus.CurrentUser ||
+Model.FriendshipStatus == ServiceModelFRStatus.Accepted)
+{
+    <div class="container posts">
+        @if (Model.FriendshipStatus == ServiceModelFRStatus.CurrentUser)
         {
-            <div class="media border p-3" style="margin-bottom: 20px;">
-                <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-                <div class="media-body">
-                    <!-- Post author and posted on-->
-                    <div class="row">
-                        <div class="col-md-10">
-                            @if (post.Post.Group != null)
-                            {
-                                <h5>@Model.CurrentUser.UserName <small><i>Posted in <b>@post.Post.Group.Title</b> on @post.Post.DatePosted.Date</i></small></h5>
+            <!-- New Post Btn -->
+            @Html.ActionLink(
+                    "Add Post", "Create", "Posts",
+                    new { path = $"Profile/Index/{ Model.User.Id }" },
+                    new { @class = "col-md-12 btn btn-outline-primary", @style = "margin: 20px" })
+        }
 
-                            }
-                            else
+        <!-- Posts -->
+        @if (Model.Posts.Count > 0)
+        {
+            foreach (var post in Model.Posts)
+            {
+                <div class="media border p-3" style="margin-bottom: 20px;">
+                    <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                    <div class="media-body">
+                        <!-- Post author and posted on-->
+                        <div class="row">
+                            <div class="col-md-10">
+                                @if (post.Group != null)
+                                {
+                                    <h5>@Model.User.UserName <small><i>Posted in <b>@post.Group.Title</b> on @post.DatePosted</i></small></h5>
+
+                                }
+                                else
+                                {
+                                    <h5>@Model.User.UserName <small><i>Posted on @post.DatePosted</i></small></h5>
+                                }
+                            </div>
+                            @if (Model.CurrentUserId == post.Author.Id)
                             {
-                                <h5>@Model.CurrentUser.UserName <small><i>Posted on @post.Post.DatePosted.Date</i></small></h5>
+                                <!-- Dropdown settings -->
+                                <div class="col-md-2 dropdown">
+                                    <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                                        <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            @Html.ActionLink(
+                             "Edit", "Edit", "Posts",
+                             new
+                             {
+                                 id = post.PostId,
+                                 path = $"Profile/Index/{ Model.User.Id }"
+                             },
+                             new { @class = "btn" })
+                                        </li>
+                                        <li>
+                                            @Html.ActionLink(
+                             "Delete", "Delete", "Posts",
+                             new 
+                             {
+                                 id = post.PostId,
+                                 path = $"Profile/Index/{ Model.User.Id }"
+                             },
+                             new { @class = "btn" })
+                                        </li>
+                                    </ul>
+                                </div>
                             }
                         </div>
-                        <!-- Dropdown settings -->
-                        <div class="col-md-2 dropdown">
-                            <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
-                                <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    @Html.ActionLink("Edit", "Edit", "Posts", new { id = post.Post.PostId, invokedFrom = "profile page" }, new { @class = "btn" })
-                                </li>
-                                <li>
-                                    @Html.ActionLink("Delete", "Delete", "Posts", new { id = post.Post.PostId, invokedFrom = "profile page" }, new { @class = "btn" })
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    @if (post.Tagged.Count > 0)
-                    {
-                        foreach (var user in post.Tagged)
+                        @if (post.TaggedFriends != null)
                         {
-                            <a href="#" class="badge badge-primary">@user.UserName</a>
+                            foreach (var user in post.TaggedFriends)
+                            {
+                                <a href="#" class="badge badge-primary">@user.UserName</a>
+                            }
                         }
-                    }
 
+                        <p style="margin: 15px">
+                            @post.Content
+                        </p>
 
-                    <p style="margin: 15px">
-                        @post.Post.Content
-                    </p>
+                        <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+                        <!-- New Comment Btn -->
+                        @Html.ActionLink(
+                         "Add Comment", "Create", "Comments",
+                         new
+                         {
+                             postId = post.PostId,
+                             path = $"Profile/Index/{ Model.User.Id }"
+                         },
+                         new { @class = "btn btn-outline-primary" })
 
-                    <!-- New Comment Btn -->
-                    @Html.ActionLink("Add Comment", "Create", "Comments", new { id = post.Post.PostId, invokedFrom = "profile page" }, new { @class = "btn btn-outline-primary" })
+                        <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
 
-                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
-
-                    <!-- Comments -->
-                    @if (post.Comments.Count > 0)
-                    {
-                        foreach (var comment in post.Comments.OrderByDescending(d => d.Comment.DatePosted))
+                        <!-- Comments -->
+                        @if (post.Comments.Count > 0)
                         {
-                            <div class="container mt-3">
-                                <div class="media border p-3">
-                                    <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
-                                    <div class="media-body">
-                                        <div class="row">
-                                            <div class="col-md-10">
-                                                <!-- Author and posted date-->
-                                                <h6>@comment.Comment.Author.UserName <small><i>Posted on @comment.Comment.DatePosted</i></small></h6>
+                            foreach (var comment in post.Comments)
+                            {
+                                <div class="container mt-3">
+                                    <div class="media border p-3">
+                                        <img src="img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                                        <div class="media-body">
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <!-- Author and posted date-->
+                                                    <h6>@comment.Author.UserName <small><i>Posted on @comment.DatePosted</i></small></h6>
 
-                                                <!-- Tagged users -->
-                                                @if (comment.Tagged.Count > 0)
-                                                {
-                                                    foreach (var user in comment.Tagged)
+                                                    <!-- Tagged users -->
+                                                    @if (comment.TaggedFriends != null)
                                                     {
-                                                        <a href="#" class="badge badge-primary">@user.UserName</a>
+                                                        foreach (var user in comment.TaggedFriends)
+                                                        {
+                                                            <a href="#" class="badge badge-primary">@user.UserName</a>
+                                                        }
                                                     }
-                                                }
+                                                </div>
+                                                <div class="col-md-2">
+                                                    @if (Model.CurrentUserId == comment.Author.Id)
+                                                    {
+                                                        <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                                                            <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                @Html.ActionLink(
+                                                 "Edit", "Edit", "Comments",
+                                                 new
+                                                 {
+                                                     id = comment.CommentId,
+                                                     path = $"Profile/Index/{ Model.User.Id}"
+                                                 },
+                                                 new { @class = "btn" })
+                                                            </li>
+                                                            <li>
+                                                                @Html.ActionLink(
+                                                 "Delete", "Delete", "Comments",
+                                                 new
+                                                 {
+                                                     id = comment.CommentId,
+                                                     path = $"Profile/Index/{ Model.User.Id}"
+                                                 },
+                                                 new { @class = "btn" })
+                                                            </li>
+                                                        </ul>
+                                                    }
+                                                </div>
                                             </div>
-                                            <div class="col-md-2">
-                                                @if (Model.CurrentUser.Id == comment.Comment.AuthorId)
-                                                {
-                                                    <button class="btn btn-outline-primary"><img width="15" height="15" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" /></button>
-                                                }
-                                            </div>
+                                            <!-- Content -->
+                                            <p>@comment.Content</p>
                                         </div>
-                                        <!-- Content -->
-                                        <p>@comment.Comment.Content</p>
                                     </div>
                                 </div>
-                            </div>
+                            }
                         }
-                    }
+                    </div>
                 </div>
-            </div>
 
+            }
         }
-    }
-</div>
+    </div>
+}

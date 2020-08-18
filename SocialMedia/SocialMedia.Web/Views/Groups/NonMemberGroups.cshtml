@@ -1,0 +1,34 @@
+﻿@model ICollection<SocialMedia.Services.Group.GroupServiceModel>
+
+@{
+    ViewData["Title"] = "Groups";
+}
+
+<h1>Groups</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    @*List all groups where the current user is not a member*@
+    <thead>
+        <tr>
+            <th>
+                Title
+            </th>
+        </tr>
+    </thead>
+    @foreach (var group in Model)
+    {
+        <tbody>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => group.Title)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Groups", new { id = group.GroupId })
+                </td>
+            </tr>
+        </tbody>
+    }
+</table>

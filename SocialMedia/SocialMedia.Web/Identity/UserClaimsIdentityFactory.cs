@@ -1,17 +1,14 @@
-﻿using SocialMedia.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-
-namespace SocialMedia.Web.Identity
+﻿namespace SocialMedia.Web.Identity
 {
+    using SocialMedia.Data.Models;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Options;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
+
     public class CustomUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<User>
     {
-        public CustomUserClaimsPrincipalFactory(UserManager<User> userManager, IOptions<IdentityOptions> optionsAccessor) 
+        public CustomUserClaimsPrincipalFactory(UserManager<User> userManager, IOptions<IdentityOptions> optionsAccessor)
             : base(userManager, optionsAccessor)
         {
         }

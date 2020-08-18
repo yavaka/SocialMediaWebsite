@@ -1,59 +1,220 @@
-﻿@model SocialMedia.Models.ViewModels.GroupViewModel
+﻿@model SocialMedia.Web.Models.GroupViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>@Model.Group.Title</h1>
-
 <!--Group information-->
-<div class="row">
-    <div class="col-sm-4">
-        <b>Group @Html.DisplayNameFor(model => model.Group.Description)</b> :
-    </div>
-    <div" class="col-sm-8">
-        @Html.DisplayFor(model => model.Group.Description)
-    </div">
-    <div class="col-md-2"><a asp-controller="Groups" asp-action="GroupMembers" asp-route-id="@Model.Group.GroupId">Members</a></div>
-    <div class="col-md-8"></div>
-    <div class="col-md-2">
-        <button>@Html.ActionLink("Leave group", "LeaveGroup", "Groups", new { id = Model.Group.GroupId })</button>
-    </div>
-</div>
-<hr />
-
-<!--Group posts-->
 <div class="container">
     <div class="jumbotron">
-        <button>@Html.ActionLink("Create post", "Create", "Posts", new { id = Model.Group.GroupId })</button>
-    </div>
-    @if (Model.Posts.Count == 0)
-    {
-        <div class="jumbotron">
-            <h3>There are no posts in this group yet.</h3>
+        <div class="row">
+            <div class="col-md">
+                <h2>@Model.Title</h2>
+            </div>
+            <div class="col-md">
+                <h5>@Model.Description</h5>
+            </div>
+            @if (Model.IsCurrentUserMember)
+            {
+                <div class="col-md-1">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                            <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                        </button>
+                        <ul class="dropdown-menu">
+                            @if (Model.Admin.Id != Model.CurrentUserId)
+                            {
+                                <li>
+                                    <button class="btn btn-outline-primary">
+                                        @Html.ActionLink(
+                                       "Leave group", "Leave", "Groups",
+                                       new { id = Model.GroupId })
+                                    </button>
+                                </li>
+                            }
+                            @if (Model.Admin.Id == Model.CurrentUserId)
+                            {
+                                <li>
+                                    <button class="btn-primary"
+                                            asp-action="Edit"
+                                            asp-route-id="@Model.GroupId">
+                                        Edit
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="btn-primary"
+                                            asp-action="Delete"
+                                            asp-route-id="@Model.GroupId">
+                                        Delete
+                                    </button>
+
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
         </div>
-    }
-    else
+    </div>
+</div>
+<!-- non members -->
+@if (!Model.IsCurrentUserMember)
+{
+    <button class="btn btn-outline-primary">
+        @Html.ActionLink("Join", "Join", "Groups",
+       new { id = Model.GroupId })
+    </button>
+}
+else
+{
+    <!-- New Post Btn -->
+    @Html.ActionLink(
+            "Add Post", "Create", "Posts",
+            new 
+            {
+                groupId = Model.GroupId,
+                path = $"Groups/Details/{Model.GroupId}"
+            },
+            new
+            {
+                @class = "col-md-12 btn btn-outline-primary",
+                @style = "margin: 20px"
+            })
+
+    <!-- Posts -->
+    @if (Model.Posts.Count > 0)
     {
-        var posts = Model.Posts.OrderByDescending(d => d.Post.DatePosted);
-
-        @foreach (var postViewModel in posts)
+        foreach (var post in Model.Posts)
         {
-            <div class="jumbotron">
-                <h3>@postViewModel.Post.Author.UserName</h3>
-                @* Tagged users *@
-                @if (postViewModel.Tagged.Count > 0)
-                {
-                    <h4>@String.Join(',', postViewModel.Tagged)</h4>
-                }
-                <hr />
-                <p style="font-size:24px">@postViewModel.Post.Content</p>
-                <span>@postViewModel.Post.DatePosted.Date</span>
-                <hr />
+            <div class="media border p-3" style="margin-bottom: 20px;">
+                <img src="~/img/profile_pic.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                <div class="media-body">
+                    <!-- Post author and posted on-->
+                    <div class="row">
+                        <div class="col-md-10">
+                            <h5>@post.Author.UserName <small><i>Posted on @post.DatePosted</i></small></h5>
+                        </div>
+                        @if (Model.CurrentUserId == post.Author.Id)
+                        {
+                            <!-- Dropdown settings -->
+                            <div class="col-md-2 dropdown">
+                                <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                                    <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        @Html.ActionLink(
+                                       "Edit", "Edit", "Posts",
+                                       new
+                                       {
+                                           id = post.PostId,
+                                           path = $"Groups/Details/{Model.GroupId}"
+                                       },
+                                       new { @class = "btn" })
+                                    </li>
+                                    <li>
+                                        @Html.ActionLink(
+                                       "Delete", "Delete", "Posts",
+                                       new
+                                       {
+                                           id = post.PostId,
+                                           path = $"Groups/Details/{Model.GroupId}"
+                                       },
+                                       new { @class = "btn" })
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                    @if (post.TaggedFriends != null)
+                    {
+                        foreach (var user in post.TaggedFriends)
+                        {
+                            <a href="#" class="badge badge-primary">@user.UserName</a>
+                        }
+                    }
 
-                <button class="btn btn-outline-info">@Html.ActionLink("Comments", "Index", "Comments", new { id = postViewModel.Post.PostId })</button>
-                <button class="btn btn-outline-primary">@Html.ActionLink("Add comment", "Create", "Comments", new { id = postViewModel.Post.PostId })</button>
+                    <p style="margin: 15px">
+                        @post.Content
+                    </p>
+
+                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+
+                    <!-- New Comment Btn -->
+                    @Html.ActionLink(
+                   "Add Comment", "Create", "Comments",
+                   new
+                   {
+                       postId = post.PostId,
+                       path = $"Groups/Details/{Model.GroupId}"
+                   },
+                   new { @class = "btn btn-outline-primary" })
+
+                    <hr style="height:1px;border-width:0;color:skyblue;background-color:skyblue">
+
+                    <!-- Comments -->
+                    @if (post.Comments.Count > 0)
+                    {
+                        foreach (var comment in post.Comments)
+                        {
+                            <div class="container mt-3">
+                                <div class="media border p-3">
+                                    <img src="~/img/profile_pic_2.png" class="mr-3 mt-3 rounded-circle" style="width:60px;">
+                                    <div class="media-body">
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <!-- Author and posted date-->
+                                                <h6>@comment.Author.UserName <small><i>Posted on @comment.DatePosted</i></small></h6>
+
+                                                <!-- Tagged users -->
+                                                @if (comment.TaggedFriends != null)
+                                                {
+                                                    foreach (var user in comment.TaggedFriends)
+                                                    {
+                                                        <a href="#" class="badge badge-primary">@user.UserName</a>
+                                                    }
+                                                }
+                                            </div>
+                                            <div class="col-md-2">
+                                                @if (Model.CurrentUserId == comment.Author.Id)
+                                                {
+                                                    <button class="btn btn-outline-primary" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">
+                                                        <img width="25" height="25" src="https://img.icons8.com/ultraviolet/40/000000/settings.png" />
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            @Html.ActionLink(
+                                                           "Edit", "Edit", "Comments",
+                                                           new
+                                                           {
+                                                               id = comment.CommentId,
+                                                               path = $"Groups/Details/{Model.GroupId}"
+                                                           },
+                                                           new { @class = "btn" })
+                                                        </li>
+                                                        <li>
+                                                            @Html.ActionLink(
+                                                           "Delete", "Delete", "Comments",
+                                                           new
+                                                           {
+                                                               id = comment.CommentId,
+                                                               path = $"Groups/Details/{Model.GroupId}"
+                                                           },
+                                                           new { @class = "btn" })
+                                                        </li>
+                                                    </ul>
+                                                }
+                                            </div>
+                                        </div>
+                                        <!-- Content -->
+                                        <p>@comment.Content</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
             </div>
         }
     }
-</div>
+}
