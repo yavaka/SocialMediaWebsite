@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 
 namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 {
@@ -20,6 +17,11 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
 
         public static string TwoFactorAuthentication => "TwoFactorAuthentication";
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public static string ProfilePicture => "ProfilePicture";
+
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
 
         public static string EmailNavClass(ViewContext viewContext) => PageNavClass(viewContext, Email);
@@ -31,6 +33,13 @@ namespace SocialMedia.Web.Areas.Identity.Pages.Account.Manage
         public static string PersonalDataNavClass(ViewContext viewContext) => PageNavClass(viewContext, PersonalData);
 
         public static string TwoFactorAuthenticationNavClass(ViewContext viewContext) => PageNavClass(viewContext, TwoFactorAuthentication);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="viewContext"></param>
+        /// <returns></returns>
+        public static string ProfilePictureNavClass(ViewContext viewContext) => PageNavClass(viewContext, ProfilePicture);
 
         private static string PageNavClass(ViewContext viewContext, string page)
         {

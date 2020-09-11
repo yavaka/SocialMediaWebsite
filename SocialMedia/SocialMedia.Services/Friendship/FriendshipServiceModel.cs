@@ -21,7 +21,9 @@
         /// </summary>
         public IEnumerable<UserServiceModel> PendingRequests { get; set; }
     }
-
+    /// <summary>
+    /// Friendship status with current user
+    /// </summary>
     public enum ServiceModelFRStatus 
     {
         CurrentUser,

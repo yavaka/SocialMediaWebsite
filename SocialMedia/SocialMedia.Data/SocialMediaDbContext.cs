@@ -18,6 +18,8 @@
         public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
         public virtual DbSet<TagFriendInPost> TagFriendsInPosts { get; set; }
         public virtual DbSet<TagFriendInComment> TagFriendsInComments { get; set; }
+        public virtual DbSet<Image> Images { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -134,6 +136,10 @@
                     .HasMaxLength(30)
                     .IsUnicode(false)
                     .IsFixedLength();
+
+                entity.HasMany(i => i.Images)
+                .WithOne(u => u.Uploader)
+                .HasForeignKey(uId => uId.UploaderId);
             });
 
             //Comments
@@ -197,7 +203,6 @@
                 .IsUnique();
 
             });
-
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,0 +1,21 @@
+﻿@page
+@model ProfilePictureModel
+@{
+    ViewData["Title"] = "Profile picture";
+    ViewData["ActivePage"] = ManageNavPages.ProfilePicture;
+}
+
+<h4>@ViewData["Title"]</h4>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<br />
+<img src="@ViewData["Avatar"]" height="100" width="100" />
+<br />
+
+<form id="profile-picture"
+      method="post"
+      enctype="multipart/form-data">
+    <input type="file" id="file1" name="file1" />
+    <button type="submit">Upload File(s)</button>
+</form>

@@ -7,22 +7,7 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item dropdown">
-            <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">Groups</a>
-            <ul class="dropdown-menu">
-                <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="JoinedGroups">My Groups</a></li>
-                <li><a class="nav-link text-dark" asp-area="" asp-controller="Groups" asp-action="NonMemberGroups">All Groups</a></li>
-            </ul>
-        </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">Friendships</a>
-            <ul class="dropdown-menu">
-                <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="Friends">Friends</a></li>
-                <li><a class="nav-link text-dark" asp-controller="Friendships" asp-action="FriendRequests">Requests</a></li>
-                <li><a class="nav-link text-dark" asp-area="" asp-controller="Friendships" asp-action="NonFriends">Non friends</a></li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Posts" asp-action="UserPosts">Posts</a>
+            
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">Account</a>

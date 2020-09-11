@@ -1,5 +1,6 @@
 namespace SocialMedia.Web
 {
+    using Infrastructure;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
@@ -8,17 +9,8 @@ namespace SocialMedia.Web
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using SocialMedia.Data;
-    using SocialMedia.Web.Identity;
-    using Infrastructure;
-    using SocialMedia.Services.TaggedUser;
     using SocialMedia.Data.Models;
-    using SocialMedia.Services.Post;
-    using SocialMedia.Services.Friendship;
-    using SocialMedia.Services.Profile;
-    using SocialMedia.Services.Comment;
-    using SocialMedia.Services.User;
-    using SocialMedia.Services.Group;
-    using SocialMedia.Services.Url;
+    using SocialMedia.Web.Identity;
 
     public class Startup
     {

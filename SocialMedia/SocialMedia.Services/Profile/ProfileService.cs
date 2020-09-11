@@ -1,5 +1,6 @@
 ﻿namespace SocialMedia.Services.Profile
 {
+    using SocialMedia.Services.Image;
     using SocialMedia.Services.Post;
     using SocialMedia.Services.User;
     using System.Threading.Tasks;
@@ -8,13 +9,16 @@
     {
         private readonly IPostService _postService;
         private readonly IUserService _userService;
+        private readonly IImageService _imageService;
 
         public ProfileService(
             IPostService postService,
-            IUserService userService)
+            IUserService userService,
+            IImageService imageService)
         {
             this._postService = postService;
             this._userService = userService;
+            this._imageService = imageService;
         }
 
         public async Task<ProfileServiceModel> GetProfileAsync(string userId)
@@ -23,7 +27,9 @@
                 User = await this._userService
                     .GetUserByIdAsync(userId),
                 Posts = await this._postService
-                    .GetPostsByUserIdAsync(userId)
+                    .GetPostsByUserIdAsync(userId),
+                AvatarUrl = this._imageService
+                    .GetAvatar(userId)
             };
     }
 }

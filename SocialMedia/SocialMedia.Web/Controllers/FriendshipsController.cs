@@ -1,5 +1,6 @@
 ﻿namespace SocialMedia.Web.Controllers
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,14 @@
         {
             this._friendshipService = friendshipService;
             this._userService = userService;
+        }
+
+        public async Task<IActionResult> UserFriends(string userId)
+        {
+            var friends = await this._friendshipService
+                .GetFriendsAsync(userId);
+
+            return View("Friends", friends);
         }
 
         public async Task<IActionResult> Friends()
@@ -57,8 +66,8 @@
 
             if (currentUserId == userId)
             {
-                return RedirectToAction("Index", "Profile", 
-                    new { friendshipStatus = ServiceModelFRStatus.CurrentUser});
+                return RedirectToAction("Index", "Profile",
+                    new { friendshipStatus = ServiceModelFRStatus.CurrentUser });
             }
 
             var friendshipStatus = await this._friendshipService
@@ -134,7 +143,7 @@
             return RedirectToAction(nameof(FriendRequests));
         }
 
-        public async Task<IActionResult> UnfriendAsync(string friendId) 
+        public async Task<IActionResult> UnfriendAsync(string friendId)
         {
             var currentUserId = this._userService.GetUserId(User);
 

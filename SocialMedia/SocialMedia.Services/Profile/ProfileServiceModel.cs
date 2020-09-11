@@ -17,6 +17,8 @@
 
         public string CurrentUserId { get; set; }
 
+        public string AvatarUrl { get; set; }
+
         private List<PostServiceModel> _posts;
         public ICollection<PostServiceModel> Posts
         {
