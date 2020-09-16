@@ -67,7 +67,7 @@
             if (currentUserId == userId)
             {
                 return RedirectToAction("Index", "Profile",
-                    new { friendshipStatus = ServiceModelFRStatus.CurrentUser });
+                    new { friendshipStatus = ServiceModelFriendshipStatus.CurrentUser });
             }
 
             var friendshipStatus = await this._friendshipService
@@ -75,11 +75,11 @@
 
             //Check is it invoked from pendings or requests collections
             if (invokedFrom != null &&
-                friendshipStatus == ServiceModelFRStatus.Pending)
+                friendshipStatus == ServiceModelFriendshipStatus.Pending)
             {
                 if (invokedFrom == "Requests")
                 {
-                    friendshipStatus = ServiceModelFRStatus.Request;
+                    friendshipStatus = ServiceModelFriendshipStatus.Request;
                 }
             }
 

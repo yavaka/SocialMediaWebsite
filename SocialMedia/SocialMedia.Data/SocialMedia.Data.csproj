@@ -25,6 +25,8 @@
     <Compile Remove="Migrations\20200410130043_TagFriend.Designer.cs" />
     <Compile Remove="Migrations\20200417093831_PostContentRequired.cs" />
     <Compile Remove="Migrations\20200417093831_PostContentRequired.Designer.cs" />
+    <Compile Remove="Migrations\20200915103306_UserAvatar.cs" />
+    <Compile Remove="Migrations\20200915103306_UserAvatar.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

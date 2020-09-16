@@ -28,8 +28,8 @@
                     .GetUserByIdAsync(userId),
                 Posts = await this._postService
                     .GetPostsByUserIdAsync(userId),
-                AvatarUrl = this._imageService
-                    .GetAvatar(userId)
+                AvatarUrl =await this._imageService
+                    .GetAvatarAsync(userId)
             };
     }
 }

@@ -10,7 +10,6 @@
     using SocialMedia.Services.TaggedUser;
     using SocialMedia.Services.User;
     using System.Linq;
-    using SocialMedia.Services.Url;
     using Microsoft.AspNetCore.Authorization;
 
     [Authorize]
@@ -20,20 +19,17 @@
         private readonly ICommentService _commentService;
         private readonly ITaggedUserService _taggedUserService;
         private readonly IUserService _userService;
-        private readonly IUrlService _urlService;
 
         public CommentsController(
             IFriendshipService friendshipService,
             ICommentService commentService,
             ITaggedUserService taggedUserService,
-            IUserService userService,
-            IUrlService urlService)
+            IUserService userService)
         {
             this._friendshipService = friendshipService;
             this._commentService = commentService;
             this._taggedUserService = taggedUserService;
             this._userService = userService;
-            this._urlService = urlService;
         }
 
         [HttpGet]
@@ -93,9 +89,7 @@
 
                 if (TempData.ContainsKey("path"))
                 {
-                    var returnUrl = this._urlService
-                        .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                    return Redirect(returnUrl);
+                    return LocalRedirect(TempData["path"].ToString());
                 }
                 else
                 {
@@ -188,9 +182,7 @@
 
                 if (TempData.ContainsKey("path"))
                 {
-                    var returnUrl = this._urlService
-                        .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                    return Redirect(returnUrl);
+                    return Redirect(TempData["path"].ToString());
                 }
                 else
                 {
@@ -231,9 +223,7 @@
 
             if (TempData.ContainsKey("path"))
             {
-                var returnUrl = this._urlService
-                    .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                return Redirect(returnUrl);
+                return Redirect(TempData["path"].ToString());
             }
             return NotFound();
         }

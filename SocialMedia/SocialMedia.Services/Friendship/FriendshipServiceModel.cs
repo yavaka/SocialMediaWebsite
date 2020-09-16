@@ -9,7 +9,7 @@
 
         public UserServiceModel Requester { get; set; }
 
-        public ServiceModelFRStatus Status{ get; set; }
+        public ServiceModelFriendshipStatus Status{ get; set; }
 
         /// <summary>
         /// Users who sent request to the current user
@@ -24,7 +24,7 @@
     /// <summary>
     /// Friendship status with current user
     /// </summary>
-    public enum ServiceModelFRStatus 
+    public enum ServiceModelFriendshipStatus 
     {
         CurrentUser,
         NonFriends,

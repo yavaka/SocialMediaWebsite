@@ -11,15 +11,15 @@
         {
         }
 
-        public virtual DbSet<Group> Groups { get; set; }
-        public virtual DbSet<Post> Posts { get; set; }
-        public virtual DbSet<Comment> Comments { get; set; }
-        public virtual DbSet<Friendship> Friendships { get; set; }
-        public virtual DbSet<UserInGroup> UsersInGroups { get; set; }
-        public virtual DbSet<TagFriendInPost> TagFriendsInPosts { get; set; }
-        public virtual DbSet<TagFriendInComment> TagFriendsInComments { get; set; }
-        public virtual DbSet<Image> Images { get; set; }
-
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Friendship> Friendships { get; set; }
+        public DbSet<UserInGroup> UsersInGroups { get; set; }
+        public DbSet<TagFriendInPost> TagFriendsInPosts { get; set; }
+        public DbSet<TagFriendInComment> TagFriendsInComments { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Avatar> ProfilePictures { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -138,8 +138,15 @@
                     .IsFixedLength();
 
                 entity.HasMany(i => i.Images)
-                .WithOne(u => u.Uploader)
-                .HasForeignKey(uId => uId.UploaderId);
+                    .WithOne(u => u.Uploader)
+                    .HasForeignKey(uId => uId.UploaderId);
+            });
+
+            modelBuilder.Entity<Avatar>(entity =>
+            {
+                entity.HasOne(i => i.Uploader)
+                    .WithOne(a => a.Avatar)
+                    .HasForeignKey<Avatar>(i => i.UploaderId);
             });
 
             //Comments

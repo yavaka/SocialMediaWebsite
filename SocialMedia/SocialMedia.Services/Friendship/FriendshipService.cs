@@ -89,7 +89,7 @@
                 })
                 .ToListAsync();
 
-        public async Task<ServiceModelFRStatus> GetFriendshipStatusAsync(string currentUserId, string userId)
+        public async Task<ServiceModelFriendshipStatus> GetFriendshipStatusAsync(string currentUserId, string userId)
         {
             var friendship = await this._data
                 .Friendships
@@ -99,17 +99,17 @@
 
             if (friendship == null)
             {
-                return ServiceModelFRStatus.NonFriends;
+                return ServiceModelFriendshipStatus.NonFriends;
             }
 
             switch (friendship.Status)
             {
                 case Status.Accepted:
-                    return ServiceModelFRStatus.Accepted;
+                    return ServiceModelFriendshipStatus.Accepted;
                 case Status.Pending:
-                    return ServiceModelFRStatus.Pending;
+                    return ServiceModelFriendshipStatus.Pending;
             }
-            return ServiceModelFRStatus.Request;
+            return ServiceModelFriendshipStatus.Request;
         }
 
         public async Task<IEnumerable<UserServiceModel>> GetFriendRequestsAsync(string currentUserId)

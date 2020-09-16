@@ -1,0 +1,35 @@
+﻿@model IEnumerable<KeyValuePair<int, string>>
+
+@{
+    ViewData["Title"] = "Gallery";
+}
+<div class="row">
+    <div class="col-md-4">
+        <h1>Gallery</h1>
+    </div>
+    <div class="col-md-4" style="padding: 15px 32px">
+        <a asp-controller="Gallery"
+           asp-action="AddImage"
+           class="btn btn-primary">Add Image</a>
+    </div>
+</div>
+
+<hr class="container" style="height: 1px; border-width: 0; color: skyblue; background-color: skyblue">
+
+<div class="container page-top">
+    <div class="row">
+        @if (Model != null)
+        {
+            @foreach (var (id, image) in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                    <a asp-controller="Gallery"
+                       asp-action="DeleteImage"
+                       asp-route-imageId="@id">
+                        <img src="@image" class="zoom img-fluid " alt="">
+                    </a>
+                </div>
+            }
+        }
+    </div>
+</div>

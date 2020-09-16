@@ -11,7 +11,7 @@
 
         Task<ICollection<UserServiceModel>> GetNonFriendsAsync(string userId);
 
-        Task<ServiceModelFRStatus> GetFriendshipStatusAsync(string currentUserId, string secondUserId);
+        Task<ServiceModelFriendshipStatus> GetFriendshipStatusAsync(string currentUserId, string secondUserId);
 
         Task<IEnumerable<UserServiceModel>> GetFriendRequestsAsync(string currentUserId);
 

@@ -32,16 +32,18 @@
         [DataType(DataType.MultilineText)]
         public string Bio { get; set; }
         public string Locale { get; set; } = "en-GB";
-        public virtual ICollection<Post> Posts { get; set; }
-        public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<Friendship> FriendshipAddressee { get; set; }
-        public virtual ICollection<Friendship> FriendshipRequester { get; set; }
-        public virtual ICollection<UserInGroup> Groups { get; set; }
-        public virtual ICollection<TagFriendInPost> TaggerInPosts { get; set; }
-        public virtual ICollection<TagFriendInPost> TaggedInPosts { get; set; }
-        public virtual ICollection<TagFriendInComment> TaggerInComments { get; set; }
-        public virtual ICollection<TagFriendInComment> TaggedInComments { get; set; }
-        public virtual ICollection<Image> Images { get; set; }
+        public ICollection<Post> Posts { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Friendship> FriendshipAddressee { get; set; }
+        public ICollection<Friendship> FriendshipRequester { get; set; }
+        public ICollection<UserInGroup> Groups { get; set; }
+        public ICollection<TagFriendInPost> TaggerInPosts { get; set; }
+        public ICollection<TagFriendInPost> TaggedInPosts { get; set; }
+        public ICollection<TagFriendInComment> TaggerInComments { get; set; }
+        public ICollection<TagFriendInComment> TaggedInComments { get; set; }
+        public ICollection<Image> Images { get; set; }
+        public int AvatarId { get; set; }
+        public Avatar Avatar { get; set; }
     }
 
     public enum Gender

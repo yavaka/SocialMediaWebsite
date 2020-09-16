@@ -11,7 +11,6 @@
     using SocialMedia.Services.Comment;
     using System.Linq;
     using SocialMedia.Services.User;
-    using SocialMedia.Services.Url;
     using Microsoft.AspNetCore.Authorization;
 
     [Authorize]
@@ -22,22 +21,19 @@
         private readonly ITaggedUserService _taggedUserService;
         private readonly ICommentService _commentService;
         private readonly IUserService _userService;
-        private readonly IUrlService _urlService;
 
         public PostsController(
             IFriendshipService friendshipService,
             IPostService postService,
             ITaggedUserService taggedUserService,
             ICommentService commentService,
-            IUserService userService,
-            IUrlService urlService)
+            IUserService userService)
         {
             this._friendshipService = friendshipService;
             this._postService = postService;
             this._taggedUserService = taggedUserService;
             this._commentService = commentService;
             this._userService = userService;
-            this._urlService = urlService;
         }
 
         [HttpGet]
@@ -78,11 +74,15 @@
                     .GetCurrentUserAsync(User);
 
                 //Get tagged friends
-                if (viewModel.TagFriends.Friends.Any(c => c.Checked == true))
+                if (viewModel.TagFriends.Friends.Any(c => c.Checked))
                 {
                     viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
-                        .Where(c => c.Checked == true)
+                        .Where(c => c.Checked)
                         .ToList();
+                }
+                else
+                {
+                    viewModel.TagFriends.TaggedFriends = new List<UserServiceModel>();
                 }
 
                 await this._postService
@@ -97,9 +97,7 @@
 
                 if (TempData.ContainsKey("path"))
                 {
-                    var returnUrl = this._urlService
-                        .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                    return Redirect(returnUrl);
+                    return LocalRedirect(TempData["path"].ToString());
                 }
                 else
                 {
@@ -191,9 +189,7 @@
 
                 if (TempData.ContainsKey("path"))
                 {
-                    var returnUrl = this._urlService
-                        .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                    return Redirect(returnUrl);
+                    return Redirect(TempData["path"].ToString());
                 }
                 else
                 {
@@ -246,9 +242,7 @@
 
             if (TempData.ContainsKey("path"))
             {
-                var returnUrl = this._urlService
-                    .GenerateReturnUrl(TempData["path"].ToString(), HttpContext);
-                return Redirect(returnUrl);
+                return Redirect(TempData["path"].ToString());
             }
             else
             {

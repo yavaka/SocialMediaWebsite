@@ -24,7 +24,7 @@
         [HttpGet]
         public async Task<IActionResult> IndexAsync(
             string userId, 
-            ServiceModelFRStatus friendshipStatus)
+            ServiceModelFriendshipStatus friendshipStatus)
         {
             var currentUserId = this._userService
                 .GetUserId(User);

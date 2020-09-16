@@ -37,6 +37,6 @@
         /// <summary>
         /// Depending of the enum value it will be generated different layout
         /// </summary>
-        public ServiceModelFRStatus FriendshipStatus{ get; set; }
+        public ServiceModelFriendshipStatus FriendshipStatus{ get; set; }
     }
 }

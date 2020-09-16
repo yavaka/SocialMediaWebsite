@@ -15,12 +15,12 @@
 
         public string AuthorId { get; set; }
 
-        public virtual User Author { get; set; }
+        public User Author { get; set; }
 
         public int CommentedPostId { get; set; }
 
-        public virtual Post CommentedPost { get; set; }
+        public Post CommentedPost { get; set; }
 
-        public virtual ICollection<TagFriendInComment> TaggedUsers { get; set; }
+        public ICollection<TagFriendInComment> TaggedUsers { get; set; }
     }
 }

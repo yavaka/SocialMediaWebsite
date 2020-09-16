@@ -7,6 +7,6 @@
 
     public interface IStreamService : IService
     {
-        Task<MemoryStream> CopyFileToMemroyStreamAsync(IFormFile file);
+        Task<MemoryStream> CopyFileToMemoryStreamAsync(IFormFile file);
     }
 }
