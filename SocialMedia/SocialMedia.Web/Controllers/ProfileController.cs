@@ -26,8 +26,8 @@
             string userId, 
             ServiceModelFriendshipStatus friendshipStatus)
         {
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             ProfileServiceModel profile;
 

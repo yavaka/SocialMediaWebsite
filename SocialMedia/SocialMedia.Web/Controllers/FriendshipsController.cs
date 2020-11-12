@@ -32,8 +32,8 @@
         public async Task<IActionResult> Friends()
         {
             TempData.Clear();
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             var friends = await this._friendshipService
                 .GetFriendsAsync(currentUserId);
@@ -44,8 +44,8 @@
         public async Task<IActionResult> NonFriends()
         {
             TempData.Clear();
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             var nonFriends = await this._friendshipService
                 .GetNonFriendsAsync(currentUserId);
@@ -61,8 +61,8 @@
                 return NotFound();
             }
 
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             if (currentUserId == userId)
             {
@@ -90,8 +90,8 @@
         {
             var model = new FriendshipServiceModel();
 
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             model.Requests = await this._friendshipService
                 .GetFriendRequestsAsync(currentUserId);
@@ -109,7 +109,8 @@
                 return NotFound();
             }
 
-            var currentUserId = this._userService.GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._friendshipService.SendRequestAsync(currentUserId, addresseeId);
 
@@ -118,7 +119,8 @@
 
         public async Task<IActionResult> AcceptAsync(string requesterId)
         {
-            var currentUserId = this._userService.GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._friendshipService.AcceptRequestAsync(currentUserId, requesterId);
 
@@ -127,7 +129,8 @@
 
         public async Task<IActionResult> RejectAsync(string requesterId)
         {
-            var currentUserId = this._userService.GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._friendshipService.RejectRequestAsync(currentUserId, requesterId);
 
@@ -136,7 +139,8 @@
 
         public async Task<IActionResult> CancelInvitationAsync(string addresseeId)
         {
-            var currentUserId = this._userService.GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._friendshipService.CancelInvitationAsync(currentUserId, addresseeId);
 
@@ -145,7 +149,8 @@
 
         public async Task<IActionResult> UnfriendAsync(string friendId)
         {
-            var currentUserId = this._userService.GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._friendshipService.UnfriendAsync(currentUserId, friendId);
 

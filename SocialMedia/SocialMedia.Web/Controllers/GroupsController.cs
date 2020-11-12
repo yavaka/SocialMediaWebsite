@@ -38,7 +38,7 @@
         public async Task<IActionResult> NonMemberGroups()
         {
             var currentUser = await this._userService
-                .GetCurrentUserAsync(User);
+                .GetUserByNameAsync(User.Identity.Name);
 
             var nonMemberGroups = await this._groupService
                 .GetNonMemberGroupsAsync(currentUser);
@@ -50,7 +50,7 @@
         public async Task<IActionResult> JoinedGroups()
         {
             var currentUser = await this._userService
-               .GetCurrentUserAsync(User);
+                .GetUserByNameAsync(User.Identity.Name);
 
             var joinedGroups = await this._groupService
                 .GetJoinedGroupsAsync(currentUser);
@@ -82,8 +82,8 @@
                     return View(serviceModel);
                 }
 
-                serviceModel.AdminId = this._userService
-                    .GetUserId(User);
+                serviceModel.AdminId = await this._userService
+                    .GetUserIdByNameAsync(User.Identity.Name);
 
                 await this._groupService.AddGroupAsync(serviceModel);
 
@@ -140,8 +140,8 @@
                 return NotFound();
             }
 
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             var viewModel = new GroupViewModel
             {
@@ -204,8 +204,8 @@
 
         public async Task<IActionResult> Join(int id)
         {
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._groupService.JoinGroupAsync(id, currentUserId);
 
@@ -214,135 +214,12 @@
 
         public async Task<IActionResult> Leave(int id)
         {
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._groupService.LeaveGroupAsync(id, currentUserId);
 
             return RedirectToAction(nameof(NonMemberGroups));
         }
-
-        //// GET: Groups/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var group = await _context.Groups
-        //        .FirstOrDefaultAsync(m => m.GroupId == id);
-        //    if (group == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(group);
-        //}
-
-        //// POST: Groups/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var group = await _context.Groups
-        //        .Include(p => p.Posts)
-        //        .FirstOrDefaultAsync(i => i.GroupId == id);
-
-        //    //Remove all group posts  
-        //    if (group.Posts.Count > 0)
-        //    {
-        //        RemoveGroupPosts(group.GroupId);
-        //    }
-
-        //    _context.Groups.Remove(group);
-        //    await _context.SaveChangesAsync();
-
-        //    return RedirectToAction(nameof(MyGroups));
-        //}
-
-        //private bool GroupExists(int id)
-        //{
-        //    return _context.Groups.Any(e => e.GroupId == id);
-        //}
-
-        //#endregion
-
-        ////Post: Groups/JoinGroup
-        //public async Task<IActionResult> JoinGroup(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    //Gets the current user
-        //    var user = await this._userManager.GetUserAsync(User);
-
-        //    //Gets the group with id sent from Groups/Details view
-        //    var group = await this._context.Groups
-        //        .FirstOrDefaultAsync(i => i.GroupId == id);
-
-        //    //Adds new row in the UsersIngroups table where the current user is not admin
-        //    var joinGroup = new UserInGroup()
-        //    {
-        //        UserId = user.Id,
-        //        User = user,
-        //        GroupId = (int)id,
-        //        Group = group
-        //    };
-
-        //    this._context.UsersInGroups.Add(joinGroup);
-        //    await this._context.SaveChangesAsync();
-
-        //    return RedirectToAction("MyGroups");
-        //}
-
-        //public async Task<IActionResult> LeaveGroup(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    //Gets the current user
-        //    var user = await this._userManager.GetUserAsync(User);
-
-        //    var userInGroupEntity = await this._context.UsersInGroups
-        //        .FirstOrDefaultAsync(i => i.GroupId == id &&
-        //                                  i.UserId == user.Id);
-
-        //    this._context.UsersInGroups.Remove(userInGroupEntity);
-        //    this._context.SaveChanges();
-
-        //    return RedirectToAction(nameof(MyGroups));
-        //}
-
-        ////Get: Groups/GroupMembers
-        //public async Task<IActionResult> GroupMembers(int id)
-        //{
-        //    var user = await this._userManager.GetUserAsync(User);
-        //    //Gets all of the members in the group with id from UsersInGroups table
-        //    var membersInTheGroup = await this._context.UsersInGroups
-        //        .Include(u => u.User)
-        //        .Where(gId => gId.GroupId == id)
-        //        .ToListAsync();
-
-        //    var members = new List<User>();
-        //    foreach (var member in membersInTheGroup)
-        //    {
-        //        if (member.UserId != user.Id)
-        //        {
-        //            if (member.Admin == true)
-        //            {
-        //                member.User.Message = "admin";
-        //            }
-        //            members.Add(member.User);
-        //        }
-        //    }
-
-        //    return View(members);
-        //}
-
     }
 }

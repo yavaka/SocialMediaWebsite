@@ -43,8 +43,8 @@
                 TempData["path"] = path;
             }
 
-            var currentUserId = this._userService
-                .GetUserId(User);
+            var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             var viewModel = new CommentViewModel
             {
@@ -67,14 +67,18 @@
             if (ModelState.IsValid)
             {
                 var currentUser = await this._userService
-                    .GetCurrentUserAsync(User);
+                    .GetUserByNameAsync(User.Identity.Name);
 
                 //Get tagged friends
-                if (viewModel.TagFriends.Friends.Any(c => c.Checked == true))
+                if (viewModel.TagFriends.Friends.Any(c => c.Checked))
                 {
                     viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
                         .Where(c => c.Checked == true)
                         .ToList();
+                }
+                else
+                {
+                    viewModel.TagFriends.TaggedFriends = new List<UserServiceModel>();
                 }
 
                 await this._commentService
@@ -114,7 +118,7 @@
                 .GetComment(id);
 
             var currentUser = await this._userService
-                .GetCurrentUserAsync(User);
+                .GetUserByNameAsync(User.Identity.Name);
 
             if (comment == null ||
                 currentUser.Id != comment.Author.Id)
@@ -162,7 +166,8 @@
         {
             if (ModelState.IsValid)
             {
-                var currentUserId = this._userService.GetUserId(User);
+                var currentUserId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
                 viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
                     .Where(c => c.Checked == true)

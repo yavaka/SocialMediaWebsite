@@ -51,8 +51,8 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddImage(IFormCollection uploadedFiles)
         {
-            var userId = this._userService
-                .GetUserId(User);
+            var userId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             var images = uploadedFiles.Files;
 
@@ -100,8 +100,8 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int imageId)
         {
-            var userId = this._userService
-                .GetUserId(User);
+            var userId = await this._userService
+                .GetUserIdByNameAsync(User.Identity.Name);
 
             await this._imageService.DeleteImageAsync(imageId);
 

@@ -1,15 +1,14 @@
 ﻿namespace SocialMedia.Services.User
 {
-    using System.Threading.Tasks;
-    using System.Security.Claims;
     using SocialMedia.Services.Common;
+    using System.Threading.Tasks;
 
     public interface IUserService : IService
     {
         Task<UserServiceModel> GetUserByIdAsync(string userId);
 
-        Task<UserServiceModel> GetCurrentUserAsync(ClaimsPrincipal principal);
+        Task<string> GetUserIdByNameAsync(string name);
 
-        string GetUserId(ClaimsPrincipal principal);
+        Task<UserServiceModel> GetUserByNameAsync(string name);
     }
 }
