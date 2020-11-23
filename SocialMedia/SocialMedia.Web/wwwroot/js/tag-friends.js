@@ -5,7 +5,7 @@ var taggedUsers = new Array();
 $('#userInput').on('input', function () {
     inputValue = $(this).val();
     //Check for the last char of user input
-    if (inputValue.charAt(inputValue.length - 1) == '@@') {
+    if (inputValue.charAt(inputValue.length - 1) == '@') {
         showDropDownList();
     }
 })
@@ -43,7 +43,7 @@ function getUsersByPartName() {
     if (searchInput.length >= 3) {
         $.ajax({
             type: 'GET',
-            url: '/Friendships/GetFriendsByPartName',
+            url: '/Friendships/GetUserFriendsByPartName',
             data: { 'partName': searchInput },
             contentType: 'application/json',
             dataType: 'json',
@@ -102,7 +102,7 @@ $('#userInput').on('keydown', function (e) {
                 inputValue != undefined) {
                 // get the whole word where the caret is
                 var word = getWord();
-                if (word[0] == '@@') {
+                if (word[0] == '@') {
                     inputValue = inputValue.replace(word, '');
                     $('#userInput').val(inputValue);
                     delete taggedUsers[word.split('_')[1]];
