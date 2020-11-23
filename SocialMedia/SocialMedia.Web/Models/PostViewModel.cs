@@ -16,6 +16,11 @@
 
         public int? GroupId { get; set; }
 
+        /// <summary>
+        /// Tagged Friends in a JSON format
+        /// </summary>
+        public string TaggedFriends { get; set; }
+
         public TagFriendsServiceModel TagFriends{ get; set; }
     }
 }

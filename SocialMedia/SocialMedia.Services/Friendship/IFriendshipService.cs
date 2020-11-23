@@ -17,6 +17,8 @@
 
         Task<IEnumerable<UserServiceModel>> GetPendingRequestsAsync(string currentUserId);
 
+        Task<IEnumerable<UserServiceModel>> GetFriendsByPartNameAsync(string partName, string userId);
+
         Task SendRequestAsync(string currentUserId, string addresseeId);
 
         Task AcceptRequestAsync(string currentUserId, string requesterId);

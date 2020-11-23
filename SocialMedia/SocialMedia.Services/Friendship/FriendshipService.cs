@@ -139,6 +139,15 @@
                 })
                 .ToListAsync();
 
+        public async Task<IEnumerable<UserServiceModel>> GetFriendsByPartNameAsync(string partName, string userId)
+        {
+            var userFriends = await GetFriendsAsync(userId);
+
+            return userFriends
+                .Where(f => f.FullName.StartsWith(partName))
+                .ToList();
+        }
+
         public async Task SendRequestAsync(string currentUserId, string addresseeId)
         {
             if (!await IsFriendshipExistAsync(currentUserId, addresseeId))
@@ -225,6 +234,5 @@
                 await this._data.SaveChangesAsync();
             }
         }
-
     }
 }
