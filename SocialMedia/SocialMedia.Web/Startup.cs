@@ -67,6 +67,8 @@ namespace SocialMedia.Web
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
+
+            app.MigrateDatabase();
         }
     }
 }
