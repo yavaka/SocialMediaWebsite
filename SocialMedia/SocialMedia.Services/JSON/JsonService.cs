@@ -2,7 +2,8 @@
 {
     using Newtonsoft.Json.Linq;
     using System.Collections.Generic;
-    
+    using System.Linq;
+
     public class JsonService<T> : IJsonService<T>
     {
         public IEnumerable<T> GetObjects(string json)
@@ -16,7 +17,7 @@
                 result.Add(jToken.ToObject<T>());
             }
 
-            return result;
+            return result.Where(i =>i != null).ToList();
         }
     }
 }

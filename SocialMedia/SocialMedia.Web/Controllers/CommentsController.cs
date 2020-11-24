@@ -11,6 +11,7 @@
     using SocialMedia.Services.User;
     using System.Linq;
     using Microsoft.AspNetCore.Authorization;
+    using SocialMedia.Services.JSON;
 
     [Authorize]
     public class CommentsController : Controller
@@ -19,17 +20,20 @@
         private readonly ICommentService _commentService;
         private readonly ITaggedUserService _taggedUserService;
         private readonly IUserService _userService;
+        private readonly IJsonService<UserServiceModel> _jsonService;
 
         public CommentsController(
             IFriendshipService friendshipService,
             ICommentService commentService,
             ITaggedUserService taggedUserService,
-            IUserService userService)
+            IUserService userService,
+            IJsonService<UserServiceModel> jsonService)
         {
             this._friendshipService = friendshipService;
             this._commentService = commentService;
             this._taggedUserService = taggedUserService;
             this._userService = userService;
+            this._jsonService = jsonService;
         }
 
         [HttpGet]
@@ -69,18 +73,6 @@
                 var currentUser = await this._userService
                     .GetUserByNameAsync(User.Identity.Name);
 
-                //Get tagged friends
-                if (viewModel.TagFriends.Friends.Any(c => c.Checked))
-                {
-                    viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
-                        .Where(c => c.Checked == true)
-                        .ToList();
-                }
-                else
-                {
-                    viewModel.TagFriends.TaggedFriends = new List<UserServiceModel>();
-                }
-
                 await this._commentService
                     .AddComment(new CommentServiceModel
                     {
@@ -88,7 +80,11 @@
                         DatePosted = DateTime.Now,
                         Author = currentUser,
                         PostId = viewModel.PostId,
-                        TaggedFriends = viewModel.TagFriends.TaggedFriends
+                        TaggedFriends = viewModel.TaggedFriends != null ?
+                            this._jsonService
+                                .GetObjects(viewModel.TaggedFriends)
+                                .ToList() :
+                            new List<UserServiceModel>()
                     });
 
                 if (TempData.ContainsKey("path"))
