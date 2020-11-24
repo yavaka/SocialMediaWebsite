@@ -14,6 +14,8 @@
 
         public UserServiceModel Author { get; set; }
 
+        public string TaggedFriends { get; set; }
+        
         public TagFriendsServiceModel TagFriends { get; set; }
 
         public int PostId { get; set; }
