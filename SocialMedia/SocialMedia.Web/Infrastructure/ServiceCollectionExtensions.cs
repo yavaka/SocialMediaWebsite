@@ -20,7 +20,7 @@
             var serviceInterfaceType = typeof(IService);
             var singletonServiceInterfaceType = typeof(ISingletonService);
             var scopedServiceInterfaceType = typeof(IScopedService);
-
+            
             var types = serviceInterfaceType
                 .Assembly
                 .GetExportedTypes()
@@ -67,12 +67,6 @@
                 .AddEntityFrameworkStores<SocialMediaDbContext>()
                 .AddDefaultTokenProviders();
 
-            return services;
-        }
-
-        public static IServiceCollection AddSocialMediaServices(this IServiceCollection services)
-        {
-            //Add services
             return services;
         }
     }

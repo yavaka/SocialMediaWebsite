@@ -3,14 +3,12 @@ namespace SocialMedia.Web
     using Infrastructure;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using SocialMedia.Data;
-    using SocialMedia.Data.Models;
-    using SocialMedia.Web.Identity;
+    using SocialMedia.Services.JSON;
 
     public class Startup
     {
@@ -31,9 +29,9 @@ namespace SocialMedia.Web
 
             services.AddIdentity();
 
-            services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
-
             services.AddConventionalServices();
+            // Add Generic service
+            services.AddTransient(typeof(IJsonService<>), typeof(JsonService<>));
 
             // Cookies for Login
             services

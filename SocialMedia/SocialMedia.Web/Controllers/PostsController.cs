@@ -1,17 +1,19 @@
 ﻿namespace SocialMedia.Web.Controllers
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
-    using SocialMedia.Services.Friendship;
-    using SocialMedia.Web.Models;
-    using SocialMedia.Services.Post;
-    using System;
-    using SocialMedia.Services.TaggedUser;
-    using SocialMedia.Services.Comment;
-    using System.Linq;
-    using SocialMedia.Services.User;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Newtonsoft.Json.Linq;
+    using SocialMedia.Services.Comment;
+    using SocialMedia.Services.Friendship;
+    using SocialMedia.Services.JSON;
+    using SocialMedia.Services.Post;
+    using SocialMedia.Services.TaggedUser;
+    using SocialMedia.Services.User;
+    using SocialMedia.Web.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     [Authorize]
     public class PostsController : Controller
@@ -21,19 +23,22 @@
         private readonly ITaggedUserService _taggedUserService;
         private readonly ICommentService _commentService;
         private readonly IUserService _userService;
+        private readonly IJsonService<UserServiceModel> _jsonService;
 
         public PostsController(
             IFriendshipService friendshipService,
             IPostService postService,
             ITaggedUserService taggedUserService,
             ICommentService commentService,
-            IUserService userService)
+            IUserService userService,
+            IJsonService<UserServiceModel> jsonService)
         {
             this._friendshipService = friendshipService;
             this._postService = postService;
             this._taggedUserService = taggedUserService;
             this._commentService = commentService;
             this._userService = userService;
+            this._jsonService = jsonService;
         }
 
         [HttpGet]
@@ -73,18 +78,6 @@
                 var currentUser = await this._userService
                     .GetUserByNameAsync(User.Identity.Name);
 
-                //Get tagged friends
-                if (viewModel.TagFriends.Friends.Any(c => c.Checked))
-                {
-                    viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
-                        .Where(c => c.Checked)
-                        .ToList();
-                }
-                else
-                {
-                    viewModel.TagFriends.TaggedFriends = new List<UserServiceModel>();
-                }
-
                 await this._postService
                     .AddPost(new PostServiceModel
                     {
@@ -92,7 +85,11 @@
                         DatePosted = DateTime.Now,
                         Author = currentUser,
                         GroupId = viewModel.GroupId,
-                        TaggedFriends = viewModel.TagFriends.TaggedFriends
+                        TaggedFriends = viewModel.TaggedFriends != null ?
+                            this._jsonService
+                                .GetObjects(viewModel.TaggedFriends)
+                                .ToList() :
+                            new List<UserServiceModel>()
                     });
 
                 if (TempData.ContainsKey("path"))
