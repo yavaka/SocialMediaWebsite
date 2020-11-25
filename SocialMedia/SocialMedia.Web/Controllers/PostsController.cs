@@ -2,7 +2,6 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Newtonsoft.Json.Linq;
     using SocialMedia.Services.Comment;
     using SocialMedia.Services.Friendship;
     using SocialMedia.Services.JSON;
@@ -42,7 +41,7 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create(int? groupId, string path)
+        public IActionResult Create(int? groupId, string path)
         {
             //If the page is reloaded without any usage of TempData,
             //it will be cleared before add a new key value pair.
@@ -52,17 +51,8 @@
                 TempData["path"] = path;
             }
 
-            var currentUserId = await this._userService
-                .GetUserIdByNameAsync(User.Identity.Name);
-
             var viewModel = new PostViewModel
             {
-                TagFriends = new TagFriendsServiceModel()
-                {
-                    Friends = await this._friendshipService
-                    .GetFriendsAsync(currentUserId),
-                    TaggedFriends = new List<UserServiceModel>()
-                },
                 GroupId = groupId
             };
 
@@ -134,27 +124,8 @@
                 Author = post.Author,
             };
 
-            var friends = await this._friendshipService
-                .GetFriendsAsync(viewModel.Author.Id);
-
-            if (post.TaggedFriends.Count > 0)
-            {
-                viewModel.TagFriends = new TagFriendsServiceModel
-                {
-                    Friends = this._taggedUserService
-                        .GetUntaggedFriends(post.TaggedFriends.ToList(), friends.ToList())
-                        .ToList(),
-                    TaggedFriends = new List<UserServiceModel>()
-                };
-            }
-            else
-            {
-                viewModel.TagFriends = new TagFriendsServiceModel
-                {
-                    Friends = friends,
-                    TaggedFriends = new List<UserServiceModel>()
-                };
-            }
+            viewModel.TaggedFriends = this._jsonService
+                .SerializeObjects(post.TaggedFriends.ToList());
 
             return View(viewModel);
         }
@@ -168,13 +139,12 @@
             {
                 var currentUserId = await this._userService
                 .GetUserIdByNameAsync(User.Identity.Name);
-
-                viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
-                    .Where(c => c.Checked == true)
-                    .ToList();
+                
+                var taggedFriends = this._jsonService
+                    .GetObjects(viewModel.TaggedFriends);
 
                 await this._taggedUserService.UpdateTaggedFriendsInPostAsync(
-                    viewModel.TagFriends.TaggedFriends,
+                    taggedFriends.ToList(),
                     viewModel.PostId,
                     currentUserId);
 

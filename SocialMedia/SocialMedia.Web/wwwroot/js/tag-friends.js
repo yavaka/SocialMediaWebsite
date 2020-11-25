@@ -1,6 +1,17 @@
 ﻿var inputValue;
 var taggedUsers = new Array();
 
+window.onload = function () {
+    // Used when a post or comment is edited
+    if ($('#taggedUsers').val()) {
+        var tagged = JSON.parse($('#taggedUsers').val());
+
+        for (var i = 0; i < tagged.length; i++) {
+            taggedUsers.push(tagged[i]);
+        }
+    }
+};
+
 // Get user input
 $('#userInput').on('input', function () {
     inputValue = $(this).val();
@@ -32,7 +43,7 @@ $(document).on('click', function (event) {
     if ($trigger !== event.target && !$trigger.has(event.target).length) {
         $('#searchDropdown').slideUp('fast');
     }
-    document.getElementById('searchInput').value = '';
+    document.getElementById('searchInput').value = "";
     removeDropDownResults();
 });
 

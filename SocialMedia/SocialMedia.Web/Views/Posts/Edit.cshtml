@@ -12,43 +12,21 @@
         <form asp-controller="Posts">
             <!--Post model-->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="@Model.PostId" />
-            <input type="hidden" asp-for="@Model.GroupId" value="@Model.GroupId" />
             <div class="form-group">
-                <input asp-for="@Model.Content" class="form-control" />
+                <input asp-for="@Model.Content" autocomplete="off" id="userInput" class="form-control" />
+                <input type="hidden" asp-for="@Model.PostId" />
+                <input type="hidden" asp-for="@Model.GroupId" value="@Model.GroupId" />
+                <input type="hidden" asp-for="@Model.TaggedFriends" value="@Model.TaggedFriends" id="taggedUsers" />
                 <span asp-validation-for="@Model.Content" class="text-danger"></span>
             </div>
             <!--Tag friends-->
-            <div class="col-md-6">
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Tag</button>
-                <div class="modal fade" id="myModal" role="dialog">
-                    <div class="modal-dialog modal-sm">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Friends</h4>
-                            </div>
-                            <div class="modal-body">
-                                <table>
-                                    @for (int i = 0; i < Model.TagFriends.Friends.Count; i++)
-                                    {
-                                        <tr>
-                                            <td>
-                                                @Html.HiddenFor(m => Model.TagFriends.Friends[i].Id)
-                                                @Html.CheckBoxFor(m => Model.TagFriends.Friends[i].Checked)
-                                            </td>
-                                            <td>
-                                                @Html.DisplayFor(m => Model.TagFriends.Friends[i].UserName)
-                                            </td>
-                                        </tr>
-                                    }
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div id="searchDropdown" class="dropdown-content" style="display: none;">
+                <input id="searchInput" type="text" autocomplete="off" placeholder="Search for user" onkeyup="getUsersByPartName()">
+                <div id="results"></div>
             </div>
+            <br />
             <div class="form-group">
-                <input type="submit" value="Update" class="btn btn-primary" />
+                <button type="submit" onclick="assignTaggedUsers()" class="btn btn-primary">Edit</button>
             </div>
         </form>
     </div>
@@ -58,6 +36,7 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+@section Scripts
+{
+    <script src="~/js/tag-friends.js"></script>
 }

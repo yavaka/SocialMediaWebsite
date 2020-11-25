@@ -19,6 +19,7 @@
                 <span asp-validation-for="@Model.Content" class="text-danger"></span>
                 <input type="hidden" asp-route="@Context.Request.Query["path"]" />
             </div>
+            <!--Tag friends-->
             <div id="searchDropdown" class="dropdown-content" style="display: none;">
                 <input id="searchInput" type="text" autocomplete="off" placeholder="Search for user" onkeyup="getUsersByPartName()">
                 <div id="results"></div>
