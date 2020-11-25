@@ -148,7 +148,7 @@
 
                 var taggedFriends = this._jsonService
                     .GetObjects(viewModel.TaggedFriends);
-
+                    
                 await this._taggedUserService.UpdateTaggedFriendsInCommentAsync(
                     taggedFriends.ToList(),
                     viewModel.CommentId,

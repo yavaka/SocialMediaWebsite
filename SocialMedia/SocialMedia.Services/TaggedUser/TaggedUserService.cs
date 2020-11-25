@@ -21,6 +21,10 @@
             string taggerId,
             IEnumerable<string> taggedFriendsIds)
         {
+            // Remove duplicate values
+            var uniqueIds = new HashSet<string>(taggedFriendsIds);
+            taggedFriendsIds = uniqueIds.ToList();
+
             var entities = new List<TagFriendInPost>();
             foreach (var taggedId in taggedFriendsIds)
             {
@@ -37,6 +41,10 @@
             string taggerId,
             IEnumerable<string> taggedFriendsIds)
         {
+            // Remove duplicate values
+            var uniqueIds = new HashSet<string>(taggedFriendsIds);
+            taggedFriendsIds = uniqueIds.ToList();
+
             var entities = new List<TagFriendInComment>();
             foreach (var taggedId in taggedFriendsIds)
             {
@@ -173,6 +181,10 @@
                         t.TaggerId == taggerId)
                 .ToListAsync();
 
+            // Remove duplicate values
+            var uniqueTaggedFriends = new HashSet<UserServiceModel>(taggedFriends);
+            taggedFriends = uniqueTaggedFriends.ToList();
+
             for (int i = 0; i < tagFriendsEntities.Count; i++)
             {
                 //This action shows that the current friend is not untagged/modified.
@@ -211,6 +223,10 @@
                 .Where(t => t.CommentId == commentId &&
                         t.TaggerId == taggerId)
                 .ToListAsync();
+
+            // Remove duplicate values
+            var uniqueIds = new HashSet<UserServiceModel>(taggedFriends);
+            taggedFriends = uniqueIds.ToList();
 
             for (int i = 0; i < tagFriendsEntities.Count; i++)
             {

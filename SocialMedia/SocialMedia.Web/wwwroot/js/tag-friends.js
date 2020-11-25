@@ -60,7 +60,7 @@ function getUsersByPartName() {
             dataType: 'json',
             success: function (data) {
                 for (var i = 0; i < data.length; i++) {
-                    let anchorTag = "<a onclick=\"hideDropdown(\'" + data[i].id + "\')\" style=\"cursor: pointer\">" + data[i].fullName + "</a>";
+                    let anchorTag = "<a onclick=\"hideDropdown(\'" + data[i].id + "\')\" style=\"cursor: pointer\">" + data[i].fullName + "(" + data[i].userName.trim() + ")</a>";
                     $('#results').append(anchorTag);
                 }
             }
@@ -78,9 +78,8 @@ function getUserById(friendId) {
         success: function (res) {
             // add the tagged user in collection
             taggedUsers.push(res);
-            var userIndex = taggedUsers.indexOf(res);
-            // display the tagged user`s first name and index in taggedUsers collection
-            displayTaggedUser(res.fullName.split(' ')[0] + '_' + userIndex + ' ');
+            // display the tagged user`s username
+            displayTaggedUser(res.userName.trim());
         },
         error: function (msg) {
             console.log(msg);
@@ -89,9 +88,9 @@ function getUserById(friendId) {
 }
 
 // Display the tagged user in the input field
-function displayTaggedUser(firstName) {
+function displayTaggedUser(userName) {
     var oldInput = $('#userInput').val();
-    var newInput = oldInput.concat(firstName);
+    var newInput = oldInput.concat(userName);
     $('#userInput').val(newInput);
 }
 
@@ -104,9 +103,7 @@ $('#userInput').on('keydown', function (e) {
         //if pressed key is delete or backspace
         if (key == 8 || key == 46) {
             //Get input tag text value
-            $('#userInput').on('input', function () {
-                inputValue = $(this).val();
-            })
+            inputValue = $('#userInput').val();
             if (inputValue != '' &&
                 inputValue != ' ' &&
                 inputValue != null &&
@@ -116,7 +113,7 @@ $('#userInput').on('keydown', function (e) {
                 if (word[0] == '@') {
                     inputValue = inputValue.replace(word, '');
                     $('#userInput').val(inputValue);
-                    delete taggedUsers[word.split('_')[1]];
+                    removeTaggedUser(word);
                 }
             }
         }
@@ -168,5 +165,28 @@ function assignTaggedUsers() {
     if (taggedUsers.length > 0) {
         var taggedUsersAsJson = JSON.stringify(taggedUsers);
         $('#taggedUsers').val(taggedUsersAsJson);
+    }
+}
+
+function removeTaggedUser(taggedUser) {
+
+    taggedUser = taggedUser.substring(1);
+
+    for (var i = 0; i < taggedUsers.length; i++) {
+        var thisUser = taggedUsers[i];
+        if (thisUser !== undefined) {
+            var username;
+            // due to different json serializations user name can be .userName or .UserName :)
+            if (thisUser.userName === undefined) {
+                username = thisUser.UserName.trim()
+            }
+            else {
+                username = thisUser.userName.trim();
+            }
+            if (taggedUser === username) {
+                delete taggedUsers[i];
+                break;
+            }
+        }
     }
 }
