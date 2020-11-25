@@ -134,7 +134,6 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PostViewModel viewModel)
         {
-
             if (ModelState.IsValid)
             {
                 var currentUserId = await this._userService

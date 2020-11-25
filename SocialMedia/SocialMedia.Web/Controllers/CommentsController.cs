@@ -131,27 +131,8 @@
                 PostId = comment.PostId
             };
 
-            var friends = await this._friendshipService
-                .GetFriendsAsync(viewModel.Author.Id);
-
-            if (comment.TaggedFriends.Count > 0)
-            {
-                viewModel.TagFriends = new TagFriendsServiceModel
-                {
-                    Friends = this._taggedUserService
-                        .GetUntaggedFriends(comment.TaggedFriends.ToList(), friends.ToList())
-                        .ToList(),
-                    TaggedFriends = new List<UserServiceModel>()
-                };
-            }
-            else
-            {
-                viewModel.TagFriends = new TagFriendsServiceModel
-                {
-                    Friends = friends,
-                    TaggedFriends = new List<UserServiceModel>()
-                };
-            }
+            viewModel.TaggedFriends = this._jsonService
+                 .SerializeObjects(comment.TaggedFriends.ToList());
 
             return View(viewModel);
         }
@@ -165,12 +146,11 @@
                 var currentUserId = await this._userService
                 .GetUserIdByNameAsync(User.Identity.Name);
 
-                viewModel.TagFriends.TaggedFriends = viewModel.TagFriends.Friends
-                    .Where(c => c.Checked == true)
-                    .ToList();
+                var taggedFriends = this._jsonService
+                    .GetObjects(viewModel.TaggedFriends);
 
                 await this._taggedUserService.UpdateTaggedFriendsInCommentAsync(
-                    viewModel.TagFriends.TaggedFriends,
+                    taggedFriends.ToList(),
                     viewModel.CommentId,
                     currentUserId);
 
