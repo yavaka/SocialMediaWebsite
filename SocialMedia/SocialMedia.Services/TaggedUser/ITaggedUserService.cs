@@ -15,8 +15,6 @@
         ICollection<TagFriendInComment> GetTagFriendsInCommentsEntities(
             string taggerId,
             IEnumerable<string> taggedFriendsIds);
-        
-        Task<ICollection<UserServiceModel>> GetTaggedFriendsByPostIdAsync(int postId);
 
         Task TagFriendPost(string taggerId, string taggedId, int postId);
 
@@ -34,18 +32,6 @@
 
         Task DeleteTaggedFriendsCommentId(int commentId);
 
-        /// <summary>
-        ///  Compare tagged with untagged friends
-        ///  For those who are tagged set checked to true
-        /// </summary>
-        /// <param name="taggedFriends"></param>
-        /// <param name="friends"></param>
-        /// <returns></returns>
-        ICollection<UserServiceModel> GetUntaggedFriends(
-            List<UserServiceModel> taggedFriends,
-            List<UserServiceModel> friends);
-
         Task DeleteTaggedFriendsInComments(ICollection<int> commentsIds);
-
     }
 }

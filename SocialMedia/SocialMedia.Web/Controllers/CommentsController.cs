@@ -37,7 +37,7 @@
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create(int postId, string path)
+        public IActionResult Create(int postId, string path)
         {
             //If the page is reloaded without any usage of TempData,
             //it will be cleared before add a new key value pair.
@@ -47,18 +47,9 @@
                 TempData["path"] = path;
             }
 
-            var currentUserId = await this._userService
-                .GetUserIdByNameAsync(User.Identity.Name);
-
             var viewModel = new CommentViewModel
             {
-                PostId = postId,
-                TagFriends = new TagFriendsServiceModel()
-                {
-                    Friends = await this._friendshipService
-                        .GetFriendsAsync(currentUserId),
-                    TaggedFriends = new List<UserServiceModel>()
-                }
+                PostId = postId
             };
 
             return View(viewModel);

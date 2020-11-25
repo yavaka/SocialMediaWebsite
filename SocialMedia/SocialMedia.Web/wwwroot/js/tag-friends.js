@@ -24,17 +24,22 @@ $('#userInput').on('input', function () {
 // Show drop down list
 function showDropDownList() {
     $('#searchDropdown').toggle();
-    //getMostRecentUsers();
+
+    $('#userInput').prop("disabled", true);
 }
 
 // Hide drop down list when one of the anchor tags is clicked
 function hideDropdown(userId) {
     removeDropDownResults();
+
     // hide the drop down list
     $('#searchDropdown').hide();
+
     // get the user who will be tagged
     // done() wait for the ajax response
     getUserById(userId);
+
+    $('#userInput').prop("disabled", false);
 }
 
 // Hide drop down list on click outside of it
@@ -45,6 +50,8 @@ $(document).on('click', function (event) {
     }
     document.getElementById('searchInput').value = "";
     removeDropDownResults();
+
+    $('#userInput').prop("disabled", false);
 });
 
 // Get users who consists part name in their names
@@ -178,7 +185,7 @@ function removeTaggedUser(taggedUser) {
             var username;
             // due to different json serializations user name can be .userName or .UserName :)
             if (thisUser.userName === undefined) {
-                username = thisUser.UserName.trim()
+                username = thisUser.UserName.trim();
             }
             else {
                 username = thisUser.userName.trim();

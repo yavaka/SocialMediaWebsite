@@ -144,7 +144,7 @@
             var userFriends = await GetFriendsAsync(userId);
 
             return userFriends
-                .Where(f => f.FullName.StartsWith(partName))
+                .Where(f => f.FullName.ToLower().StartsWith(partName.ToLower()))
                 .ToList();
         }
 

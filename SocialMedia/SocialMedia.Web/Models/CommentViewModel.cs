@@ -1,6 +1,5 @@
 ﻿namespace SocialMedia.Web.Models
 {
-    using SocialMedia.Services.TaggedUser;
     using SocialMedia.Services.User;
     using System;
 
@@ -14,9 +13,10 @@
 
         public UserServiceModel Author { get; set; }
 
+        /// <summary>
+        /// Tagged Friends in a JSON format
+        /// </summary>
         public string TaggedFriends { get; set; }
-        
-        public TagFriendsServiceModel TagFriends { get; set; }
 
         public int PostId { get; set; }
     }
