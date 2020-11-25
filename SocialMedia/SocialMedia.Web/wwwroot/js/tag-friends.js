@@ -3,8 +3,8 @@ var taggedUsers = new Array();
 
 window.onload = function () {
     // Used when a post or comment is edited
-    if ($('#taggedUsers').val()) {
-        var tagged = JSON.parse($('#taggedUsers').val());
+    if ($('#tagged-users').val()) {
+        var tagged = JSON.parse($('#tagged-users').val());
 
         for (var i = 0; i < tagged.length; i++) {
             taggedUsers.push(tagged[i]);
@@ -13,7 +13,7 @@ window.onload = function () {
 };
 
 // Get user input
-$('#userInput').on('input', function () {
+$('#user-input').on('input', function () {
     inputValue = $(this).val();
     //Check for the last char of user input
     if (inputValue.charAt(inputValue.length - 1) == '@') {
@@ -23,9 +23,9 @@ $('#userInput').on('input', function () {
 
 // Show drop down list
 function showDropDownList() {
-    $('#searchDropdown').toggle();
+    $('#search-dropdown').toggle();
 
-    $('#userInput').prop("disabled", true);
+    $('#user-input').prop("disabled", true);
 }
 
 // Hide drop down list when one of the anchor tags is clicked
@@ -33,30 +33,30 @@ function hideDropdown(userId) {
     removeDropDownResults();
 
     // hide the drop down list
-    $('#searchDropdown').hide();
+    $('#search-dropdown').hide();
 
     // get the user who will be tagged
     // done() wait for the ajax response
     getUserById(userId);
 
-    $('#userInput').prop("disabled", false);
+    $('#user-input').prop("disabled", false);
 }
 
 // Hide drop down list on click outside of it
 $(document).on('click', function (event) {
-    var $trigger = $('#searchDropdown');
+    var $trigger = $('#search-dropdown');
     if ($trigger !== event.target && !$trigger.has(event.target).length) {
-        $('#searchDropdown').slideUp('fast');
+        $('#search-dropdown').slideUp('fast');
     }
-    document.getElementById('searchInput').value = "";
+    document.getElementById('search-input').value = "";
     removeDropDownResults();
 
-    $('#userInput').prop("disabled", false);
+    $('#user-input').prop("disabled", false);
 });
 
 // Get users who consists part name in their names
 function getUsersByPartName() {
-    var searchInput = document.getElementById('searchInput').value;
+    var searchInput = document.getElementById('search-input').value;
     removeDropDownResults();
     if (searchInput.length >= 3) {
         $.ajax({
@@ -96,13 +96,13 @@ function getUserById(friendId) {
 
 // Display the tagged user in the input field
 function displayTaggedUser(userName) {
-    var oldInput = $('#userInput').val();
+    var oldInput = $('#user-input').val();
     var newInput = oldInput.concat(userName);
-    $('#userInput').val(newInput);
+    $('#user-input').val(newInput);
 }
 
 // Catch every press of delete and backspace buttons
-$('#userInput').on('keydown', function (e) {
+$('#user-input').on('keydown', function (e) {
     // if there are tagged users get into the body
     if (taggedUsers.length > 0) {
         //get the pressed key code or char code
@@ -110,7 +110,7 @@ $('#userInput').on('keydown', function (e) {
         //if pressed key is delete or backspace
         if (key == 8 || key == 46) {
             //Get input tag text value
-            inputValue = $('#userInput').val();
+            inputValue = $('#user-input').val();
             if (inputValue != '' &&
                 inputValue != ' ' &&
                 inputValue != null &&
@@ -119,7 +119,7 @@ $('#userInput').on('keydown', function (e) {
                 var word = getWord();
                 if (word[0] == '@') {
                     inputValue = inputValue.replace(word, '');
-                    $('#userInput').val(inputValue);
+                    $('#user-input').val(inputValue);
                     removeTaggedUser(word);
                 }
             }
@@ -148,7 +148,7 @@ function getCaret(node) {
 
 // Get the word where the cursor position is in the input field
 function getWord() {
-    var el = document.getElementById('userInput');
+    var el = document.getElementById('user-input');
     var carret = getCaret(el);
     var words = el.value.split(' ');
     var x = 0;
@@ -171,7 +171,7 @@ function removeDropDownResults() {
 function assignTaggedUsers() {
     if (taggedUsers.length > 0) {
         var taggedUsersAsJson = JSON.stringify(taggedUsers);
-        $('#taggedUsers').val(taggedUsersAsJson);
+        $('#tagged-users').val(taggedUsersAsJson);
     }
 }
 

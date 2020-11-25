@@ -13,15 +13,15 @@
             <!--Post model-->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <input asp-for="@Model.Content" autocomplete="off" id="userInput" class="form-control" />
+                <input asp-for="@Model.Content" autocomplete="off" id="user-input" class="form-control" />
                 <input type="hidden" asp-for="@Model.PostId" />
                 <input type="hidden" asp-for="@Model.GroupId" value="@Model.GroupId" />
-                <input type="hidden" asp-for="@Model.TaggedFriends" value="@Model.TaggedFriends" id="taggedUsers" />
+                <input type="hidden" asp-for="@Model.TaggedFriends" value="@Model.TaggedFriends" id="tagged-users" />
                 <span asp-validation-for="@Model.Content" class="text-danger"></span>
             </div>
             <!--Tag friends-->
-            <div id="searchDropdown" class="dropdown-content" style="display: none;">
-                <input id="searchInput" type="text" autocomplete="off" placeholder="Search for user" onkeyup="getUsersByPartName()">
+            <div id="search-dropdown" class="dropdown-content" style="display: none;">
+                <input id="search-input" type="text" autocomplete="off" placeholder="Search for user" onkeyup="getUsersByPartName()">
                 <div id="results"></div>
             </div>
             <br />
