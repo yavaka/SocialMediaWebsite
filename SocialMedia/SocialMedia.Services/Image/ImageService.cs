@@ -53,8 +53,8 @@
         => this._data.ProfilePictures
             .Any(u => u.UploaderId == userId);
 
-        public async Task<bool> IsImageExistAsync(int imageId)
-        => await this._data.Images
+        public Task<bool> IsImageExistAsync(int imageId)
+        => this._data.Images
             .AnyAsync(i => i.Id == imageId);
 
         public async Task<string> GetAvatarAsync(string userId)

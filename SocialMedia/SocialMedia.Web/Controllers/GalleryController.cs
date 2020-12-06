@@ -2,7 +2,6 @@
 {
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-    using SocialMedia.Data.Models;
     using SocialMedia.Services.Image;
     using SocialMedia.Services.Stream;
     using SocialMedia.Services.User;
