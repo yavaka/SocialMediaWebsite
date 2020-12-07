@@ -243,7 +243,7 @@ namespace SocialMedia.Data.Migrations
                     b.ToTable("Groups");
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Image", b =>
+            modelBuilder.Entity("SocialMedia.Data.Models.Imagess", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -595,7 +595,7 @@ namespace SocialMedia.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SocialMedia.Data.Models.Image", b =>
+            modelBuilder.Entity("SocialMedia.Data.Models.Imagess", b =>
                 {
                     b.HasOne("SocialMedia.Data.Models.User", "Uploader")
                         .WithMany("Images")

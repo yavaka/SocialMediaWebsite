@@ -11,7 +11,7 @@
         {
             using var scope = app.ApplicationServices.CreateScope();
 
-            var db = scope.ServiceProvider.GetService<SocialMediaDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<SocialMediaDbContext>();
 
             db.Database.Migrate();
 

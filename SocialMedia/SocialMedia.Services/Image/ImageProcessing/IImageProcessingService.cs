@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    interface IImageProcessingService : IService
+    public interface IImageProcessingService : IService
     {
         Task ProcessAsync(IEnumerable<ImageInputModel> images);
     }
