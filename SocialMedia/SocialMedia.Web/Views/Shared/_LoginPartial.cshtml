@@ -6,8 +6,8 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item dropdown">
-            
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Images" asp-action="Gallery">Gallery</a>
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link text-dark dropdown-toggle" data-toggle="dropdown" role="menu" aria-expanded="false" style="cursor:pointer">Account</a>
@@ -21,14 +21,14 @@
                 </li>
             </ul>
         </li>
-    }
-    else
-    {
+        }
+        else
+        {
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
-    }
-</ul>
+        }
+    </ul>

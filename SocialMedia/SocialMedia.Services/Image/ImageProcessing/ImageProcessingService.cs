@@ -19,9 +19,7 @@
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         public ImageProcessingService(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
+        => this._serviceScopeFactory = serviceScopeFactory;
 
         public async Task ProcessAsync(IEnumerable<ImageInputModel> images)
         {

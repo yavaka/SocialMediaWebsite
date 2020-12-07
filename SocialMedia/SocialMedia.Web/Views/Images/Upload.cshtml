@@ -1,5 +1,5 @@
 ﻿<form method="post" enctype="multipart/form-data">
     <input type="file" multiple="multiple" accept="image/*" name="images" />
     <input type="submit" /> <br />
-    @Html.ValidationMessage("images")
+    <span class="text-danger">@Html.ValidationMessage("images")</span>
 </form>
