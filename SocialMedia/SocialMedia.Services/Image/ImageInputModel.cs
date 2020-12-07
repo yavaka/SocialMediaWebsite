@@ -1,4 +1,4 @@
-﻿namespace SocialMedia.Web.Models
+﻿namespace SocialMedia.Services.Image
 {
     using System.IO;
 
@@ -7,5 +7,6 @@
         public string Name { get; set; }
         public string Type { get; set; }
         public Stream Content { get; set; }
+        public string UploaderId { get; set; }
     }
 }

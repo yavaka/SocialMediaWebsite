@@ -16,7 +16,7 @@
             this.FriendshipAddressee = new HashSet<Friendship>();
             this.FriendshipRequester = new HashSet<Friendship>();
             this.Groups = new HashSet<UserInGroup>();
-            this.Images = new HashSet<Image>();
+            this.Images = new HashSet<ImageData>();
         }
 
         public string FirstName { get; set; }
@@ -41,7 +41,7 @@
         public ICollection<TagFriendInPost> TaggedInPosts { get; set; }
         public ICollection<TagFriendInComment> TaggerInComments { get; set; }
         public ICollection<TagFriendInComment> TaggedInComments { get; set; }
-        public ICollection<Image> Images { get; set; }
+        public ICollection<ImageData> Images { get; set; }
         public int AvatarId { get; set; }
         public Avatar Avatar { get; set; }
     }

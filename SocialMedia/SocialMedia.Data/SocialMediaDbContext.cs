@@ -18,7 +18,6 @@
         public DbSet<UserInGroup> UsersInGroups { get; set; }
         public DbSet<TagFriendInPost> TagFriendsInPosts { get; set; }
         public DbSet<TagFriendInComment> TagFriendsInComments { get; set; }
-        public DbSet<Image> Images { get; set; }
         public DbSet<ImageData> ImagesData { get; set; }
         public DbSet<Avatar> ProfilePictures { get; set; }
 
@@ -143,6 +142,7 @@
                     .HasForeignKey(uId => uId.UploaderId);
             });
 
+            //Avatar
             modelBuilder.Entity<Avatar>(entity =>
             {
                 entity.HasOne(i => i.Uploader)

@@ -12,5 +12,7 @@
         public byte[] OriginalContent { get; set; }
         public byte[] FullscreenContent { get; set; }
         public byte[] ThumbnailContent { get; set; }
+        public string UploaderId { get; set; }
+        public User Uploader { get; set; }
     }
 }
