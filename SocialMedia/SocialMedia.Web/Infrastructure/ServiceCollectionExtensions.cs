@@ -11,7 +11,6 @@
     {
         /// <summary>
         /// Automatic registration of services using reflection
-        /// Cannot register generic services!
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
@@ -63,6 +62,7 @@
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequiredUniqueChars = 6;
                     options.User.RequireUniqueEmail = true;
+
                 })
                 .AddEntityFrameworkStores<SocialMediaDbContext>()
                 .AddDefaultTokenProviders();

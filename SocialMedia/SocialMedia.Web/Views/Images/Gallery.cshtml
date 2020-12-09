@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Gallery";
 }
+
+@section Styles {
+    <link href="@Url.Content("~/css/gallery-style.css")" rel="stylesheet" type="text/css" />
+}
+
 <div class="row">
     <div class="col-md-4">
         <h1>Gallery</h1>
@@ -14,18 +19,23 @@
 
 <hr class="container" style="height: 1px; border-width: 0; color: skyblue; background-color: skyblue">
 
-<div class="container page-top">
-    <div class="row">
+<div class="container">
+    <div class="row justify-content-center">
         @if (Model != null)
         {
             @foreach (var image in Model)
             {
-                <div class="col-lg-3 col-md-4 col-xs-6 thumb">
-                    <a href="Fullscreen/@image">
-                        <img src="Thumbnail/@image">
-                    </a>
+                <div class="col-md-4 " style="margin-top: 10px;">
+                    <img src="Thumbnail/@image" onclick="fullscreenImg('@image')" id="gallery-img">
                 </div>
             }
         }
     </div>
 </div>
+
+<div id="gallery-modal" class="modal"><!--Clicked image goes here--></div>
+
+@section Scripts
+{
+    <script src="~/js/gallery.js"></script>
+}

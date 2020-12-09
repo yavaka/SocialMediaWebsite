@@ -73,7 +73,7 @@
                 UploaderId = currentUserId
             }));
 
-            return RedirectToAction(nameof(GalleryAsync));
+            return RedirectToAction("Gallery");
         }
 
         public async Task<IActionResult> GalleryAsync()

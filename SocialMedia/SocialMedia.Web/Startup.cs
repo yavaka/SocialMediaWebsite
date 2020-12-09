@@ -32,11 +32,6 @@ namespace SocialMedia.Web
             services.AddConventionalServices();
             // Add Generic service
             services.AddTransient(typeof(IJsonService<>), typeof(JsonService<>));
-
-            // Cookies for Login
-            services
-                .ConfigureApplicationCookie(options => options
-                    .LoginPath = "/Account/Login");
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
