@@ -33,7 +33,31 @@
     </div>
 </div>
 
-<div id="gallery-modal" class="modal"><!--Clicked image goes here--></div>
+@{ 
+    var testId = "123";
+}
+
+<div id="gallery-modal" class="modal">
+    <div class="container">
+        <!--hamburger icon-->
+        <div class="row">
+            <div class="col-md-10">
+                <a class="btn btn-primary" id="download-btn">Download</a>
+            </div>
+            <div class="col-md-2">
+                <img src="~/img/hamburger_icon.png" class="hamburger-icon" alt="hamburger icon" style="height: 50px; width: 50px; margin-bottom: 30px" />
+            </div>
+        </div>
+        <!--image-->
+        <div class="row" id="img-row-modal"></div>
+        <!--comments-->
+        <div class="row" id="img-comments" style="margin-top: 30px;">
+            <div class="col-md-1"></div>
+            <div class="col-md-10">Comments go here</div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {

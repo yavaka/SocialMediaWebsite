@@ -25,6 +25,7 @@
         /// </summary>
         private const int MAX_IMAGE_SIZE = 10 * 1024 * 1024;
         private const int MAX_UPLOADED_IMAGES = 10;
+        private const string JPEG_CONTENT_TYPE = "image/jpeg";
 
         private readonly IUserService _userService;
         private readonly IImageProcessingService _imageProcessingService;
@@ -93,6 +94,14 @@
         public async Task<IActionResult> Fullscreen(string id)
             => this.ReturnImage(await this._imageFetchingService.GetFullscreen(id));
 
+        public FileResult Download(string id)
+        {
+            var image = this._imageFetchingService
+                .GetOriginalImageDetails(id);
+
+            return File(image.OriginalContent, JPEG_CONTENT_TYPE, image.Name);
+        }
+
         private IActionResult ReturnImage(Stream image)
         {
             var headers = this.Response.GetTypedHeaders();
@@ -105,7 +114,7 @@
 
             headers.Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(30));
 
-            return this.File(image, "image/jpeg");
+            return this.File(image, JPEG_CONTENT_TYPE);
         }
     }
 }

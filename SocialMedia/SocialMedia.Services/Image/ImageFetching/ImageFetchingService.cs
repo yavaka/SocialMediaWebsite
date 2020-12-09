@@ -27,6 +27,17 @@
         public Task<Stream> GetFullscreen(string id)
         => this.GetImageData(id, "Fullscreen");
 
+        public ImageServiceModel GetOriginalImageDetails(string id)
+        => this._data
+            .ImagesData
+            .Where(i => i.Id.ToString() == id)
+            .Select(i => new ImageServiceModel 
+            {
+                Name = i.OriginalFileName,
+                OriginalContent = i.OriginalContent
+            })
+            .FirstOrDefault();
+
         private async Task<Stream> GetImageData(string id, string size)
         {
             var db = this._data.Database;

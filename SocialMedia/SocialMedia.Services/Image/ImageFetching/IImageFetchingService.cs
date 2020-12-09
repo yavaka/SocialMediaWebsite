@@ -12,5 +12,7 @@
         Task<Stream> GetThumbnail(string id);
 
         Task<Stream> GetFullscreen(string id);
+
+        ImageServiceModel GetOriginalImageDetails(string id);
     }
 }
