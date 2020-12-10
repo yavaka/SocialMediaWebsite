@@ -44,6 +44,7 @@
                         OriginalContent = original,
                         FullscreenContent = fullscreen,
                         ThumbnailContent = thumbnail,
+                        UploadDate = image.UploadDate,
                         UploaderId = image.UploaderId
                     });
 

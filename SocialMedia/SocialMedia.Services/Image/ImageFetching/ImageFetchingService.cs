@@ -14,11 +14,15 @@
 
         public ImageFetchingService(SocialMediaDbContext data) => this._data = data;
 
-        public Task<List<string>> GetAllImagesByUserId(string userId)
+        public Task<List<ImageServiceModel>> GetAllImagesByUserId(string userId)
         => this._data
             .ImagesData
             .Where(u => u.UploaderId == userId)
-            .Select(i => i.Id.ToString())
+            .Select(i => new ImageServiceModel 
+            {
+                Id = i.Id.ToString(),
+                UploadDate = i.UploadDate
+            })
             .ToListAsync();
 
         public Task<Stream> GetThumbnail(string id)

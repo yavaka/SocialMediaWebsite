@@ -9,6 +9,7 @@
     using SocialMedia.Services.Image.ImageProcessing;
     using SocialMedia.Services.User;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -71,6 +72,7 @@
                 Name = i.FileName,
                 Type = i.ContentType,
                 Content = i.OpenReadStream(),
+                UploadDate = DateTime.Now,
                 UploaderId = currentUserId
             }));
 
@@ -82,10 +84,11 @@
             var currentUserId = await this._userService
                 .GetUserIdByNameAsync(User.Identity.Name);
 
-            var imagesIds = await this._imageFetchingService
+            var images = await this._imageFetchingService
                 .GetAllImagesByUserId(currentUserId);
 
-            return View(imagesIds);
+            return View(
+                DivideIntoGroups(images.OrderByDescending(d => d.UploadDate).ToList()));
         }
 
         public async Task<IActionResult> Thumbnail(string id)
@@ -115,6 +118,22 @@
             headers.Expires = new DateTimeOffset(DateTime.UtcNow.AddDays(30));
 
             return this.File(image, JPEG_CONTENT_TYPE);
+        }
+
+        //There are 3 columns in the gallery view where images will be added
+        private List<ImageServiceModel> DivideIntoGroups(List<ImageServiceModel> images)
+        {
+            for (int i = 1; i <= images.Count - 1; i++)
+            {
+                if (i % 3 == 1)
+                    images[i].GroupNum = 1;
+                else if (i % 3 == 2)
+                    images[i].GroupNum = 2;
+                else if (i % 3 == 0)
+                    images[i].GroupNum = 3;
+            }
+
+            return images;
         }
     }
 }

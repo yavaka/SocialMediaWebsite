@@ -7,7 +7,7 @@
 
     public interface IImageFetchingService : IService
     {
-        Task<List<string>> GetAllImagesByUserId(string userId);
+        Task<List<ImageServiceModel>> GetAllImagesByUserId(string userId);
 
         Task<Stream> GetThumbnail(string id);
 

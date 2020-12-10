@@ -1,4 +1,6 @@
-﻿namespace SocialMedia.Web.Models
+﻿using System;
+
+namespace SocialMedia.Web.Models
 {
     public class ImageViewModel
     {

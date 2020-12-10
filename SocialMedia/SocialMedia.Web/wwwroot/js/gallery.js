@@ -22,3 +22,7 @@
         }
     });
 }
+
+$(document).ready(function () {
+    $("#clientScreenWidth").val($(window).width());
+});

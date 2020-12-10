@@ -1,4 +1,5 @@
-﻿@model IEnumerable<string>
+﻿@model ICollection<SocialMedia.Services.Image.ImageServiceModel>
+@inject IJSRuntime JS;
 
 @{
     ViewData["Title"] = "Gallery";
@@ -12,49 +13,57 @@
     <div class="col-md-4">
         <h1>Gallery</h1>
     </div>
-    <div class="col-md-4" style="padding: 15px 32px">
+    <div class="col-md-4" id="upload-img-btn">
         <a asp-controller="Images" asp-action="Upload" class="btn btn-primary">Add Images</a>
     </div>
 </div>
 
-<hr class="container" style="height: 1px; border-width: 0; color: skyblue; background-color: skyblue">
+<hr class="container hr-line">
 
 <div class="container">
-    <div class="row justify-content-center">
+    <div class="row">
         @if (Model != null)
         {
-            @foreach (var image in Model)
-            {
-                <div class="col-md-4 " style="margin-top: 10px;">
-                    <img src="Thumbnail/@image" onclick="fullscreenImg('@image')" id="gallery-img">
-                </div>
-            }
+            <div class="column">
+                @foreach (var image in Model.Where(g => g.GroupNum == 1))
+                {
+                    <img src="Thumbnail/@image.Id" onclick="fullscreenImg('@image.Id')" id="gallery-img">
+                }
+            </div>
+            <div class="column">
+                @foreach (var image in Model.Where(g => g.GroupNum == 2))
+                {
+                    <img src="Thumbnail/@image.Id" onclick="fullscreenImg('@image.Id')" id="gallery-img">
+                }
+            </div>
+            <div class="column">
+                @foreach (var image in Model.Where(g => g.GroupNum == 3))
+                {
+                    <img src="Thumbnail/@image.Id" onclick="fullscreenImg('@image.Id')" id="gallery-img">
+                }
+            </div>
         }
     </div>
-</div>
 
-@{ 
-    var testId = "123";
-}
-
-<div id="gallery-modal" class="modal">
-    <div class="container">
-        <!--hamburger icon-->
-        <div class="row">
-            <div class="col-md-10">
-                <a class="btn btn-primary" id="download-btn">Download</a>
+    <div id="gallery-modal" class="modal">
+        <div class="container">
+            <!--hamburger icon-->
+            <div class="row">
+                <div class="col-md-10">
+                    <a class="btn btn-primary" id="download-btn">Download</a>
+                </div>
+                <div class="col-md-2">
+                    <img src="~/img/hamburger_icon.png" class="hamburger-icon" alt="hamburger icon" style="height: 50px; width: 50px; margin-bottom: 30px" />
+                </div>
             </div>
-            <div class="col-md-2">
-                <img src="~/img/hamburger_icon.png" class="hamburger-icon" alt="hamburger icon" style="height: 50px; width: 50px; margin-bottom: 30px" />
+            <!--image-->
+            <div class="row" id="img-row-modal"></div>
+            <!--comments-->
+            <div class="row modal-content" id="img-comments">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">Comments go here</div>
+                <div class="col-md-1"></div>
             </div>
-        </div>
-        <!--image-->
-        <div class="row" id="img-row-modal"></div>
-        <!--comments-->
-        <div class="row" id="img-comments" style="margin-top: 30px;">
-            <div class="col-md-1"></div>
-            <div class="col-md-10">Comments go here</div>
-            <div class="col-md-1"></div>
         </div>
     </div>
 </div>
