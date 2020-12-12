@@ -1,5 +1,4 @@
 ﻿@model ICollection<SocialMedia.Services.Image.ImageServiceModel>
-@inject IJSRuntime JS;
 
 @{
     ViewData["Title"] = "Gallery";
@@ -49,11 +48,17 @@
         <div class="container">
             <!--hamburger icon-->
             <div class="row">
-                <div class="col-md-10">
-                    <a class="btn btn-primary" id="download-btn">Download</a>
-                </div>
+                <div class="col-md-10"></div>
                 <div class="col-md-2">
-                    <img src="~/img/hamburger_icon.png" class="hamburger-icon" alt="hamburger icon" style="height: 50px; width: 50px; margin-bottom: 30px" />
+                    <div class="dropdown">
+                        <a class="dropbtn">
+                            <img src="~/img/hamburger_icon.png" class="hamburger-icon" alt="hamburger icon" style="height: 50px; width: 50px; margin-bottom: 30px" />
+                        </a>
+                        <div class="dropdown-content">
+                            <a id="download-btn">Download</a>
+                            <a asp-action="Delete">Delete</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--image-->

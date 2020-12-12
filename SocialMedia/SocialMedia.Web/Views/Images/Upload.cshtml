@@ -1,5 +1,16 @@
 ﻿<form method="post" enctype="multipart/form-data">
-    <input type="file" multiple="multiple" accept="image/*" name="images" />
+    <input type="file" multiple="multiple" accept="image/*" name="images" id="image-browse-btn" />
     <input type="submit" /> <br />
     <span class="text-danger">@Html.ValidationMessage("images")</span>
 </form>
+
+<hr class="hr-line" />
+
+<div class="container">
+    <div class="row" id="images-preview"></div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/upload-images.js"></script>
+}
